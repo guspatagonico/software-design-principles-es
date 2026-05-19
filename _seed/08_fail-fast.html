@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fail Fast — Fallá pronto, fallá fuerte</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #100a0a;
+    --surface:   #181010;
+    --surface2:  #201616;
+    --border:    rgba(255,255,255,0.07);
+    --border2:   rgba(255,255,255,0.13);
+    --text:      #f0e4e4;
+    --muted:     #7a5858;
+    --accent:    #f43f5e;
+    --accent2:   #be123c;
+    --accent-r:  rgba(244,63,94,.1);
+    --accent-rb: rgba(244,63,94,.28);
+    --fast:      #f43f5e;
+    --fast-r:    rgba(244,63,94,.1);
+    --fast-rb:   rgba(244,63,94,.28);
+    --safe:      #34d399;
+    --safe-r:    rgba(52,211,153,.1);
+    --safe-rb:   rgba(52,211,153,.28);
+    --warn:      #fb923c;
+    --warn-r:    rgba(251,146,60,.1);
+    --warn-rb:   rgba(251,146,60,.28);
+    --ok:        #60a5fa;
+    --ok-r:      rgba(96,165,250,.1);
+    --ok-rb:     rgba(96,165,250,.28);
+    --mono:      'DM Mono', monospace;
+    --sans:      'DM Sans', sans-serif;
+    --serif:     'Fraunces', serif;
+    --radius:    10px;
+    --transition: .22s cubic-bezier(.4,0,.2,1);
+  }
+
+  html { scroll-behavior: smooth;
+  /* ── GLOBAL SCALE ── */
+  zoom: 1.3;
+ }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-weight: 300; min-height: 100vh; line-height: 1.65; -webkit-font-smoothing: antialiased; }
+
+  /* ── HEADER ── */
+  header { padding: 72px 48px 56px; max-width: 960px; margin: 0 auto; }
+  .header-label { font-family: var(--mono); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); margin-bottom: 20px; }
+  header h1 { font-family: var(--serif); font-size: clamp(44px, 7vw, 76px); font-weight: 300; line-height: 1.05; letter-spacing: -.02em; }
+  header h1 em { font-style: italic; font-weight: 300; color: var(--muted); }
+  header p { margin-top: 24px; font-size: 15px; color: var(--muted); max-width: 540px; line-height: 1.75; }
+
+  /* ── NAV ── */
+  .nav-wrap { max-width: 960px; margin: 0 auto; padding: 0 48px; }
+  .nav { display: flex; gap: 2px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 4px; position: relative; }
+  .nav-pill { position: absolute; top: 4px; height: calc(100% - 8px); border-radius: 10px; background: var(--accent-r); transition: left var(--transition), width var(--transition); pointer-events: none; z-index: 0; }
+  .tab-btn { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 14px 8px; background: none; border: none; cursor: pointer; border-radius: 10px; color: var(--muted); transition: color var(--transition); position: relative; z-index: 1; font-family: var(--sans); }
+  .tab-btn.active { color: var(--accent); }
+  .tab-icon { font-size: 18px; line-height: 1; }
+  .tab-word { font-family: var(--mono); font-size: 10px; letter-spacing: .06em; text-transform: uppercase; }
+
+  /* ── PANELS ── */
+  main { max-width: 960px; margin: 32px auto 0; padding: 0 48px 96px; }
+  .panel { display: none; animation: fadeUp .28s ease both; }
+  .panel.active { display: block; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+  .p-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; margin-bottom: 32px; padding-bottom: 28px; border-bottom: 1px solid var(--border); }
+  .p-letter { font-family: var(--serif); font-size: 96px; font-weight: 600; line-height: .85; opacity: .1; flex-shrink: 0; user-select: none; color: var(--accent); }
+  .p-name { font-family: var(--serif); font-size: clamp(24px, 3.5vw, 36px); font-weight: 300; line-height: 1.1; margin-bottom: 10px; }
+  .p-tagline { display: inline-flex; align-items: center; font-family: var(--mono); font-size: 12px; padding: 5px 14px; border-radius: 999px; border: 1px solid var(--accent-rb); background: var(--accent-r); color: var(--accent); letter-spacing: .04em; }
+  .p-desc { margin-top: 20px; font-size: 15px; color: var(--muted); max-width: 640px; line-height: 1.75; }
+  .p-desc strong { color: var(--text); font-weight: 400; }
+
+  /* ── ANALOGY ── */
+  .analogy { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 22px; margin: 28px 0; font-size: 14px; color: var(--muted); display: flex; gap: 14px; align-items: flex-start; }
+  .analogy-icon { font-size: 20px; flex-shrink: 0; line-height: 1.4; }
+  .analogy em { font-style: italic; color: var(--text); }
+
+  /* ── FAILURE TIMELINE ── */
+  .timeline {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px 24px 20px;
+    margin: 28px 0;
+  }
+  .timeline-label { font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 20px; }
+  .timeline-row { display: flex; align-items: center; gap: 0; margin-bottom: 16px; }
+  .timeline-row:last-child { margin-bottom: 0; }
+  .tl-name { font-family: var(--mono); font-size: 11px; color: var(--muted); min-width: 90px; }
+  .tl-track { flex: 1; height: 28px; border-radius: 6px; position: relative; display: flex; align-items: center; }
+  .tl-segment {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .04em;
+  }
+  .tl-seg-ok   { background: rgba(96,165,250,.15); border: 1px solid rgba(96,165,250,.2); border-radius: 5px 0 0 5px; color: var(--ok); }
+  .tl-seg-warn { background: rgba(251,146,60,.12); border: 1px solid rgba(251,146,60,.2); border-left: none; color: var(--warn); }
+  .tl-seg-fail { background: rgba(244,63,94,.15);  border: 1px solid rgba(244,63,94,.2);  border-left: none; border-radius: 0 5px 5px 0; color: var(--fast); }
+  .tl-seg-fail-only { background: rgba(244,63,94,.15); border: 1px solid rgba(244,63,94,.25); border-radius: 5px; color: var(--fast); font-weight: 500; }
+  .tl-cost { font-family: var(--mono); font-size: 11px; min-width: 80px; text-align: right; }
+
+  /* ── SIGNALS GRID ── */
+  .signals-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 24px 0; }
+  @media (max-width: 620px) { .signals-grid { grid-template-columns: 1fr; } }
+  .signal-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; position: relative; overflow: hidden; }
+  .signal-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: var(--accent); }
+  .signal-num { font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--accent); margin-bottom: 10px; }
+  .signal-title { font-size: 14px; font-weight: 400; margin-bottom: 8px; color: var(--text); }
+  .signal-desc { font-size: 13px; color: var(--muted); line-height: 1.7; }
+  .signal-desc em { font-style: italic; color: var(--text); }
+  .signal-code { margin-top: 12px; background: var(--surface2); border-radius: 6px; padding: 10px 12px; font-family: var(--mono); font-size: 11.5px; line-height: 1.65; color: var(--muted); }
+  .sc-ok  { color: #4ade80; }
+  .sc-bad { color: #f87171; }
+
+  /* ── CODE ── */
+  .comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 24px 0; }
+  @media (max-width: 620px) { .comparison { grid-template-columns: 1fr; } }
+  .code-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .code-card-header { display: flex; align-items: center; gap: 8px; padding: 10px 16px; font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; border-bottom: 1px solid var(--border); color: var(--muted); }
+  .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .dot-bad  { background: #f87171; }
+  .dot-good { background: #4ade80; }
+  pre { padding: 18px; font-family: var(--mono); font-size: 12.5px; line-height: 1.7; overflow-x: auto; tab-size: 2; white-space: pre; }
+  .kw  { color: #c084fc; }
+  .cl  { color: #f43f5e; }
+  .fn  { color: #60a5fa; }
+  .str { color: #fb923c; }
+  .cm  { color: #2a1a1a; font-style: italic; }
+  .num { color: #f472b6; }
+  .ok  { color: #4ade80; }
+  .err { color: #f87171; }
+
+  /* ── TIP ── */
+  .tip { border-radius: var(--radius); padding: 18px 22px; font-size: 14px; line-height: 1.7; border-left: 3px solid var(--accent); background: var(--surface); margin-top: 24px; color: var(--muted); }
+  .tip strong { font-weight: 500; display: block; margin-bottom: 4px; font-size: 12px; font-family: var(--mono); letter-spacing: .05em; text-transform: uppercase; color: var(--accent); }
+  .tip code { font-family: var(--mono); font-size: 12px; background: var(--surface2); padding: 1px 6px; border-radius: 4px; color: var(--text); }
+
+  /* ── FAST VS SAFE ── */
+  .versus-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 28px 0; }
+  @media (max-width: 620px) { .versus-grid { grid-template-columns: 1fr; } }
+  .versus-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 22px; position: relative; overflow: hidden; }
+  .versus-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+  .vfast::before { background: var(--fast); }
+  .vsafe::before { background: var(--safe); }
+  .versus-label { font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 10px; font-weight: 500; }
+  .versus-name  { font-family: var(--serif); font-size: 20px; font-weight: 300; margin-bottom: 10px; }
+  .versus-desc  { font-size: 13px; color: var(--muted); line-height: 1.7; }
+  .versus-desc em { font-style: italic; color: var(--text); }
+  .versus-desc strong { color: var(--text); font-weight: 400; }
+  .versus-examples { margin-top: 14px; display: flex; flex-direction: column; gap: 5px; }
+  .versus-ex { font-family: var(--mono); font-size: 11px; padding: 4px 0; border-top: 1px solid var(--border); color: var(--muted); }
+
+  /* ── CONTEXT MATRIX ── */
+  .ctx-matrix { width: 100%; border-collapse: separate; border-spacing: 0; margin: 24px 0; font-size: 13px; }
+  .ctx-matrix th { font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); font-weight: 400; }
+  .ctx-matrix td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; color: var(--muted); font-size: 13px; }
+  .ctx-matrix td:first-child { color: var(--text); font-size: 13px; }
+  .ctx-matrix tr:last-child td { border-bottom: none; }
+  .ctx-matrix tr:hover td { background: var(--surface2); }
+  .badge-fast { display: inline-block; font-family: var(--mono); font-size: 10px; padding: 2px 8px; border-radius: 999px; background: var(--fast-r); border: 1px solid var(--fast-rb); color: var(--fast); }
+  .badge-safe { display: inline-block; font-family: var(--mono); font-size: 10px; padding: 2px 8px; border-radius: 999px; background: var(--safe-r); border: 1px solid var(--safe-rb); color: var(--safe); }
+  .badge-both { display: inline-block; font-family: var(--mono); font-size: 10px; padding: 2px 8px; border-radius: 999px; background: var(--ok-r); border: 1px solid var(--ok-rb); color: var(--ok); }
+
+  /* ── TRAP LIST ── */
+  .trap-list { list-style: none; margin: 20px 0; display: flex; flex-direction: column; gap: 14px; }
+  .trap-list li { display: flex; gap: 14px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; font-size: 14px; color: var(--muted); line-height: 1.65; align-items: flex-start; }
+  .trap-icon { font-size: 18px; flex-shrink: 0; }
+  .trap-list li strong { color: var(--text); font-weight: 400; display: block; margin-bottom: 4px; }
+  .trap-list li code { font-family: var(--mono); font-size: 12px; background: var(--surface2); padding: 1px 5px; border-radius: 4px; color: var(--text); }
+
+  /* ── CONTEXT ── */
+  .context-inner { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px 28px; display: grid; grid-template-columns: 1fr 1px 1fr; gap: 24px; }
+  @media (max-width: 620px) { .context-inner { grid-template-columns: 1fr; } }
+  .context-divider { background: var(--border); }
+  .context-section-label { font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+  .context-text { font-size: 13.5px; color: var(--muted); line-height: 1.75; }
+  .context-text strong { color: var(--text); font-weight: 400; }
+  .scope-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .pill { font-family: var(--mono); font-size: 11px; padding: 4px 12px; border-radius: 999px; border: 1px solid var(--border2); color: var(--muted); letter-spacing: .04em; }
+  .pill.yes { border-color: rgba(244,63,94,.3); background: rgba(244,63,94,.06); color: var(--accent); }
+  .pill.partial { border-color: rgba(251,146,60,.3); background: rgba(251,146,60,.06); color: #fb923c; }
+
+  /* ── PROGRESS / NAV ── */
+  .progress { display: flex; gap: 6px; margin-top: 40px; }
+  .prog-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border2); transition: background var(--transition), transform var(--transition); cursor: pointer; }
+  .prog-dot.active { transform: scale(1.4); background: var(--accent); }
+  .nav-btns { display: flex; gap: 10px; margin-top: 16px; }
+  .nav-btn { display: flex; align-items: center; gap: 6px; background: var(--surface); border: 1px solid var(--border); color: var(--muted); font-family: var(--mono); font-size: 12px; letter-spacing: .04em; padding: 10px 18px; border-radius: 8px; cursor: pointer; transition: color var(--transition), border-color var(--transition), background var(--transition); }
+  .nav-btn:hover { color: var(--text); border-color: var(--border2); background: var(--surface2); }
+
+  footer { border-top: 1px solid var(--border); padding: 32px 48px; max-width: 960px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: .05em; flex-wrap: wrap; gap: 8px; }
+  footer a { color: var(--muted); text-decoration: none; transition: color var(--transition); }
+  footer a:hover { color: var(--text); }
+
+
+
+
+/* ── SITE NAV ── */
+body { padding-top: 56px; padding-bottom: 64px; }
+
+.snav {
+  position: fixed;
+  left: 0; right: 0;
+  top: 0;
+  z-index: 1000;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 20px;
+  background: rgba(9,9,11,.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255,255,255,.09);
+  font-family: 'DM Mono', monospace;
+}
+.snav-bot {
+  top: auto;
+  bottom: 0;
+  border-bottom: none;
+  border-top: 1px solid rgba(255,255,255,.09);
+  height: 52px;
+}
+.snav-prev, .snav-next {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  text-decoration: none;
+  font-size: 11px;
+  letter-spacing: .05em;
+  padding: 7px 14px;
+  border-radius: 8px;
+  border: 1px solid;
+  transition: opacity .16s, background .16s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 220px;
+}
+.snav-prev:hover, .snav-next:hover { opacity: .7; }
+.snav-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.snav-spacer { flex: 1; }
+.snav-center {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.snav-home {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  font-size: 11px;
+  letter-spacing: .07em;
+  padding: 7px 16px;
+  border-radius: 8px;
+  color: #f0ede8;
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.14);
+  transition: background .16s, border-color .16s;
+  white-space: nowrap;
+  font-weight: 500;
+}
+.snav-home:hover {
+  background: rgba(255,255,255,.13);
+  border-color: rgba(255,255,255,.24);
+}
+.snav-pos {
+  font-size: 10px;
+  letter-spacing: .12em;
+  color: rgba(255,255,255,.28);
+  padding: 0 2px;
+  white-space: nowrap;
+}
+.snav-ghost { width: 80px; flex-shrink: 0; }
+@media (max-width: 600px) {
+  .snav-label { display: none; }
+  .snav { padding: 0 10px; gap: 5px; }
+  .snav-prev, .snav-next { padding: 7px 11px; }
+  .snav-home { padding: 7px 12px; }
+  .snav-ghost { width: 40px; }
+}
+
+</style>
+</head>
+<body>
+<!-- SNAV-TOP -->
+<nav class="snav snav-top">
+  <a class="snav-prev" href="07_lod-principle.html" style="color:#7dd3fc;background:rgba(125,211,252,.12);border-color:rgba(125,211,252,.32)"><span>←</span><span class="snav-label">Law of Demeter</span></a>
+  <div class="snav-spacer"></div>
+  <div class="snav-center">
+    <a class="snav-home" href="00_index.html" >↑&nbsp;&nbsp;Índice de secciones</a>
+    <span class="snav-pos">08&thinsp;/&thinsp;12</span>
+  </div>
+  <div class="snav-spacer"></div>
+  <a class="snav-next" href="09_package-principles.html" style="color:#f0abfc;background:rgba(240,171,252,.12);border-color:rgba(240,171,252,.32)"><span class="snav-label">Paquetes</span><span>→</span></a>
+</nav>
+<!-- /SNAV-TOP -->
+
+<header>
+  <div class="header-label">Principios de diseño · Referencia para devs</div>
+  <h1><em>Fail</em><br>Fast</h1>
+  <p>Cuando algo está mal, el sistema debería decirlo de inmediato y de forma ruidosa. Un bug que explota en el momento exacto en que ocurre es exponencialmente más barato que uno que se descubre tres pasos después.</p>
+</header>
+
+<div class="nav-wrap">
+  <div class="nav" id="nav">
+    <div class="nav-pill" id="navPill"></div>
+    <button class="tab-btn active" data-idx="0" onclick="show(0)">
+      <span class="tab-icon">💡</span>
+      <span class="tab-word">Concepto</span>
+    </button>
+    <button class="tab-btn" data-idx="1" onclick="show(1)">
+      <span class="tab-icon">🚨</span>
+      <span class="tab-word">Cuándo aplicar</span>
+    </button>
+    <button class="tab-btn" data-idx="2" onclick="show(2)">
+      <span class="tab-icon">💻</span>
+      <span class="tab-word">En el código</span>
+    </button>
+    <button class="tab-btn" data-idx="3" onclick="show(3)">
+      <span class="tab-icon">⚖️</span>
+      <span class="tab-word">Fail Fast vs Fail Safe</span>
+    </button>
+    <button class="tab-btn" data-idx="4" onclick="show(4)">
+      <span class="tab-icon">⚠️</span>
+      <span class="tab-word">Trampas</span>
+    </button>
+  </div>
+</div>
+
+<main>
+
+  <!-- ── CONCEPTO ── -->
+  <div class="panel active" id="panel-0">
+    <div class="p-header">
+      <div>
+        <div class="p-name">¿Qué es Fail Fast?</div>
+        <span class="p-tagline">Fallá pronto · Fallá fuerte · Fallá claro</span>
+        <p class="p-desc">Fail Fast dice que cuando el sistema detecta una condición inválida, debería <strong>fallar de inmediato y de manera visible</strong>, en lugar de continuar con un estado potencialmente corrupto que va a causar errores mucho más difíciles de diagnosticar más adelante.</p>
+        <p class="p-desc" style="margin-top:10px">El principio fue articulado por <strong>Jim Shore en 2004</strong> en IEEE Software. La idea central: <strong>el costo de un fallo crece exponencialmente con la distancia entre dónde ocurre el problema y dónde se detecta</strong>. Detectar temprano es barato. Detectar tarde es catastrófico.</p>
+      </div>
+      <div class="p-letter">F</div>
+    </div>
+
+    <div class="timeline">
+      <div class="timeline-label">Costo del fallo según cuándo se detecta</div>
+      <div class="timeline-row">
+        <div class="tl-name" style="color:var(--fast)">Fail Fast</div>
+        <div class="tl-track">
+          <div class="tl-seg-fail-only" style="width:12%;padding:0 8px;font-size:10px">falla</div>
+          <div style="flex:1;padding-left:10px;font-size:12px;color:var(--muted)">→ stack trace exacto, estado conocido, fácil de reproducir</div>
+        </div>
+        <div class="tl-cost" style="color:var(--fast)">costo bajo</div>
+      </div>
+      <div class="timeline-row">
+        <div class="tl-name" style="color:var(--warn)">Fallo tardío</div>
+        <div class="tl-track">
+          <div class="tl-seg-ok"   style="width:30%;padding:0 6px;font-size:10px">ejecuta...</div>
+          <div class="tl-seg-warn" style="width:30%;padding:0 6px;font-size:10px">corrompe...</div>
+          <div class="tl-seg-fail" style="width:40%;padding:0 6px;font-size:10px">falla lejos</div>
+        </div>
+        <div class="tl-cost" style="color:var(--warn)">costo alto</div>
+      </div>
+      <div class="timeline-row">
+        <div class="tl-name" style="color:#f87171">Fallo silencioso</div>
+        <div class="tl-track">
+          <div class="tl-seg-ok"   style="width:25%;padding:0 6px;font-size:10px">ejecuta...</div>
+          <div class="tl-seg-warn" style="width:35%;padding:0 6px;font-size:10px">datos malos...</div>
+          <div class="tl-seg-warn" style="width:40%;padding:0 6px;font-size:10px;border-radius:0 5px 5px 0">se propagan...</div>
+        </div>
+        <div class="tl-cost" style="color:#f87171">costo enorme</div>
+      </div>
+    </div>
+
+    <div class="analogy">
+      <span class="analogy-icon">🏗️</span>
+      <span>En construcción, cuando un ladrillo está mal colocado, mejor descubrirlo ahora que cuando el edificio tiene diez pisos arriba. El costo de reparar la cimentación crece con cada capa que se agrega encima. <em>El mismo principio aplica a los bugs: cuanto más tarde se detectan, más código construiste encima del error.</em></span>
+    </div>
+
+    <div class="analogy">
+      <span class="analogy-icon">🩺</span>
+      <span>Un sistema que no falla ruidosamente cuando tiene un problema es como un paciente que no siente dolor cuando debería. El dolor es una señal de alarma del cuerpo —molesta, pero es mucho mejor que no sentirlo y que la enfermedad progrese sin síntomas. <em>Las excepciones son el dolor del software.</em></span>
+    </div>
+
+    <div class="tip">
+      <strong>La regla de Jim Shore</strong>
+      "Comprobá frecuentemente, fallá ruidosamente, no continúes con estado inválido." Un sistema que detecta un problema y sigue ejecutando como si no hubiera pasado nada es mucho más peligroso que uno que se detiene inmediatamente. El primero corrompe datos; el segundo solo interrumpe.
+    </div>
+  </div>
+
+  <!-- ── CUÁNDO APLICAR ── -->
+  <div class="panel" id="panel-1">
+    <div class="p-header">
+      <div>
+        <div class="p-name">¿Cuándo aplicar Fail Fast?</div>
+        <span class="p-tagline">Las cuatro señales de alarma que deben fallar pronto</span>
+        <p class="p-desc">Fail Fast no significa lanzar excepciones por todo. Significa identificar los <strong>puntos críticos donde un estado inválido no debería propagarse</strong> y cortarlo ahí. Hay cuatro categorías principales donde siempre aplica.</p>
+      </div>
+      <div class="p-letter">F</div>
+    </div>
+
+    <div class="signals-grid">
+      <div class="signal-card">
+        <div class="signal-num">01 — Precondiciones</div>
+        <div class="signal-title">Validar entradas al inicio de cada función</div>
+        <div class="signal-desc">Antes de ejecutar cualquier lógica, verificar que los argumentos son válidos. Si no lo son, <em>fallar de inmediato</em> con un mensaje claro que diga exactamente qué está mal y dónde.</div>
+        <div class="signal-code">
+          <span class="sc-ok">✓</span> <span style="color:#c084fc">if</span> (!userId) <span style="color:#c084fc">throw</span> <span style="color:#f43f5e">new</span> Error(<span style="color:#fb923c">'userId requerido'</span>)<br>
+          <span class="sc-ok">✓</span> <span style="color:#c084fc">if</span> (amount &lt;= 0) <span style="color:#c084fc">throw</span> <span style="color:#f43f5e">new</span> Error(<span style="color:#fb923c">'amount > 0'</span>)
+        </div>
+      </div>
+      <div class="signal-card">
+        <div class="signal-num">02 — Bordes del sistema</div>
+        <div class="signal-title">Validar todo lo que entra desde afuera</div>
+        <div class="signal-desc">HTTP requests, archivos, mensajes de queues, respuestas de APIs externas. Todo lo que viene de afuera del sistema es no confiable. <em>Validar en el borde, antes de que los datos lleguen al dominio.</em></div>
+        <div class="signal-code">
+          <span class="sc-bad">✗</span> aceptar JSON sin parsear ni validar schema<br>
+          <span class="sc-ok">✓</span> validar con Zod/Joi/Pydantic en el controller
+        </div>
+      </div>
+      <div class="signal-card">
+        <div class="signal-num">03 — Invariantes de dominio</div>
+        <div class="signal-title">Reglas que nunca deben violarse</div>
+        <div class="signal-desc">Las condiciones que el sistema asume que siempre son verdaderas. Si se violan, hay un bug —no una condición de negocio. <em>Usar assertions para detectarlos en el momento exacto en que ocurren.</em></div>
+        <div class="signal-code">
+          <span class="sc-ok">✓</span> assert(items.length > 0, <span style="color:#fb923c">'order sin items'</span>)<br>
+          <span class="sc-ok">✓</span> assert(total >= 0, <span style="color:#fb923c">'total negativo'</span>)
+        </div>
+      </div>
+      <div class="signal-card">
+        <div class="signal-num">04 — Errores de configuración</div>
+        <div class="signal-title">Fallar al inicio, no en runtime</div>
+        <div class="signal-desc">Si falta una variable de entorno, una clave de API o una conexión a base de datos, <em>fallar inmediatamente al arrancar</em>, no cuando el primer usuario intenta hacer algo y recibe un error críptico.</div>
+        <div class="signal-code">
+          <span class="sc-bad">✗</span> leer process.env.API_KEY cuando se usa<br>
+          <span class="sc-ok">✓</span> verificar todas las vars al inicio del proceso
+        </div>
+      </div>
+    </div>
+
+    <div class="analogy">
+      <span class="analogy-icon">🛫</span>
+      <span>Un avión no despega con un motor defectuoso esperando que "quizás no sea tan grave". La verificación pre-vuelo es un Fail Fast sistemático. <em>Es preferible cancelar el vuelo en tierra que descubrir el problema a 10.000 metros de altura.</em></span>
+    </div>
+
+    <div class="tip">
+      <strong>El punto de validación correcto</strong>
+      Fail Fast no significa validar en todos los niveles del sistema. Significa validar <em>en el punto más cercano a la fuente del dato</em>. Los datos externos se validan en el borde. Las precondiciones de una función se validan al entrar. Los invariantes se verifican donde se modifica el estado. No repitas la validación en cada capa —eso viola DRY.
+    </div>
+  </div>
+
+  <!-- ── EN EL CÓDIGO ── -->
+  <div class="panel" id="panel-2">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Fail Fast en el código</div>
+        <span class="p-tagline">Guard clauses, assertions y validación en el borde</span>
+        <p class="p-desc">Fail Fast se implementa con tres herramientas principales: <strong>guard clauses</strong> que cortan el flujo temprano, <strong>assertions</strong> que verifican invariantes en desarrollo, y <strong>validación de schema</strong> en las fronteras del sistema.</p>
+      </div>
+      <div class="p-letter">a</div>
+    </div>
+
+    <div class="comparison">
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-bad"></span> Fallo tardío y silencioso</div>
+        <pre><span class="kw">function</span> <span class="fn">processOrder</span>(order) {
+  <span class="cm">// no validamos nada</span>
+  <span class="kw">const</span> total = order.items
+    .<span class="fn">reduce</span>((s, i) => s + i.price, <span class="num">0</span>)
+
+  <span class="cm">// si order.customer es null:</span>
+  <span class="cm">// falla acá con un error</span>
+  <span class="cm">// que no dice nada útil 💥</span>
+  <span class="fn">sendEmail</span>(order.customer.email)
+
+  <span class="fn">saveToDb</span>(total, order.customer.id)
+}</pre>
+      </div>
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-good"></span> Fail Fast — guard clauses</div>
+        <pre><span class="kw">function</span> <span class="fn">processOrder</span>(order) {
+  <span class="cm">// validamos antes de empezar</span>
+  <span class="kw">if</span> (!order)
+    <span class="kw">throw</span> <span class="kw">new</span> <span class="cl">Error</span>(<span class="str">'order requerida'</span>)
+  <span class="kw">if</span> (!order.customer?.email)
+    <span class="kw">throw</span> <span class="kw">new</span> <span class="cl">Error</span>(<span class="str">'email de cliente falta'</span>)
+  <span class="kw">if</span> (!order.items?.length)
+    <span class="kw">throw</span> <span class="kw">new</span> <span class="cl">Error</span>(<span class="str">'orden sin items'</span>)
+
+  <span class="cm">// ahora el flujo principal</span>
+  <span class="cm">// trabaja con datos válidos ✓</span>
+}</pre>
+      </div>
+    </div>
+
+    <div class="comparison">
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-bad"></span> Config que falla tarde</div>
+        <pre><span class="kw">async function</span> <span class="fn">sendEmail</span>(to, body) {
+  <span class="cm">// se lee cuando se usa</span>
+  <span class="kw">const</span> key = process.env.SENDGRID_KEY
+
+  <span class="cm">// si KEY no existe, falla acá</span>
+  <span class="cm">// cuando el primer email se envía</span>
+  <span class="cm">// quizás horas después del deploy 💥</span>
+  <span class="kw">await</span> sendgrid.<span class="fn">send</span>({ to, body, key })
+}</pre>
+      </div>
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-good"></span> Config que falla al arrancar</div>
+        <pre><span class="cm">// al inicio del proceso</span>
+<span class="kw">const</span> REQUIRED_VARS = [
+  <span class="str">'SENDGRID_KEY'</span>, <span class="str">'DATABASE_URL'</span>,
+  <span class="str">'JWT_SECRET'</span>, <span class="str">'APP_PORT'</span>
+]
+
+<span class="kw">for</span> (<span class="kw">const</span> v <span class="kw">of</span> REQUIRED_VARS) {
+  <span class="kw">if</span> (!process.env[v])
+    <span class="kw">throw</span> <span class="kw">new</span> <span class="cl">Error</span>(<span class="str">`Falta: ${v}`</span>)
+}
+<span class="cm">// si llegamos acá, todo OK ✓</span></pre>
+      </div>
+    </div>
+
+    <div class="comparison">
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-bad"></span> Retornar null — fallo diferido</div>
+        <pre><span class="kw">function</span> <span class="fn">findUser</span>(id) {
+  <span class="kw">const</span> user = db.<span class="fn">query</span>(id)
+  <span class="kw">if</span> (!user) <span class="kw">return</span> <span class="ok">null</span> <span class="cm">// 😬</span>
+  <span class="kw">return</span> user
+}
+
+<span class="cm">// Quien llama recibe null y</span>
+<span class="cm">// si no lo chequea, el</span>
+<span class="cm">// NullPointerException aparece</span>
+<span class="cm">// tres llamadas después 💥</span></pre>
+      </div>
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-good"></span> Lanzar excepción — fallo inmediato</div>
+        <pre><span class="kw">function</span> <span class="fn">findUser</span>(id) {
+  <span class="kw">const</span> user = db.<span class="fn">query</span>(id)
+  <span class="kw">if</span> (!user)
+    <span class="kw">throw</span> <span class="kw">new</span> <span class="cl">UserNotFoundError</span>(id)
+  <span class="kw">return</span> user <span class="cm">// siempre válido ✓</span>
+}
+
+<span class="cm">// El error ocurre exactamente</span>
+<span class="cm">// donde está el problema</span>
+<span class="cm">// con un mensaje descriptivo ✓</span></pre>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>Excepciones descriptivas, no genéricas</strong>
+      <code>throw new Error('error')</code> viola el espíritu de Fail Fast aunque técnicamente falle pronto. El mensaje debe decir <em>qué</em> salió mal, <em>dónde</em> y con <em>qué valor</em>. <code>throw new Error(`userId inválido: esperado string, recibido ${typeof userId}`)</code> es un fallo rápido útil. El error genérico es solo un fallo rápido ruidoso.
+    </div>
+  </div>
+
+  <!-- ── FAIL FAST VS FAIL SAFE ── -->
+  <div class="panel" id="panel-3">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Fail Fast vs Fail Safe</div>
+        <span class="p-tagline">No son opuestos — son herramientas para contextos distintos</span>
+        <p class="p-desc">Fail Safe es el otro extremo: diseñar el sistema para que, cuando algo falla, <strong>degrade de forma controlada</strong> en lugar de detenerse completamente. No son contradictorios —son complementarios y se aplican en capas distintas del sistema.</p>
+      </div>
+      <div class="p-letter">s</div>
+    </div>
+
+    <div class="versus-grid">
+      <div class="versus-card vfast">
+        <div class="versus-label" style="color:var(--fast)">Fail Fast</div>
+        <div class="versus-name" style="color:var(--fast)">Fallar inmediato y visible</div>
+        <div class="versus-desc">
+          Detectar el problema <strong>en el momento en que ocurre</strong> y reportarlo ruidosamente. El objetivo es que los errores sean obvios y fáciles de diagnosticar, especialmente en desarrollo.
+          <br><br>
+          Prioriza la <em>integridad del sistema</em> sobre la disponibilidad. Preferible que el sistema se detenga antes de continuar con datos corruptos.
+        </div>
+        <div class="versus-examples">
+          <div class="versus-ex">→ Validación de precondiciones</div>
+          <div class="versus-ex">→ Assertions de invariantes</div>
+          <div class="versus-ex">→ Verificación de configuración al inicio</div>
+          <div class="versus-ex">→ Lanzar excepción en lugar de retornar null</div>
+        </div>
+      </div>
+      <div class="versus-card vsafe">
+        <div class="versus-label" style="color:var(--safe)">Fail Safe</div>
+        <div class="versus-name" style="color:var(--safe)">Degradar de forma controlada</div>
+        <div class="versus-desc">
+          Diseñar para que cuando un componente falle, el sistema completo <strong>siga funcionando de forma degradada</strong> en lugar de colapsar. El objetivo es la resiliencia del sistema ante fallos inevitables.
+          <br><br>
+          Prioriza la <em>disponibilidad</em>. Acceptable que algunas features fallen si el sistema sigue parcialmente operativo.
+        </div>
+        <div class="versus-examples">
+          <div class="versus-ex">→ Circuit breakers en servicios externos</div>
+          <div class="versus-ex">→ Fallback a caché si la BD no responde</div>
+          <div class="versus-ex">→ Retry con backoff exponencial</div>
+          <div class="versus-ex">→ Valores por defecto cuando un servicio falla</div>
+        </div>
+      </div>
+    </div>
+
+    <table class="ctx-matrix">
+      <thead>
+        <tr>
+          <th>Contexto</th>
+          <th>Estrategia</th>
+          <th>Razonamiento</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Bug de programación (null inesperado, tipo incorrecto)</td>
+          <td><span class="badge-fast">Fail Fast</span></td>
+          <td style="color:var(--muted)">Es un bug —necesita ser detectado y corregido, no ignorado</td>
+        </tr>
+        <tr>
+          <td>Configuración inválida al arrancar</td>
+          <td><span class="badge-fast">Fail Fast</span></td>
+          <td style="color:var(--muted)">El sistema no puede funcionar correctamente sin config válida</td>
+        </tr>
+        <tr>
+          <td>Servicio externo temporalmente caído</td>
+          <td><span class="badge-safe">Fail Safe</span></td>
+          <td style="color:var(--muted)">Es una condición de red, no un bug. El sistema debería degradar</td>
+        </tr>
+        <tr>
+          <td>Feature no crítica con error</td>
+          <td><span class="badge-safe">Fail Safe</span></td>
+          <td style="color:var(--muted)">No tiene sentido bajar todo el sistema por una feature secundaria</td>
+        </tr>
+        <tr>
+          <td>Input inválido de usuario</td>
+          <td><span class="badge-both">Ambos</span></td>
+          <td style="color:var(--muted)">Fail Fast para detectar el error, Fail Safe para mostrar un mensaje amigable</td>
+        </tr>
+        <tr>
+          <td>Datos corruptos en base de datos</td>
+          <td><span class="badge-fast">Fail Fast</span></td>
+          <td style="color:var(--muted)">Datos inválidos no deben propagarse —mejor detener y alertar</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="tip">
+      <strong>La regla de las capas</strong>
+      Fail Fast aplica en el <em>interior</em> del sistema: en las funciones, los servicios, el dominio. Fail Safe aplica en las <em>fronteras externas</em>: la comunicación con servicios de terceros, los recursos de red, las integraciones. El núcleo falla fuerte para que los bugs sean obvios; el borde falla con gracia para que los problemas externos no colapsen todo.
+    </div>
+  </div>
+
+  <!-- ── TRAMPAS ── -->
+  <div class="panel" id="panel-4">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Trampas comunes</div>
+        <span class="p-tagline">Las formas en que los bugs se vuelven invisibles</span>
+        <p class="p-desc">Violar Fail Fast casi siempre parece <strong>la opción más segura</strong> en el momento. Retornar null en lugar de lanzar, capturar la excepción para que "no moleste", devolver un valor por defecto "razonable". Estas decisiones vuelven los bugs invisibles hasta que el daño ya está hecho.</p>
+      </div>
+      <div class="p-letter">t</div>
+    </div>
+
+    <ul class="trap-list">
+      <li>
+        <span class="trap-icon">🔇</span>
+        <div>
+          <strong>Swallowing exceptions — tragar el error</strong>
+          El antipatrón más dañino. Un bloque <code>try/catch</code> que captura la excepción y no hace nada con ella —o solo loguea "algo salió mal"— convierte un fallo ruidoso en uno silencioso. El sistema continúa en un estado inválido y el bug aparece mucho después, irreconocible.
+          <div style="margin-top:8px;background:var(--surface2);border-radius:6px;padding:10px 12px;font-family:var(--mono);font-size:12px;color:var(--muted)">
+            <span style="color:#f87171">✗</span> try { ... } catch (e) { console.log('error') }<br>
+            <span style="color:#4ade80">✓</span> try { ... } catch (e) { throw new AppError('contexto', e) }
+          </div>
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">👻</span>
+        <div>
+          <strong>Retornar null, -1 o "" como señal de error</strong>
+          Retornar <code>null</code> cuando no se encuentra algo, <code>-1</code> cuando falla un índice, o <code>""</code> cuando falta un valor transfiere la responsabilidad de detectar el error al llamador —que quizás no lo chequea. La excepción falla en el origen; el <code>null</code> falla tres llamadas después con un NullPointerException sin contexto.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🧢</span>
+        <div>
+          <strong>Valores por defecto que ocultan errores de configuración</strong>
+          <code>const timeout = process.env.TIMEOUT ?? 5000</code> parece prudente. Pero si <code>TIMEOUT</code> debería estar configurado y no lo está, el valor por defecto enmascara una mala configuración. El sistema funciona con un timeout incorrecto sin que nadie se entere. La alternativa es fallar al inicio si la variable es obligatoria.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🌊</span>
+        <div>
+          <strong>Continuar después de detectar un estado inválido</strong>
+          Verificar que algo está mal y seguir de todas formas: <code>if (!user) { log('user not found'); return user; }</code> —el log dice que el usuario no existe, pero se retorna <code>undefined</code> de todos modos. El código que llama recibe <code>undefined</code> y falla más tarde. Si el estado es inválido, <em>no continúes</em>.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🔄</span>
+        <div>
+          <strong>Validar solo en desarrollo, no en producción</strong>
+          Deshabilitar assertions o validaciones en producción "por performance" es una forma de Fail Slow selectivo. Los bugs que solo se manifiestan en producción —con datos reales, bajo carga real— son los más difíciles de diagnosticar. Las assertions tienen un costo mínimo y salvan horas de debugging.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">📨</span>
+        <div>
+          <strong>Mensajes de error sin contexto</strong>
+          <code>throw new Error('invalid input')</code> es Fail Fast en forma pero no en espíritu. Un error útil dice: qué valor recibió, qué esperaba, en qué función, con qué parámetros. <code>throw new Error(`amount debe ser positivo, recibido: ${amount} en processPayment(orderId=${orderId})`)</code> lleva al bug en segundos.
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- context -->
+  <div style="margin-top:36px;padding-top:32px;border-top:1px solid var(--border)">
+    <div class="context-inner">
+      <div>
+        <div class="context-section-label">Origen</div>
+        <p class="context-text">
+          El principio fue articulado por <strong>Jim Shore</strong> en su artículo <em>"Fail Fast"</em> publicado en <em>IEEE Software</em> en 2004. Shore describió cómo los sistemas que detectan y reportan errores inmediatamente son mucho más fáciles de depurar que los que continúan con estado inválido. También está fuertemente asociado al trabajo de <strong>Martin Fowler</strong> sobre assertion patterns y diseño defensivo.
+        </p>
+      </div>
+      <div class="context-divider"></div>
+      <div>
+        <div class="context-section-label">¿Solo aplica al código?</div>
+        <p class="context-text">Fail Fast es un principio de sistemas en general —aplica en hardware, en procesos, en equipos.</p>
+        <div class="scope-pills">
+          <span class="pill yes">Código de aplicación</span>
+          <span class="pill yes">Configuración / arranque</span>
+          <span class="pill yes">Tests (assertions)</span>
+          <span class="pill yes">Pipelines de CI/CD</span>
+          <span class="pill yes">Validación de APIs</span>
+          <span class="pill partial">Sistemas distribuidos — balancear con Fail Safe</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="progress" id="progress">
+    <div class="prog-dot active" onclick="show(0)"></div>
+    <div class="prog-dot" onclick="show(1)"></div>
+    <div class="prog-dot" onclick="show(2)"></div>
+    <div class="prog-dot" onclick="show(3)"></div>
+    <div class="prog-dot" onclick="show(4)"></div>
+  </div>
+  <div class="nav-btns">
+    <button class="nav-btn" id="btnPrev" onclick="navigate(-1)">← Anterior</button>
+    <button class="nav-btn" id="btnNext" onclick="navigate(1)">Siguiente →</button>
+  </div>
+</main>
+
+<footer>
+  <span>Fail Fast · Jim Shore · IEEE Software · 2004</span>
+  <span>Gustavo Adrián Salvini · <a href="https://github.com/guspatagonico" target="_blank">@guspatagonico</a></span>
+</footer>
+
+<script>
+  let current = 0;
+  const total = 5;
+
+  function show(idx) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.prog-dot').forEach((d, i) => d.classList.toggle('active', i === idx));
+    document.getElementById('panel-' + idx).classList.add('active');
+    document.querySelectorAll('.tab-btn')[idx].classList.add('active');
+    current = idx;
+    movePill(idx);
+    document.getElementById('btnPrev').style.opacity = idx === 0 ? '.3' : '1';
+    document.getElementById('btnPrev').style.pointerEvents = idx === 0 ? 'none' : 'auto';
+    document.getElementById('btnNext').style.opacity = idx === total - 1 ? '.3' : '1';
+    document.getElementById('btnNext').style.pointerEvents = idx === total - 1 ? 'none' : 'auto';
+  }
+
+  function navigate(dir) { show(Math.max(0, Math.min(total - 1, current + dir))); }
+
+  function movePill(idx) {
+    const tabs = document.querySelectorAll('.tab-btn');
+    const pill = document.getElementById('navPill');
+    const tab = tabs[idx];
+    pill.style.left = tab.offsetLeft + 'px';
+    pill.style.width = tab.offsetWidth + 'px';
+  }
+
+  window.addEventListener('load', () => { movePill(0); show(0); });
+  window.addEventListener('resize', () => movePill(current));
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight') navigate(1);
+    if (e.key === 'ArrowLeft')  navigate(-1);
+  });
+</script>
+
+
+
+<!-- SNAV-BOT -->
+<nav class="snav snav-bot">
+  <a class="snav-prev" href="07_lod-principle.html" style="color:#7dd3fc;background:rgba(125,211,252,.12);border-color:rgba(125,211,252,.32)"><span>←</span><span class="snav-label">Law of Demeter</span></a>
+  <div class="snav-spacer"></div>
+  <div class="snav-center">
+    <a class="snav-home" href="00_index.html" >↑&nbsp;&nbsp;Índice</a>
+    <span class="snav-pos">08&thinsp;/&thinsp;12</span>
+  </div>
+  <div class="snav-spacer"></div>
+  <a class="snav-next" href="09_package-principles.html" style="color:#f0abfc;background:rgba(240,171,252,.12);border-color:rgba(240,171,252,.32)"><span class="snav-label">Paquetes</span><span>→</span></a>
+</nav>
+<!-- /SNAV-BOT -->
+</body>
+</html>

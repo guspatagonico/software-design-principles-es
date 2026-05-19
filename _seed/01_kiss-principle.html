@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KISS — Keep It Simple, Stupid</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:       #0d0f0e;
+    --surface:  #131614;
+    --surface2: #1a1d1b;
+    --border:   rgba(255,255,255,0.07);
+    --border2:  rgba(255,255,255,0.13);
+    --text:     #e6e8e6;
+    --muted:    #748070;
+    --accent:   #2dd4bf;
+    --accent2:  #0d9488;
+    --accent-r: rgba(45,212,191,.12);
+    --accent-rb:rgba(45,212,191,.28);
+    --mono:     'DM Mono', monospace;
+    --sans:     'DM Sans', sans-serif;
+    --serif:    'Fraunces', serif;
+    --radius:   10px;
+    --transition: .22s cubic-bezier(.4,0,.2,1);
+  }
+
+  html { scroll-behavior: smooth;
+  /* ── GLOBAL SCALE ── */
+  zoom: 1.3;
+ }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    font-weight: 300;
+    min-height: 100vh;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  header {
+    padding: 72px 48px 56px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  .header-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .16em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 20px;
+  }
+  header h1 {
+    font-family: var(--serif);
+    font-size: clamp(44px, 7vw, 76px);
+    font-weight: 300;
+    line-height: 1.05;
+    letter-spacing: -.02em;
+  }
+  header h1 em { font-style: italic; font-weight: 300; color: var(--muted); }
+  header p { margin-top: 24px; font-size: 15px; color: var(--muted); max-width: 520px; }
+
+  .nav-wrap { max-width: 900px; margin: 0 auto; padding: 0 48px; }
+  .nav {
+    display: flex;
+    gap: 2px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 4px;
+    position: relative;
+  }
+  .nav-pill {
+    position: absolute;
+    top: 4px;
+    height: calc(100% - 8px);
+    border-radius: 10px;
+    background: var(--accent-r);
+    transition: left var(--transition), width var(--transition);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .tab-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 14px 8px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    border-radius: 10px;
+    color: var(--muted);
+    transition: color var(--transition);
+    position: relative;
+    z-index: 1;
+    font-family: var(--sans);
+  }
+  .tab-btn.active { color: var(--accent); }
+  .tab-icon { font-size: 18px; line-height: 1; }
+  .tab-word { font-family: var(--mono); font-size: 10px; letter-spacing: .06em; text-transform: uppercase; }
+
+  main { max-width: 900px; margin: 32px auto 0; padding: 0 48px 96px; }
+  .panel { display: none; animation: fadeUp .28s ease both; }
+  .panel.active { display: block; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .p-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 24px;
+    margin-bottom: 32px;
+    padding-bottom: 28px;
+    border-bottom: 1px solid var(--border);
+  }
+  .p-letter {
+    font-family: var(--serif);
+    font-size: 96px;
+    font-weight: 600;
+    line-height: .85;
+    opacity: .1;
+    flex-shrink: 0;
+    user-select: none;
+    color: var(--accent);
+  }
+  .p-name {
+    font-family: var(--serif);
+    font-size: clamp(26px, 4vw, 38px);
+    font-weight: 300;
+    line-height: 1.1;
+    margin-bottom: 10px;
+  }
+  .p-tagline {
+    display: inline-flex;
+    align-items: center;
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 5px 14px;
+    border-radius: 999px;
+    border: 1px solid var(--accent-rb);
+    background: var(--accent-r);
+    color: var(--accent);
+    letter-spacing: .04em;
+  }
+  .p-desc { margin-top: 20px; font-size: 15px; color: var(--muted); max-width: 600px; line-height: 1.75; }
+  .p-desc strong { color: var(--text); font-weight: 400; }
+
+  .analogy {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 22px;
+    margin: 28px 0;
+    font-size: 14px;
+    color: var(--muted);
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+  }
+  .analogy-icon { font-size: 20px; flex-shrink: 0; line-height: 1.4; }
+  .analogy em { font-style: italic; color: var(--text); }
+
+  .comparison {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin: 24px 0;
+  }
+  @media (max-width: 620px) { .comparison { grid-template-columns: 1fr; } }
+
+  .code-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .code-card-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .dot-bad  { background: #f87171; }
+  .dot-good { background: #4ade80; }
+  pre {
+    padding: 18px;
+    font-family: var(--mono);
+    font-size: 12.5px;
+    line-height: 1.7;
+    overflow-x: auto;
+    tab-size: 2;
+    white-space: pre;
+  }
+  .kw  { color: #c084fc; }
+  .cl  { color: #2dd4bf; }
+  .fn  { color: #60a5fa; }
+  .str { color: #fb923c; }
+  .cm  { color: #3a4a48; font-style: italic; }
+  .num { color: #f472b6; }
+
+  .tip {
+    border-radius: var(--radius);
+    padding: 18px 22px;
+    font-size: 14px;
+    line-height: 1.7;
+    border-left: 3px solid var(--accent);
+    background: var(--surface);
+    margin-top: 24px;
+    color: var(--muted);
+  }
+  .tip strong { font-weight: 500; display: block; margin-bottom: 4px; font-size: 12px; font-family: var(--mono); letter-spacing: .05em; text-transform: uppercase; color: var(--accent); }
+  .tip code { font-family: var(--mono); font-size: 12px; background: var(--surface2); padding: 1px 6px; border-radius: 4px; color: var(--text); }
+
+  .rules-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin: 24px 0;
+  }
+  @media (max-width: 560px) { .rules-grid { grid-template-columns: 1fr; } }
+
+  .rule-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+  }
+  .rule-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--accent);
+    letter-spacing: .08em;
+    margin-bottom: 8px;
+  }
+  .rule-title { font-size: 14px; font-weight: 500; margin-bottom: 6px; color: var(--text); }
+  .rule-desc { font-size: 13px; color: var(--muted); line-height: 1.65; }
+
+  .trap-list { list-style: none; margin: 20px 0; display: flex; flex-direction: column; gap: 14px; }
+  .trap-list li {
+    display: flex;
+    gap: 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.65;
+    align-items: flex-start;
+  }
+  .trap-icon { font-size: 18px; flex-shrink: 0; }
+  .trap-list li strong { color: var(--text); font-weight: 400; display: block; margin-bottom: 4px; }
+
+  .context-inner {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px 28px;
+    display: grid;
+    grid-template-columns: 1fr 1px 1fr;
+    gap: 24px;
+  }
+  @media (max-width: 620px) { .context-inner { grid-template-columns: 1fr; } }
+  .context-divider { background: var(--border); }
+  .context-section-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .context-text { font-size: 13.5px; color: var(--muted); line-height: 1.75; }
+  .context-text strong { color: var(--text); font-weight: 400; }
+  .context-text code { font-family: var(--mono); font-size: 12px; background: var(--surface2); padding: 1px 6px; border-radius: 4px; color: var(--text); }
+  .scope-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .pill { font-family: var(--mono); font-size: 11px; padding: 4px 12px; border-radius: 999px; border: 1px solid var(--border2); color: var(--muted); letter-spacing: .04em; }
+  .pill.yes { border-color: rgba(45,212,191,.3); background: rgba(45,212,191,.06); color: var(--accent); }
+  .pill.partial { border-color: rgba(251,146,60,.3); background: rgba(251,146,60,.06); color: #fb923c; }
+
+  .progress { display: flex; gap: 6px; margin-top: 40px; }
+  .prog-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border2); transition: background var(--transition), transform var(--transition); cursor: pointer; }
+  .prog-dot.active { transform: scale(1.4); background: var(--accent); }
+
+  .nav-btns { display: flex; gap: 10px; margin-top: 16px; }
+  .nav-btn {
+    display: flex; align-items: center; gap: 6px;
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--muted); font-family: var(--mono); font-size: 12px;
+    letter-spacing: .04em; padding: 10px 18px; border-radius: 8px;
+    cursor: pointer; transition: color var(--transition), border-color var(--transition), background var(--transition);
+  }
+  .nav-btn:hover { color: var(--text); border-color: var(--border2); background: var(--surface2); }
+
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 32px 48px;
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: .05em;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  footer a { color: var(--muted); text-decoration: none; transition: color var(--transition); }
+  footer a:hover { color: var(--text); }
+
+
+
+
+/* ── SITE NAV ── */
+body { padding-top: 56px; padding-bottom: 64px; }
+
+.snav {
+  position: fixed;
+  left: 0; right: 0;
+  top: 0;
+  z-index: 1000;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 20px;
+  background: rgba(9,9,11,.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255,255,255,.09);
+  font-family: 'DM Mono', monospace;
+}
+.snav-bot {
+  top: auto;
+  bottom: 0;
+  border-bottom: none;
+  border-top: 1px solid rgba(255,255,255,.09);
+  height: 52px;
+}
+.snav-prev, .snav-next {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  text-decoration: none;
+  font-size: 11px;
+  letter-spacing: .05em;
+  padding: 7px 14px;
+  border-radius: 8px;
+  border: 1px solid;
+  transition: opacity .16s, background .16s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 220px;
+}
+.snav-prev:hover, .snav-next:hover { opacity: .7; }
+.snav-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.snav-spacer { flex: 1; }
+.snav-center {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.snav-home {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  font-size: 11px;
+  letter-spacing: .07em;
+  padding: 7px 16px;
+  border-radius: 8px;
+  color: #f0ede8;
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.14);
+  transition: background .16s, border-color .16s;
+  white-space: nowrap;
+  font-weight: 500;
+}
+.snav-home:hover {
+  background: rgba(255,255,255,.13);
+  border-color: rgba(255,255,255,.24);
+}
+.snav-pos {
+  font-size: 10px;
+  letter-spacing: .12em;
+  color: rgba(255,255,255,.28);
+  padding: 0 2px;
+  white-space: nowrap;
+}
+.snav-ghost { width: 80px; flex-shrink: 0; }
+@media (max-width: 600px) {
+  .snav-label { display: none; }
+  .snav { padding: 0 10px; gap: 5px; }
+  .snav-prev, .snav-next { padding: 7px 11px; }
+  .snav-home { padding: 7px 12px; }
+  .snav-ghost { width: 40px; }
+}
+
+</style>
+</head>
+<body>
+<!-- SNAV-TOP -->
+<nav class="snav snav-top">
+  <a class="snav-prev" href="00_index.html" style="color:#d4d4d8;background:rgba(212,212,216,.12);border-color:rgba(212,212,216,.28)"><span>←</span><span class="snav-label">Índice</span></a>
+  <div class="snav-spacer"></div>
+  <div class="snav-center">
+    <a class="snav-home" href="00_index.html" >↑&nbsp;&nbsp;Índice de secciones</a>
+    <span class="snav-pos">01&thinsp;/&thinsp;12</span>
+  </div>
+  <div class="snav-spacer"></div>
+  <a class="snav-next" href="02_yagni-principle.html" style="color:#fcd34d;background:rgba(252,211,77,.12);border-color:rgba(252,211,77,.32)"><span class="snav-label">YAGNI</span><span>→</span></a>
+</nav>
+<!-- /SNAV-TOP -->
+
+<header>
+  <div class="header-label">Principios de diseño · Referencia para devs</div>
+  <h1><em>Keep It Simple,</em><br>Stupid</h1>
+  <p>La solución más simple que funciona casi siempre es la correcta. La complejidad innecesaria es deuda técnica disfrazada de sofisticación.</p>
+</header>
+
+<div class="nav-wrap">
+  <div class="nav" id="nav">
+    <div class="nav-pill" id="navPill"></div>
+    <button class="tab-btn active" data-idx="0" onclick="show(0)">
+      <span class="tab-icon">💡</span>
+      <span class="tab-word">Concepto</span>
+    </button>
+    <button class="tab-btn" data-idx="1" onclick="show(1)">
+      <span class="tab-icon">💻</span>
+      <span class="tab-word">En el código</span>
+    </button>
+    <button class="tab-btn" data-idx="2" onclick="show(2)">
+      <span class="tab-icon">📐</span>
+      <span class="tab-word">Reglas</span>
+    </button>
+    <button class="tab-btn" data-idx="3" onclick="show(3)">
+      <span class="tab-icon">⚠️</span>
+      <span class="tab-word">Trampas</span>
+    </button>
+  </div>
+</div>
+
+<main>
+
+  <!-- CONCEPTO -->
+  <div class="panel active" id="panel-0">
+    <div class="p-header">
+      <div>
+        <div class="p-name">¿Qué significa KISS?</div>
+        <span class="p-tagline">La simplicidad es una feature, no una limitación</span>
+        <p class="p-desc">KISS es un principio de diseño que dice que los sistemas funcionan mejor cuando son simples. Surgió en la ingeniería aeronáutica de la Navy de EE.UU. en los años 60 y fue adoptado por el desarrollo de software porque aplica perfectamente: <strong>el código que no existe no puede tener bugs</strong>, y el código simple es más fácil de leer, testear y modificar.</p>
+      </div>
+      <div class="p-letter">K</div>
+    </div>
+
+    <div class="analogy">
+      <span class="analogy-icon">✏️</span>
+      <span>Un lápiz resuelve el problema de escribir en el espacio igual que un bolígrafo de tinta especialmente presurizado. La NASA usó el segundo. Los rusos usaron el lápiz. <em>La solución correcta no es la más sofisticada, sino la más adecuada al problema.</em></span>
+    </div>
+
+    <div class="analogy">
+      <span class="analogy-icon">🗓️</span>
+      <span>El código que escribís hoy lo va a leer alguien —probablemente vos mismo— dentro de seis meses a las 11 de la noche intentando arreglar un bug en producción. <em>Escribí para ese momento, no para impresionar en una entrevista.</em></span>
+    </div>
+
+    <div class="tip">
+      <strong>La pregunta clave</strong>
+      Antes de agregar una abstracción, un patrón o una capa nueva, preguntate: <em>¿esto resuelve un problema real que tengo ahora, o un problema imaginario que podría tener en el futuro?</em> Si es lo segundo, probablemente estás violando KISS —y también YAGNI.
+    </div>
+  </div>
+
+  <!-- EN EL CÓDIGO -->
+  <div class="panel" id="panel-1">
+    <div class="p-header">
+      <div>
+        <div class="p-name">KISS en el código</div>
+        <span class="p-tagline">Simple no significa trivial</span>
+        <p class="p-desc">Código simple no es código corto ni código sin estructura. Es código cuya intención se entiende de inmediato. <strong>La complejidad accidental</strong> es la que aparece cuando sobre-diseñamos o cuando resolvemos el problema equivocado.</p>
+      </div>
+      <div class="p-letter">I</div>
+    </div>
+
+    <div class="comparison">
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-bad"></span> Viola KISS</div>
+        <pre><span class="cm">// ¿Qué hace esto?</span>
+<span class="kw">const</span> result = data
+  .<span class="fn">filter</span>(x => !x.d)
+  .<span class="fn">reduce</span>((a, c) =>
+    ({...a, [c.k]: [...(a[c.k]||[]), c.v]}),
+  {})
+
+<span class="cm">// Hay que ejecutarlo en la mente</span>
+<span class="cm">// para saber qué hace 🤯</span></pre>
+      </div>
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-good"></span> Respeta KISS</div>
+        <pre><span class="cm">// Filtrá los activos</span>
+<span class="kw">const</span> activeItems = data
+  .<span class="fn">filter</span>(item => !item.deleted)
+
+<span class="cm">// Agrupalos por categoría</span>
+<span class="kw">const</span> byCategory = {}
+<span class="kw">for</span> (<span class="kw">const</span> item <span class="kw">of</span> activeItems) {
+  <span class="kw">const</span> key = item.category
+  byCategory[key] ??= []
+  byCategory[key].<span class="fn">push</span>(item.value)
+}</pre>
+      </div>
+    </div>
+
+    <div class="comparison">
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-bad"></span> Viola KISS — sobre-abstracción</div>
+        <pre><span class="kw">class</span> <span class="cl">UserValidatorFactoryStrategy</span> {
+  <span class="fn">createValidator</span>(type) {
+    <span class="kw">return</span> <span class="kw">new</span> <span class="cl">ValidatorFactory</span>()
+      .<span class="fn">getStrategy</span>(type)
+      .<span class="fn">build</span>()
+  }
+}
+<span class="cm">// Tres clases para validar</span>
+<span class="cm">// un email 🙃</span></pre>
+      </div>
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-good"></span> Respeta KISS</div>
+        <pre><span class="kw">function</span> <span class="fn">isValidEmail</span>(email) {
+  <span class="kw">return</span> email.<span class="fn">includes</span>(<span class="str">'@'</span>)
+    && email.<span class="fn">includes</span>(<span class="str">'.'</span>)
+}
+
+<span class="cm">// Fácil de leer, fácil de</span>
+<span class="cm">// testear, fácil de cambiar ✓</span></pre>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>Regla de los tres segundos</strong>
+      Si después de leer una función por tres segundos no sabés qué hace, es demasiado compleja. Renombrá variables, extraé funciones auxiliares con nombres descriptivos, o dividí en pasos explícitos.
+    </div>
+  </div>
+
+  <!-- REGLAS -->
+  <div class="panel" id="panel-2">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Reglas prácticas</div>
+        <span class="p-tagline">Guías concretas para aplicar KISS</span>
+        <p class="p-desc">KISS no es una regla con forma de código. Es una <strong>actitud de diseño</strong> que se aplica en cada decisión: cómo nombrás una variable, cuántas capas tiene tu arquitectura, qué tanto abstraés antes de tiempo.</p>
+      </div>
+      <div class="p-letter">S</div>
+    </div>
+
+    <div class="rules-grid">
+      <div class="rule-card">
+        <div class="rule-num">01</div>
+        <div class="rule-title">Una función, una tarea</div>
+        <div class="rule-desc">Si una función necesita la conjunción "y" para describirse, hace demasiado. <code style="font-family:var(--mono);font-size:11px;background:var(--surface2);padding:1px 5px;border-radius:3px">validateAndSave()</code> debería ser dos funciones.</div>
+      </div>
+      <div class="rule-card">
+        <div class="rule-num">02</div>
+        <div class="rule-title">Nombres que explican la intención</div>
+        <div class="rule-desc">Una variable llamada <code style="font-family:var(--mono);font-size:11px;background:var(--surface2);padding:1px 5px;border-radius:3px">x</code> o <code style="font-family:var(--mono);font-size:11px;background:var(--surface2);padding:1px 5px;border-radius:3px">d</code> obliga a quien lee a ejecutar el código en la mente. <code style="font-family:var(--mono);font-size:11px;background:var(--surface2);padding:1px 5px;border-radius:3px">deletedAt</code> no necesita comentario.</div>
+      </div>
+      <div class="rule-card">
+        <div class="rule-num">03</div>
+        <div class="rule-title">Menos capas de abstracción</div>
+        <div class="rule-desc">Cada capa de abstracción es un costo cognitivo. Agregala solo cuando el beneficio —reuso, testabilidad, flexibilidad real— supera ese costo.</div>
+      </div>
+      <div class="rule-card">
+        <div class="rule-num">04</div>
+        <div class="rule-title">Preferí el flujo lineal</div>
+        <div class="rule-desc">Un bloque de código que se lee de arriba a abajo sin saltar entre archivos es más simple que diez clases bien encapsuladas que hacen exactamente lo mismo.</div>
+      </div>
+      <div class="rule-card">
+        <div class="rule-num">05</div>
+        <div class="rule-title">Estructuras de datos planas</div>
+        <div class="rule-desc">Un objeto con dos niveles de anidamiento es más fácil de manejar que uno con cinco. Si necesitás cinco niveles, probablemente el modelo de datos tiene un problema.</div>
+      </div>
+      <div class="rule-card">
+        <div class="rule-num">06</div>
+        <div class="rule-title">Código borrable > código flexible</div>
+        <div class="rule-desc">El mejor código no es el más reutilizable, sino el más fácil de reemplazar cuando los requisitos cambian. La flexibilidad anticipada casi nunca apunta en la dirección correcta.</div>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>El test del colega</strong>
+      Mostrále tu función a un colega sin contexto. Si en 30 segundos no puede decirte qué hace, la función viola KISS. El objetivo es código que se explica solo —el comentario más claro es no necesitar comentarios.
+    </div>
+  </div>
+
+  <!-- TRAMPAS -->
+  <div class="panel" id="panel-3">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Trampas comunes</div>
+        <span class="p-tagline">KISS mal entendido también tiene costos</span>
+        <p class="p-desc">KISS no significa "escribí el código más corto posible" ni "no uses patrones". Hay formas muy comunes de violar KISS sin darse cuenta, <strong>generalmente por querer demostrar habilidad técnica</strong> o por anticipar problemas que nunca van a ocurrir.</p>
+      </div>
+      <div class="p-letter">S</div>
+    </div>
+
+    <ul class="trap-list">
+      <li>
+        <span class="trap-icon">🧠</span>
+        <div>
+          <strong>Código inteligente en lugar de código claro</strong>
+          Un one-liner con encadenamiento de métodos, comprensiones de lista anidadas o bit manipulation puede ser impresionante. También puede ser incomprensible. El objetivo es comunicar, no demostrar.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🏗️</span>
+        <div>
+          <strong>Arquitectura para un sistema 10x más grande</strong>
+          Diseñar microservicios, event sourcing y CQRS para una app que tiene 50 usuarios activos es complejidad accidental pura. La arquitectura correcta es la mínima que soporta los requisitos actuales más un margen razonable.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">📦</span>
+        <div>
+          <strong>Patrones de diseño como solución a todo</strong>
+          Un Factory, un Decorator o un Observer tienen su lugar. Usados sin un problema concreto que justifique su complejidad, añaden capas de indirección que hacen el código más difícil de seguir, no más flexible.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🔄</span>
+        <div>
+          <strong>Confundir KISS con código sin estructura</strong>
+          KISS no es excusa para escribir funciones de 400 líneas o archivos con todo mezclado. La estructura que ayuda a entender el código —separación en módulos, nombres claros, funciones cortas— es precisamente lo que hace el código simple.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">⚙️</span>
+        <div>
+          <strong>Optimizar antes de medir</strong>
+          El código optimizado prematuramente casi siempre es más complejo y menos legible. Escribí la versión simple primero, medí dónde está el cuello de botella real, y optimizá solo eso.
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- context -->
+  <div style="margin-top:36px;padding-top:32px;border-top:1px solid var(--border)">
+    <div class="context-inner">
+      <div>
+        <div class="context-section-label">Origen del principio</div>
+        <p class="context-text">
+          KISS fue formulado por <strong>Kelly Johnson</strong>, ingeniero aeronáutico de Lockheed, en la década de 1960. La idea era que los aviones de combate debían poder ser reparados en condiciones de campo con herramientas básicas. En software, la frase se popularizó en los años 70 y es hoy uno de los principios más citados en ingeniería de software, junto a DRY y YAGNI.
+        </p>
+      </div>
+      <div class="context-divider"></div>
+      <div>
+        <div class="context-section-label">¿Solo aplica a código?</div>
+        <p class="context-text">No. KISS aplica en cualquier nivel de decisión técnica.</p>
+        <div class="scope-pills">
+          <span class="pill yes">Código</span>
+          <span class="pill yes">Arquitectura</span>
+          <span class="pill yes">APIs</span>
+          <span class="pill yes">Bases de datos</span>
+          <span class="pill yes">UX / interfaces</span>
+          <span class="pill partial">Procesos de equipo</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="progress" id="progress">
+    <div class="prog-dot active" onclick="show(0)"></div>
+    <div class="prog-dot" onclick="show(1)"></div>
+    <div class="prog-dot" onclick="show(2)"></div>
+    <div class="prog-dot" onclick="show(3)"></div>
+  </div>
+  <div class="nav-btns">
+    <button class="nav-btn" id="btnPrev" onclick="navigate(-1)">← Anterior</button>
+    <button class="nav-btn" id="btnNext" onclick="navigate(1)">Siguiente →</button>
+  </div>
+</main>
+
+<footer>
+  <span>KISS · Kelly Johnson · 1960 · principio de diseño de software</span>
+  <span>Gustavo Adrián Salvini · <a href="https://github.com/guspatagonico" target="_blank">@guspatagonico</a></span>
+</footer>
+
+<script>
+  let current = 0;
+  const total = 4;
+
+  function show(idx) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.prog-dot').forEach((d, i) => d.classList.toggle('active', i === idx));
+    document.getElementById('panel-' + idx).classList.add('active');
+    document.querySelectorAll('.tab-btn')[idx].classList.add('active');
+    current = idx;
+    movePill(idx);
+    document.getElementById('btnPrev').style.opacity = idx === 0 ? '.3' : '1';
+    document.getElementById('btnPrev').style.pointerEvents = idx === 0 ? 'none' : 'auto';
+    document.getElementById('btnNext').style.opacity = idx === total - 1 ? '.3' : '1';
+    document.getElementById('btnNext').style.pointerEvents = idx === total - 1 ? 'none' : 'auto';
+  }
+
+  function navigate(dir) { show(Math.max(0, Math.min(total - 1, current + dir))); }
+
+  function movePill(idx) {
+    const tabs = document.querySelectorAll('.tab-btn');
+    const pill = document.getElementById('navPill');
+    const tab = tabs[idx];
+    pill.style.left = tab.offsetLeft + 'px';
+    pill.style.width = tab.offsetWidth + 'px';
+  }
+
+  window.addEventListener('load', () => { movePill(0); show(0); });
+  window.addEventListener('resize', () => movePill(current));
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight') navigate(1);
+    if (e.key === 'ArrowLeft')  navigate(-1);
+  });
+</script>
+
+
+
+<!-- SNAV-BOT -->
+<nav class="snav snav-bot">
+  <a class="snav-prev" href="00_index.html" style="color:#d4d4d8;background:rgba(212,212,216,.12);border-color:rgba(212,212,216,.28)"><span>←</span><span class="snav-label">Índice</span></a>
+  <div class="snav-spacer"></div>
+  <div class="snav-center">
+    <a class="snav-home" href="00_index.html" >↑&nbsp;&nbsp;Índice</a>
+    <span class="snav-pos">01&thinsp;/&thinsp;12</span>
+  </div>
+  <div class="snav-spacer"></div>
+  <a class="snav-next" href="02_yagni-principle.html" style="color:#fcd34d;background:rgba(252,211,77,.12);border-color:rgba(252,211,77,.32)"><span class="snav-label">YAGNI</span><span>→</span></a>
+</nav>
+<!-- /SNAV-BOT -->
+</body>
+</html>

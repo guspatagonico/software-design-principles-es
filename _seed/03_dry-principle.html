@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DRY — Don't Repeat Yourself</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:       #0c0d10;
+    --surface:  #121318;
+    --surface2: #191b22;
+    --border:   rgba(255,255,255,0.07);
+    --border2:  rgba(255,255,255,0.13);
+    --text:     #e4e6ee;
+    --muted:    #6a7080;
+    --accent:   #818cf8;
+    --accent2:  #6366f1;
+    --accent-r: rgba(129,140,248,.1);
+    --accent-rb:rgba(129,140,248,.28);
+    --mono:     'DM Mono', monospace;
+    --sans:     'DM Sans', sans-serif;
+    --serif:    'Fraunces', serif;
+    --radius:   10px;
+    --transition: .22s cubic-bezier(.4,0,.2,1);
+  }
+
+  html { scroll-behavior: smooth;
+  /* ── GLOBAL SCALE ── */
+  zoom: 1.3;
+ }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-weight: 300; min-height: 100vh; line-height: 1.65; -webkit-font-smoothing: antialiased; }
+
+  header { padding: 72px 48px 56px; max-width: 900px; margin: 0 auto; }
+  .header-label { font-family: var(--mono); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); margin-bottom: 20px; }
+  header h1 { font-family: var(--serif); font-size: clamp(44px, 7vw, 76px); font-weight: 300; line-height: 1.05; letter-spacing: -.02em; }
+  header h1 em { font-style: italic; font-weight: 300; color: var(--muted); }
+  header p { margin-top: 24px; font-size: 15px; color: var(--muted); max-width: 520px; }
+
+  .nav-wrap { max-width: 900px; margin: 0 auto; padding: 0 48px; }
+  .nav { display: flex; gap: 2px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 4px; position: relative; }
+  .nav-pill { position: absolute; top: 4px; height: calc(100% - 8px); border-radius: 10px; background: var(--accent-r); transition: left var(--transition), width var(--transition); pointer-events: none; z-index: 0; }
+  .tab-btn { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 14px 8px; background: none; border: none; cursor: pointer; border-radius: 10px; color: var(--muted); transition: color var(--transition); position: relative; z-index: 1; font-family: var(--sans); }
+  .tab-btn.active { color: var(--accent); }
+  .tab-icon { font-size: 18px; line-height: 1; }
+  .tab-word { font-family: var(--mono); font-size: 10px; letter-spacing: .06em; text-transform: uppercase; }
+
+  main { max-width: 900px; margin: 32px auto 0; padding: 0 48px 96px; }
+  .panel { display: none; animation: fadeUp .28s ease both; }
+  .panel.active { display: block; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+  .p-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; margin-bottom: 32px; padding-bottom: 28px; border-bottom: 1px solid var(--border); }
+  .p-letter { font-family: var(--serif); font-size: 96px; font-weight: 600; line-height: .85; opacity: .1; flex-shrink: 0; user-select: none; color: var(--accent); }
+  .p-name { font-family: var(--serif); font-size: clamp(26px, 4vw, 38px); font-weight: 300; line-height: 1.1; margin-bottom: 10px; }
+  .p-tagline { display: inline-flex; align-items: center; font-family: var(--mono); font-size: 12px; padding: 5px 14px; border-radius: 999px; border: 1px solid var(--accent-rb); background: var(--accent-r); color: var(--accent); letter-spacing: .04em; }
+  .p-desc { margin-top: 20px; font-size: 15px; color: var(--muted); max-width: 600px; line-height: 1.75; }
+  .p-desc strong { color: var(--text); font-weight: 400; }
+
+  .analogy { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 22px; margin: 28px 0; font-size: 14px; color: var(--muted); display: flex; gap: 14px; align-items: flex-start; }
+  .analogy-icon { font-size: 20px; flex-shrink: 0; line-height: 1.4; }
+  .analogy em { font-style: italic; color: var(--text); }
+
+  .comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 24px 0; }
+  @media (max-width: 620px) { .comparison { grid-template-columns: 1fr; } }
+
+  .code-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .code-card-header { display: flex; align-items: center; gap: 8px; padding: 10px 16px; font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; border-bottom: 1px solid var(--border); color: var(--muted); }
+  .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .dot-bad  { background: #f87171; }
+  .dot-good { background: #4ade80; }
+  .dot-warn { background: #f59e0b; }
+  pre { padding: 18px; font-family: var(--mono); font-size: 12.5px; line-height: 1.7; overflow-x: auto; tab-size: 2; white-space: pre; }
+  .kw  { color: #c084fc; }
+  .cl  { color: #818cf8; }
+  .fn  { color: #60a5fa; }
+  .str { color: #fb923c; }
+  .cm  { color: #2a2c38; font-style: italic; }
+  .num { color: #f472b6; }
+
+  .tip { border-radius: var(--radius); padding: 18px 22px; font-size: 14px; line-height: 1.7; border-left: 3px solid var(--accent); background: var(--surface); margin-top: 24px; color: var(--muted); }
+  .tip strong { font-weight: 500; display: block; margin-bottom: 4px; font-size: 12px; font-family: var(--mono); letter-spacing: .05em; text-transform: uppercase; color: var(--accent); }
+  .tip code { font-family: var(--mono); font-size: 12px; background: var(--surface2); padding: 1px 6px; border-radius: 4px; color: var(--text); }
+
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin: 24px 0; }
+  @media (max-width: 660px) { .three-col { grid-template-columns: 1fr; } }
+
+  .concept-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 20px; }
+  .concept-label { font-family: var(--mono); font-size: 11px; letter-spacing: .08em; text-transform: uppercase; margin-bottom: 10px; font-weight: 500; }
+  .concept-name { font-size: 18px; font-family: var(--serif); font-weight: 300; margin-bottom: 8px; }
+  .concept-desc { font-size: 13px; color: var(--muted); line-height: 1.65; }
+  .concept-desc em { font-style: italic; color: var(--text); }
+
+  .trap-list { list-style: none; margin: 20px 0; display: flex; flex-direction: column; gap: 14px; }
+  .trap-list li { display: flex; gap: 14px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; font-size: 14px; color: var(--muted); line-height: 1.65; align-items: flex-start; }
+  .trap-icon { font-size: 18px; flex-shrink: 0; }
+  .trap-list li strong { color: var(--text); font-weight: 400; display: block; margin-bottom: 4px; }
+
+  .context-inner { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px 28px; display: grid; grid-template-columns: 1fr 1px 1fr; gap: 24px; }
+  @media (max-width: 620px) { .context-inner { grid-template-columns: 1fr; } }
+  .context-divider { background: var(--border); }
+  .context-section-label { font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+  .context-text { font-size: 13.5px; color: var(--muted); line-height: 1.75; }
+  .context-text strong { color: var(--text); font-weight: 400; }
+  .scope-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .pill { font-family: var(--mono); font-size: 11px; padding: 4px 12px; border-radius: 999px; border: 1px solid var(--border2); color: var(--muted); letter-spacing: .04em; }
+  .pill.yes { border-color: rgba(129,140,248,.3); background: rgba(129,140,248,.06); color: var(--accent); }
+  .pill.partial { border-color: rgba(251,146,60,.3); background: rgba(251,146,60,.06); color: #fb923c; }
+
+  .progress { display: flex; gap: 6px; margin-top: 40px; }
+  .prog-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border2); transition: background var(--transition), transform var(--transition); cursor: pointer; }
+  .prog-dot.active { transform: scale(1.4); background: var(--accent); }
+
+  .nav-btns { display: flex; gap: 10px; margin-top: 16px; }
+  .nav-btn { display: flex; align-items: center; gap: 6px; background: var(--surface); border: 1px solid var(--border); color: var(--muted); font-family: var(--mono); font-size: 12px; letter-spacing: .04em; padding: 10px 18px; border-radius: 8px; cursor: pointer; transition: color var(--transition), border-color var(--transition), background var(--transition); }
+  .nav-btn:hover { color: var(--text); border-color: var(--border2); background: var(--surface2); }
+
+  footer { border-top: 1px solid var(--border); padding: 32px 48px; max-width: 900px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: .05em; flex-wrap: wrap; gap: 8px; }
+  footer a { color: var(--muted); text-decoration: none; transition: color var(--transition); }
+  footer a:hover { color: var(--text); }
+
+
+
+
+/* ── SITE NAV ── */
+body { padding-top: 56px; padding-bottom: 64px; }
+
+.snav {
+  position: fixed;
+  left: 0; right: 0;
+  top: 0;
+  z-index: 1000;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 20px;
+  background: rgba(9,9,11,.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255,255,255,.09);
+  font-family: 'DM Mono', monospace;
+}
+.snav-bot {
+  top: auto;
+  bottom: 0;
+  border-bottom: none;
+  border-top: 1px solid rgba(255,255,255,.09);
+  height: 52px;
+}
+.snav-prev, .snav-next {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  text-decoration: none;
+  font-size: 11px;
+  letter-spacing: .05em;
+  padding: 7px 14px;
+  border-radius: 8px;
+  border: 1px solid;
+  transition: opacity .16s, background .16s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 220px;
+}
+.snav-prev:hover, .snav-next:hover { opacity: .7; }
+.snav-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.snav-spacer { flex: 1; }
+.snav-center {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.snav-home {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  font-size: 11px;
+  letter-spacing: .07em;
+  padding: 7px 16px;
+  border-radius: 8px;
+  color: #f0ede8;
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.14);
+  transition: background .16s, border-color .16s;
+  white-space: nowrap;
+  font-weight: 500;
+}
+.snav-home:hover {
+  background: rgba(255,255,255,.13);
+  border-color: rgba(255,255,255,.24);
+}
+.snav-pos {
+  font-size: 10px;
+  letter-spacing: .12em;
+  color: rgba(255,255,255,.28);
+  padding: 0 2px;
+  white-space: nowrap;
+}
+.snav-ghost { width: 80px; flex-shrink: 0; }
+@media (max-width: 600px) {
+  .snav-label { display: none; }
+  .snav { padding: 0 10px; gap: 5px; }
+  .snav-prev, .snav-next { padding: 7px 11px; }
+  .snav-home { padding: 7px 12px; }
+  .snav-ghost { width: 40px; }
+}
+
+</style>
+</head>
+<body>
+<!-- SNAV-TOP -->
+<nav class="snav snav-top">
+  <a class="snav-prev" href="02_yagni-principle.html" style="color:#fcd34d;background:rgba(252,211,77,.12);border-color:rgba(252,211,77,.32)"><span>←</span><span class="snav-label">YAGNI</span></a>
+  <div class="snav-spacer"></div>
+  <div class="snav-center">
+    <a class="snav-home" href="00_index.html" >↑&nbsp;&nbsp;Índice de secciones</a>
+    <span class="snav-pos">03&thinsp;/&thinsp;12</span>
+  </div>
+  <div class="snav-spacer"></div>
+  <a class="snav-next" href="04_solid-principles.html" style="color:#c4b5fd;background:rgba(196,181,253,.12);border-color:rgba(196,181,253,.32)"><span class="snav-label">SOLID</span><span>→</span></a>
+</nav>
+<!-- /SNAV-TOP -->
+
+<header>
+  <div class="header-label">Principios de diseño · Referencia para devs</div>
+  <h1><em>Don't</em><br>Repeat Yourself</h1>
+  <p>Cada pieza de conocimiento debe tener una única, inequívoca y autoritativa representación dentro de un sistema.</p>
+</header>
+
+<div class="nav-wrap">
+  <div class="nav" id="nav">
+    <div class="nav-pill" id="navPill"></div>
+    <button class="tab-btn active" data-idx="0" onclick="show(0)">
+      <span class="tab-icon">💡</span>
+      <span class="tab-word">Concepto</span>
+    </button>
+    <button class="tab-btn" data-idx="1" onclick="show(1)">
+      <span class="tab-icon">💻</span>
+      <span class="tab-word">En el código</span>
+    </button>
+    <button class="tab-btn" data-idx="2" onclick="show(2)">
+      <span class="tab-icon">⚖️</span>
+      <span class="tab-word">DRY vs WET vs DAMP</span>
+    </button>
+    <button class="tab-btn" data-idx="3" onclick="show(3)">
+      <span class="tab-icon">⚠️</span>
+      <span class="tab-word">Trampas</span>
+    </button>
+  </div>
+</div>
+
+<main>
+
+  <!-- CONCEPTO -->
+  <div class="panel active" id="panel-0">
+    <div class="p-header">
+      <div>
+        <div class="p-name">¿Qué significa DRY?</div>
+        <span class="p-tagline">Una sola fuente de verdad</span>
+        <p class="p-desc">DRY viene de <em>The Pragmatic Programmer</em> (Hunt &amp; Thomas, 1999) y dice que <strong>cada pieza de conocimiento del sistema debe tener una única representación</strong>. Cuando algo cambia, debería cambiar en un solo lugar. Si cambia en varios, alguno se va a olvidar.</p>
+      </div>
+      <div class="p-letter">D</div>
+    </div>
+
+    <div class="analogy">
+      <span class="analogy-icon">🗺️</span>
+      <span>Imaginá que el precio de un producto está hardcodeado en la página de listado, en el carrito, en el email de confirmación y en la factura. Cuando el precio cambia, hay que actualizar cuatro lugares. Y siempre hay uno que se olvida. <em>DRY dice: el precio vive en un solo lugar; todos los demás lo leen de ahí.</em></span>
+    </div>
+
+    <div class="analogy">
+      <span class="analogy-icon">📖</span>
+      <span>DRY no habla solo de código duplicado. Habla de <strong>conocimiento duplicado</strong>: la misma lógica de negocio en dos lugares, la misma validación en el frontend y el backend sin compartir la fuente, la misma estructura de datos definida dos veces. <em>El riesgo no es el copy-paste, es la divergencia silenciosa.</em></span>
+    </div>
+
+    <div class="tip">
+      <strong>La pregunta clave de DRY</strong>
+      "Si esta regla cambia, ¿en cuántos lugares tengo que cambiar código?" Si la respuesta es más de uno, probablemente estás violando DRY. El objetivo es que la respuesta siempre sea exactamente uno.
+    </div>
+  </div>
+
+  <!-- EN EL CÓDIGO -->
+  <div class="panel" id="panel-1">
+    <div class="p-header">
+      <div>
+        <div class="p-name">DRY en el código</div>
+        <span class="p-tagline">El problema real no es el copy-paste, es la sincronización</span>
+        <p class="p-desc">La duplicación de código es un síntoma. El problema de fondo es que cuando la lógica cambia en un lugar pero no en el otro, el sistema queda en un <strong>estado inconsistente que es difícil de detectar</strong>.</p>
+      </div>
+      <div class="p-letter">R</div>
+    </div>
+
+    <div class="comparison">
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-bad"></span> Viola DRY — lógica repetida</div>
+        <pre><span class="kw">function</span> <span class="fn">createOrder</span>(items) {
+  <span class="kw">const</span> total = items
+    .<span class="fn">reduce</span>((s, i) => s + i.price, <span class="num">0</span>)
+  <span class="kw">const</span> tax = total * <span class="num">0.21</span>
+  <span class="kw">return</span> { total, tax }
+}
+
+<span class="kw">function</span> <span class="fn">createQuote</span>(items) {
+  <span class="kw">const</span> total = items
+    .<span class="fn">reduce</span>((s, i) => s + i.price, <span class="num">0</span>)
+  <span class="kw">const</span> tax = total * <span class="num">0.21</span>
+  <span class="cm">// IVA duplicado en dos lugares</span>
+  <span class="kw">return</span> { total, tax, valid: <span class="kw">true</span> }
+}</pre>
+      </div>
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-good"></span> Respeta DRY</div>
+        <pre><span class="kw">const</span> TAX_RATE = <span class="num">0.21</span>
+
+<span class="kw">function</span> <span class="fn">calcTotals</span>(items) {
+  <span class="kw">const</span> total = items
+    .<span class="fn">reduce</span>((s, i) => s + i.price, <span class="num">0</span>)
+  <span class="kw">return</span> { total, tax: total * TAX_RATE }
+}
+
+<span class="kw">function</span> <span class="fn">createOrder</span>(items) {
+  <span class="kw">return</span> <span class="fn">calcTotals</span>(items)
+}
+<span class="kw">function</span> <span class="fn">createQuote</span>(items) {
+  <span class="kw">return</span> { ...<span class="fn">calcTotals</span>(items), valid: <span class="kw">true</span> }
+}</pre>
+      </div>
+    </div>
+
+    <div class="comparison">
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-bad"></span> Viola DRY — schema duplicado</div>
+        <pre><span class="cm">// En la BD (migration)</span>
+users: name VARCHAR(100)
+
+<span class="cm">// En el backend (validación)</span>
+<span class="kw">if</span> (name.length > <span class="num">100</span>) error()
+
+<span class="cm">// En el frontend (form)</span>
+maxlength=<span class="str">"100"</span>
+
+<span class="cm">// La regla "100 chars" vive
+// en 3 lugares distintos 😬</span></pre>
+      </div>
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-good"></span> Respeta DRY</div>
+        <pre><span class="cm">// Una fuente de verdad</span>
+<span class="kw">const</span> USER_SCHEMA = {
+  name: { maxLength: <span class="num">100</span> }
+}
+
+<span class="cm">// Backend lee de ahí</span>
+<span class="fn">validate</span>(name, USER_SCHEMA.name)
+
+<span class="cm">// Frontend genera el form
+// a partir de USER_SCHEMA ✓</span>
+<span class="fn">renderForm</span>(USER_SCHEMA)</pre>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>DRY aplica también a configuración y documentación</strong>
+      Una constante mágica como <code>0.21</code> hardcodeada en tres archivos es una violación de DRY. Una descripción de API que existe tanto en el código como en un documento Word separado también lo es. Cuando algo cambie, uno de los dos va a quedar desactualizado.
+    </div>
+  </div>
+
+  <!-- DRY vs WET vs DAMP -->
+  <div class="panel" id="panel-2">
+    <div class="p-header">
+      <div>
+        <div class="p-name">DRY, WET y DAMP</div>
+        <span class="p-tagline">No toda duplicación es mala</span>
+        <p class="p-desc">DRY tiene dos opuestos conocidos. <strong>WET</strong> (Write Everything Twice) es la violación directa. <strong>DAMP</strong> (Descriptive And Meaningful Phrases) es una alternativa deliberada para contextos donde la claridad importa más que la deduplicación —especialmente en tests.</p>
+      </div>
+      <div class="p-letter">Y</div>
+    </div>
+
+    <div class="three-col">
+      <div class="concept-card">
+        <div class="concept-label" style="color:var(--accent)">DRY</div>
+        <div class="concept-name">Don't Repeat Yourself</div>
+        <div class="concept-desc">Una sola fuente de verdad para cada pieza de conocimiento. Cambios en un lugar se propagan automáticamente. <em>Ideal para lógica de negocio, validaciones, esquemas.</em></div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-label" style="color:#f87171">WET</div>
+        <div class="concept-name">Write Everything Twice</div>
+        <div class="concept-desc">Código duplicado sin justificación. Cuando la lógica cambia, hay que recordar actualizar cada copia. La fuente de innumerables bugs silenciosos. <em>Siempre es un problema.</em></div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-label" style="color:#f59e0b">DAMP</div>
+        <div class="concept-name">Descriptive And Meaningful Phrases</div>
+        <div class="concept-desc">Duplicación aceptada cuando hace el código más legible. <em>Especialmente en tests:</em> un test debe poder leerse sin saltar a helpers externos. La claridad tiene más valor que la deduplicación.</div>
+      </div>
+    </div>
+
+    <div class="comparison">
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-warn"></span> DRY extremo en tests — problema</div>
+        <pre><span class="cm">// Helper compartido, "DRY"</span>
+<span class="kw">function</span> <span class="fn">makeUser</span>(overrides) {
+  <span class="kw">return</span> { id: <span class="num">1</span>, role: <span class="str">'user'</span>, ...overrides }
+}
+
+<span class="fn">test</span>(<span class="str">'admin can delete'</span>, () => {
+  <span class="kw">const</span> u = <span class="fn">makeUser</span>({ role: <span class="str">'admin'</span> })
+  <span class="cm">// ¿Qué tiene este usuario?
+  // Hay que ir a leer makeUser()</span>
+})</pre>
+      </div>
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-good"></span> DAMP en tests — preferible</div>
+        <pre><span class="fn">test</span>(<span class="str">'admin can delete'</span>, () => {
+  <span class="kw">const</span> user = {
+    id: <span class="num">42</span>,
+    role: <span class="str">'admin'</span>,
+    active: <span class="kw">true</span>
+  }
+  <span class="cm">// Todo el contexto está acá,
+  // el test se lee solo ✓</span>
+  <span class="fn">expect</span>(<span class="fn">canDelete</span>(user)).<span class="fn">toBe</span>(<span class="kw">true</span>)
+})</pre>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>Regla práctica</strong>
+      Usá DRY en código de producción: lógica de negocio, validaciones, constantes, esquemas. Usá DAMP en tests: cada test debería ser autocontenido y legible sin contexto externo. Los tests son documentación —la claridad es más importante que evitar la repetición.
+    </div>
+  </div>
+
+  <!-- TRAMPAS -->
+  <div class="panel" id="panel-3">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Trampas comunes</div>
+        <span class="p-tagline">DRY mal aplicado crea acoplamiento innecesario</span>
+        <p class="p-desc">El error más común con DRY es <strong>abstraer demasiado temprano</strong> basándose en similitud de código, cuando en realidad son dos conceptos distintos que hoy se parecen pero van a divergir. La deduplicación incorrecta crea acoplamiento entre cosas que deberían ser independientes.</p>
+      </div>
+      <div class="p-letter">D</div>
+    </div>
+
+    <ul class="trap-list">
+      <li>
+        <span class="trap-icon">🪤</span>
+        <div>
+          <strong>Abstraer por similitud de código, no de concepto</strong>
+          Dos funciones que hacen cosas parecidas hoy no necesariamente representan el mismo conocimiento. Si el código de "calcular descuento para cliente VIP" y "calcular descuento en liquidación" se parece, no las unas en una función genérica: cuando los criterios de uno cambien, van a afectar al otro.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🔗</span>
+        <div>
+          <strong>Crear acoplamiento entre módulos no relacionados</strong>
+          Para evitar repetir código, a veces se crea una función utilitaria compartida entre dos módulos que no deberían conocerse. El resultado es que cambiar esa utilidad afecta a ambos, y los módulos quedan acoplados por accidente.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🌀</span>
+        <div>
+          <strong>La abstracción prematura por la regla de tres</strong>
+          Hay una heurística popular que dice "cuando copias algo por tercera vez, abstraelo". Es razonable como punto de partida, pero el número de copias no determina si algo merece una abstracción —lo determina si representan el mismo conocimiento o no.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🧩</span>
+        <div>
+          <strong>Un helper que hace demasiado para evitar repetición</strong>
+          A veces se agregan parámetros a una función existente para reutilizarla en un nuevo contexto, en vez de crear una nueva función. El resultado es una función con muchas responsabilidades y lógica condicional compleja. Dos funciones simples son mejores que una función flexible.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">📋</span>
+        <div>
+          <strong>Ignorar DRY en la documentación y configuración</strong>
+          DRY se viola constantemente fuera del código: la misma información en el README, en la wiki y en los comentarios del código. Cuando algo cambia, las tres fuentes divergen y ninguna es confiable. Una sola fuente de verdad, con links desde las otras.
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- context -->
+  <div style="margin-top:36px;padding-top:32px;border-top:1px solid var(--border)">
+    <div class="context-inner">
+      <div>
+        <div class="context-section-label">Origen del principio</div>
+        <p class="context-text">
+          DRY fue formulado por <strong>Andy Hunt y Dave Thomas</strong> en <em>The Pragmatic Programmer</em> (1999). La definición original habla de "conocimiento", no de "código" —una distinción importante que suele perderse cuando se enseña el principio como "no copies y pegues".
+        </p>
+      </div>
+      <div class="context-divider"></div>
+      <div>
+        <div class="context-section-label">Dónde aplica</div>
+        <p class="context-text">DRY aplica en todo lugar donde exista conocimiento que pueda divergir.</p>
+        <div class="scope-pills">
+          <span class="pill yes">Lógica de negocio</span>
+          <span class="pill yes">Validaciones</span>
+          <span class="pill yes">Schemas / modelos</span>
+          <span class="pill yes">Configuración</span>
+          <span class="pill yes">Documentación</span>
+          <span class="pill partial">Tests — usar DAMP</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="progress" id="progress">
+    <div class="prog-dot active" onclick="show(0)"></div>
+    <div class="prog-dot" onclick="show(1)"></div>
+    <div class="prog-dot" onclick="show(2)"></div>
+    <div class="prog-dot" onclick="show(3)"></div>
+  </div>
+  <div class="nav-btns">
+    <button class="nav-btn" id="btnPrev" onclick="navigate(-1)">← Anterior</button>
+    <button class="nav-btn" id="btnNext" onclick="navigate(1)">Siguiente →</button>
+  </div>
+</main>
+
+<footer>
+  <span>DRY · Hunt &amp; Thomas · The Pragmatic Programmer · 1999</span>
+  <span>Gustavo Adrián Salvini · <a href="https://github.com/guspatagonico" target="_blank">@guspatagonico</a></span>
+</footer>
+
+<script>
+  let current = 0;
+  const total = 4;
+
+  function show(idx) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.prog-dot').forEach((d, i) => d.classList.toggle('active', i === idx));
+    document.getElementById('panel-' + idx).classList.add('active');
+    document.querySelectorAll('.tab-btn')[idx].classList.add('active');
+    current = idx;
+    movePill(idx);
+    document.getElementById('btnPrev').style.opacity = idx === 0 ? '.3' : '1';
+    document.getElementById('btnPrev').style.pointerEvents = idx === 0 ? 'none' : 'auto';
+    document.getElementById('btnNext').style.opacity = idx === total - 1 ? '.3' : '1';
+    document.getElementById('btnNext').style.pointerEvents = idx === total - 1 ? 'none' : 'auto';
+  }
+
+  function navigate(dir) { show(Math.max(0, Math.min(total - 1, current + dir))); }
+
+  function movePill(idx) {
+    const tabs = document.querySelectorAll('.tab-btn');
+    const pill = document.getElementById('navPill');
+    const tab = tabs[idx];
+    pill.style.left = tab.offsetLeft + 'px';
+    pill.style.width = tab.offsetWidth + 'px';
+  }
+
+  window.addEventListener('load', () => { movePill(0); show(0); });
+  window.addEventListener('resize', () => movePill(current));
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight') navigate(1);
+    if (e.key === 'ArrowLeft')  navigate(-1);
+  });
+</script>
+
+
+
+<!-- SNAV-BOT -->
+<nav class="snav snav-bot">
+  <a class="snav-prev" href="02_yagni-principle.html" style="color:#fcd34d;background:rgba(252,211,77,.12);border-color:rgba(252,211,77,.32)"><span>←</span><span class="snav-label">YAGNI</span></a>
+  <div class="snav-spacer"></div>
+  <div class="snav-center">
+    <a class="snav-home" href="00_index.html" >↑&nbsp;&nbsp;Índice</a>
+    <span class="snav-pos">03&thinsp;/&thinsp;12</span>
+  </div>
+  <div class="snav-spacer"></div>
+  <a class="snav-next" href="04_solid-principles.html" style="color:#c4b5fd;background:rgba(196,181,253,.12);border-color:rgba(196,181,253,.32)"><span class="snav-label">SOLID</span><span>→</span></a>
+</nav>
+<!-- /SNAV-BOT -->
+</body>
+</html>

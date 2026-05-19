@@ -1,0 +1,848 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Information Hiding — Principio de Mínimo Conocimiento</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #090e0a;
+    --surface:   #0f1610;
+    --surface2:  #161e17;
+    --border:    rgba(255,255,255,0.07);
+    --border2:   rgba(255,255,255,0.13);
+    --text:      #ddeedd;
+    --muted:     #5a7060;
+    --accent:    #4ade80;
+    --accent2:   #16a34a;
+    --accent-r:  rgba(74,222,128,.1);
+    --accent-rb: rgba(74,222,128,.28);
+    --pub:       #60a5fa;
+    --pub-r:     rgba(96,165,250,.1);
+    --pub-rb:    rgba(96,165,250,.28);
+    --priv:      #f472b6;
+    --priv-r:    rgba(244,114,182,.1);
+    --priv-rb:   rgba(244,114,182,.28);
+    --iface:     #fb923c;
+    --iface-r:   rgba(251,146,60,.1);
+    --iface-rb:  rgba(251,146,60,.28);
+    --mono:      'DM Mono', monospace;
+    --sans:      'DM Sans', sans-serif;
+    --serif:     'Fraunces', serif;
+    --radius:    10px;
+    --transition: .22s cubic-bezier(.4,0,.2,1);
+  }
+
+  html { scroll-behavior: smooth;
+  /* ── GLOBAL SCALE ── */
+  zoom: 1.3;
+ }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-weight: 300; min-height: 100vh; line-height: 1.65; -webkit-font-smoothing: antialiased; }
+
+  /* ── HEADER ── */
+  header { padding: 72px 48px 56px; max-width: 960px; margin: 0 auto; }
+  .header-label { font-family: var(--mono); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); margin-bottom: 20px; }
+  header h1 { font-family: var(--serif); font-size: clamp(40px, 6.5vw, 72px); font-weight: 300; line-height: 1.05; letter-spacing: -.02em; }
+  header h1 em { font-style: italic; font-weight: 300; color: var(--muted); }
+  header p { margin-top: 24px; font-size: 15px; color: var(--muted); max-width: 540px; line-height: 1.75; }
+
+  /* ── NAV ── */
+  .nav-wrap { max-width: 960px; margin: 0 auto; padding: 0 48px; }
+  .nav { display: flex; gap: 2px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 4px; position: relative; }
+  .nav-pill { position: absolute; top: 4px; height: calc(100% - 8px); border-radius: 10px; background: var(--accent-r); transition: left var(--transition), width var(--transition); pointer-events: none; z-index: 0; }
+  .tab-btn { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 14px 8px; background: none; border: none; cursor: pointer; border-radius: 10px; color: var(--muted); transition: color var(--transition); position: relative; z-index: 1; font-family: var(--sans); }
+  .tab-btn.active { color: var(--accent); }
+  .tab-icon { font-size: 18px; line-height: 1; }
+  .tab-word { font-family: var(--mono); font-size: 10px; letter-spacing: .06em; text-transform: uppercase; }
+
+  /* ── PANELS ── */
+  main { max-width: 960px; margin: 32px auto 0; padding: 0 48px 96px; }
+  .panel { display: none; animation: fadeUp .28s ease both; }
+  .panel.active { display: block; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+  .p-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; margin-bottom: 32px; padding-bottom: 28px; border-bottom: 1px solid var(--border); }
+  .p-letter { font-family: var(--serif); font-size: 96px; font-weight: 600; line-height: .85; opacity: .1; flex-shrink: 0; user-select: none; color: var(--accent); }
+  .p-name { font-family: var(--serif); font-size: clamp(24px, 3.5vw, 36px); font-weight: 300; line-height: 1.1; margin-bottom: 10px; }
+  .p-tagline { display: inline-flex; align-items: center; font-family: var(--mono); font-size: 12px; padding: 5px 14px; border-radius: 999px; border: 1px solid var(--accent-rb); background: var(--accent-r); color: var(--accent); letter-spacing: .04em; }
+  .p-desc { margin-top: 20px; font-size: 15px; color: var(--muted); max-width: 640px; line-height: 1.75; }
+  .p-desc strong { color: var(--text); font-weight: 400; }
+
+  /* ── ANALOGY ── */
+  .analogy { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 22px; margin: 28px 0; font-size: 14px; color: var(--muted); display: flex; gap: 14px; align-items: flex-start; }
+  .analogy-icon { font-size: 20px; flex-shrink: 0; line-height: 1.4; }
+  .analogy em { font-style: italic; color: var(--text); }
+
+  /* ── INTERFACE DIAGRAM ── */
+  .interface-diagram {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 28px 24px;
+    margin: 28px 0;
+    display: grid;
+    grid-template-columns: 1fr 40px 1fr;
+    gap: 0;
+    align-items: center;
+  }
+  @media (max-width: 600px) { .interface-diagram { grid-template-columns: 1fr; gap: 16px; } }
+
+  .diag-side { display: flex; flex-direction: column; gap: 8px; }
+  .diag-label { font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 6px; }
+  .diag-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 7px;
+    font-family: var(--mono);
+    font-size: 12px;
+    border: 1px solid;
+  }
+  .diag-item-pub  { border-color: var(--pub-rb);  background: var(--pub-r);  color: var(--pub); }
+  .diag-item-priv { border-color: var(--priv-rb); background: var(--priv-r); color: var(--priv); opacity: .55; }
+  .diag-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    font-size: 20px;
+    color: var(--accent);
+  }
+  .diag-arrow { font-size: 20px; }
+  .diag-wall {
+    width: 2px;
+    height: 120px;
+    background: var(--border2);
+    margin: 0 auto;
+  }
+  .diag-wall-label { font-family: var(--mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); writing-mode: vertical-lr; transform: rotate(180deg); }
+  .diag-client-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 7px;
+    font-family: var(--mono);
+    font-size: 12px;
+    border: 1px solid var(--accent-rb);
+    background: var(--accent-r);
+    color: var(--accent);
+  }
+
+  /* ── WHAT TO HIDE GRID ── */
+  .hide-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 28px 0; }
+  @media (max-width: 620px) { .hide-grid { grid-template-columns: 1fr; } }
+
+  .hide-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+  .hide-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .hide-icon { font-size: 22px; }
+  .hide-title { font-size: 14px; font-weight: 400; }
+  .hide-desc { font-size: 13px; color: var(--muted); line-height: 1.7; }
+  .hide-desc em { font-style: italic; color: var(--text); }
+  .hide-examples { margin-top: 12px; display: flex; flex-direction: column; gap: 4px; }
+  .hide-ex { font-family: var(--mono); font-size: 11px; color: var(--muted); padding: 3px 0; border-top: 1px solid var(--border); }
+  .hide-ex .yes { color: var(--accent); }
+  .hide-ex .no  { color: #f87171; }
+
+  /* ── ENC VS IH ── */
+  .versus-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 28px 0; }
+  @media (max-width: 620px) { .versus-grid { grid-template-columns: 1fr; } }
+  .versus-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 22px; position: relative; overflow: hidden; }
+  .versus-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+  .enc-card::before { background: var(--pub); }
+  .ih-card::before  { background: var(--accent); }
+  .versus-label { font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 10px; font-weight: 500; }
+  .versus-name  { font-family: var(--serif); font-size: 20px; font-weight: 300; margin-bottom: 10px; }
+  .versus-desc  { font-size: 13px; color: var(--muted); line-height: 1.7; }
+  .versus-desc em { font-style: italic; color: var(--text); }
+  .versus-desc strong { color: var(--text); font-weight: 400; }
+  .versus-footer { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border); font-family: var(--mono); font-size: 11px; color: var(--muted); }
+
+  /* ── VISIBILITY TABLE ── */
+  .vis-table { width: 100%; border-collapse: separate; border-spacing: 0; margin: 24px 0; font-size: 13px; }
+  .vis-table th { font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); font-weight: 400; }
+  .vis-table td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; color: var(--muted); }
+  .vis-table td:first-child { font-family: var(--mono); font-size: 12px; font-weight: 500; }
+  .vis-table tr:last-child td { border-bottom: none; }
+  .vis-table tr:hover td { background: var(--surface2); }
+  .badge { display: inline-block; font-family: var(--mono); font-size: 10px; padding: 2px 8px; border-radius: 999px; }
+  .badge-pub   { background: var(--pub-r);   border: 1px solid var(--pub-rb);   color: var(--pub); }
+  .badge-priv  { background: var(--priv-r);  border: 1px solid var(--priv-rb);  color: var(--priv); }
+  .badge-prot  { background: var(--iface-r); border: 1px solid var(--iface-rb); color: var(--iface); }
+  .badge-mod   { background: var(--accent-r); border: 1px solid var(--accent-rb); color: var(--accent); }
+
+  /* ── CODE ── */
+  .comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 24px 0; }
+  @media (max-width: 620px) { .comparison { grid-template-columns: 1fr; } }
+  .code-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .code-card-header { display: flex; align-items: center; gap: 8px; padding: 10px 16px; font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; border-bottom: 1px solid var(--border); color: var(--muted); }
+  .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .dot-bad  { background: #f87171; }
+  .dot-good { background: #4ade80; }
+  pre { padding: 18px; font-family: var(--mono); font-size: 12.5px; line-height: 1.7; overflow-x: auto; tab-size: 2; white-space: pre; }
+  .kw   { color: #c084fc; }
+  .cl   { color: #4ade80; }
+  .fn   { color: #60a5fa; }
+  .str  { color: #fb923c; }
+  .cm   { color: #1e3020; font-style: italic; }
+  .pub  { color: var(--pub); }
+  .priv { color: var(--priv); }
+  .num  { color: #f472b6; }
+
+  /* ── TIP ── */
+  .tip { border-radius: var(--radius); padding: 18px 22px; font-size: 14px; line-height: 1.7; border-left: 3px solid var(--accent); background: var(--surface); margin-top: 24px; color: var(--muted); }
+  .tip strong { font-weight: 500; display: block; margin-bottom: 4px; font-size: 12px; font-family: var(--mono); letter-spacing: .05em; text-transform: uppercase; color: var(--accent); }
+  .tip code { font-family: var(--mono); font-size: 12px; background: var(--surface2); padding: 1px 6px; border-radius: 4px; color: var(--text); }
+
+  /* ── TRAP LIST ── */
+  .trap-list { list-style: none; margin: 20px 0; display: flex; flex-direction: column; gap: 14px; }
+  .trap-list li { display: flex; gap: 14px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; font-size: 14px; color: var(--muted); line-height: 1.65; align-items: flex-start; }
+  .trap-icon { font-size: 18px; flex-shrink: 0; }
+  .trap-list li strong { color: var(--text); font-weight: 400; display: block; margin-bottom: 4px; }
+  .trap-list li code { font-family: var(--mono); font-size: 12px; background: var(--surface2); padding: 1px 5px; border-radius: 4px; color: var(--text); }
+
+  /* ── LEAKY BOX ── */
+  .leaky-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin: 24px 0; }
+  @media (max-width: 660px) { .leaky-grid { grid-template-columns: 1fr; } }
+  .leaky-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+  .leaky-label { font-family: var(--mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; margin-bottom: 8px; }
+  .leaky-title { font-size: 13px; font-weight: 400; margin-bottom: 6px; color: var(--text); }
+  .leaky-desc { font-size: 12px; color: var(--muted); line-height: 1.65; }
+  .leaky-desc em { font-style: italic; color: var(--text); }
+
+  /* ── CONTEXT ── */
+  .context-inner { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px 28px; display: grid; grid-template-columns: 1fr 1px 1fr; gap: 24px; }
+  @media (max-width: 620px) { .context-inner { grid-template-columns: 1fr; } }
+  .context-divider { background: var(--border); }
+  .context-section-label { font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+  .context-text { font-size: 13.5px; color: var(--muted); line-height: 1.75; }
+  .context-text strong { color: var(--text); font-weight: 400; }
+  .scope-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .pill { font-family: var(--mono); font-size: 11px; padding: 4px 12px; border-radius: 999px; border: 1px solid var(--border2); color: var(--muted); letter-spacing: .04em; }
+  .pill.yes { border-color: rgba(74,222,128,.3); background: rgba(74,222,128,.06); color: var(--accent); }
+  .pill.partial { border-color: rgba(251,146,60,.3); background: rgba(251,146,60,.06); color: #fb923c; }
+
+  /* ── PROGRESS / NAV ── */
+  .progress { display: flex; gap: 6px; margin-top: 40px; }
+  .prog-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border2); transition: background var(--transition), transform var(--transition); cursor: pointer; }
+  .prog-dot.active { transform: scale(1.4); background: var(--accent); }
+  .nav-btns { display: flex; gap: 10px; margin-top: 16px; }
+  .nav-btn { display: flex; align-items: center; gap: 6px; background: var(--surface); border: 1px solid var(--border); color: var(--muted); font-family: var(--mono); font-size: 12px; letter-spacing: .04em; padding: 10px 18px; border-radius: 8px; cursor: pointer; transition: color var(--transition), border-color var(--transition), background var(--transition); }
+  .nav-btn:hover { color: var(--text); border-color: var(--border2); background: var(--surface2); }
+
+  footer { border-top: 1px solid var(--border); padding: 32px 48px; max-width: 960px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: .05em; flex-wrap: wrap; gap: 8px; }
+  footer a { color: var(--muted); text-decoration: none; transition: color var(--transition); }
+  footer a:hover { color: var(--text); }
+
+
+
+
+/* ── SITE NAV ── */
+body { padding-top: 56px; padding-bottom: 64px; }
+
+.snav {
+  position: fixed;
+  left: 0; right: 0;
+  top: 0;
+  z-index: 1000;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 20px;
+  background: rgba(9,9,11,.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255,255,255,.09);
+  font-family: 'DM Mono', monospace;
+}
+.snav-bot {
+  top: auto;
+  bottom: 0;
+  border-bottom: none;
+  border-top: 1px solid rgba(255,255,255,.09);
+  height: 52px;
+}
+.snav-prev, .snav-next {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  text-decoration: none;
+  font-size: 11px;
+  letter-spacing: .05em;
+  padding: 7px 14px;
+  border-radius: 8px;
+  border: 1px solid;
+  transition: opacity .16s, background .16s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 220px;
+}
+.snav-prev:hover, .snav-next:hover { opacity: .7; }
+.snav-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.snav-spacer { flex: 1; }
+.snav-center {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.snav-home {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  font-size: 11px;
+  letter-spacing: .07em;
+  padding: 7px 16px;
+  border-radius: 8px;
+  color: #f0ede8;
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.14);
+  transition: background .16s, border-color .16s;
+  white-space: nowrap;
+  font-weight: 500;
+}
+.snav-home:hover {
+  background: rgba(255,255,255,.13);
+  border-color: rgba(255,255,255,.24);
+}
+.snav-pos {
+  font-size: 10px;
+  letter-spacing: .12em;
+  color: rgba(255,255,255,.28);
+  padding: 0 2px;
+  white-space: nowrap;
+}
+.snav-ghost { width: 80px; flex-shrink: 0; }
+@media (max-width: 600px) {
+  .snav-label { display: none; }
+  .snav { padding: 0 10px; gap: 5px; }
+  .snav-prev, .snav-next { padding: 7px 11px; }
+  .snav-home { padding: 7px 12px; }
+  .snav-ghost { width: 40px; }
+}
+
+</style>
+</head>
+<body>
+<!-- SNAV-TOP -->
+<nav class="snav snav-top">
+  <a class="snav-prev" href="05_soc-principle.html" style="color:#fdba74;background:rgba(253,186,116,.12);border-color:rgba(253,186,116,.32)"><span>←</span><span class="snav-label">SoC</span></a>
+  <div class="snav-spacer"></div>
+  <div class="snav-center">
+    <a class="snav-home" href="00_index.html" >↑&nbsp;&nbsp;Índice de secciones</a>
+    <span class="snav-pos">06&thinsp;/&thinsp;12</span>
+  </div>
+  <div class="snav-spacer"></div>
+  <a class="snav-next" href="07_lod-principle.html" style="color:#7dd3fc;background:rgba(125,211,252,.12);border-color:rgba(125,211,252,.32)"><span class="snav-label">Law of Demeter</span><span>→</span></a>
+</nav>
+<!-- /SNAV-TOP -->
+
+<header>
+  <div class="header-label">Principios de diseño · Referencia para devs</div>
+  <h1><em>Information</em><br>Hiding</h1>
+  <p>Lo que no es público no puede romperse desde afuera. Cada módulo debería exponer solo lo mínimo necesario y ocultar todo lo demás detrás de una interfaz estable.</p>
+</header>
+
+<div class="nav-wrap">
+  <div class="nav" id="nav">
+    <div class="nav-pill" id="navPill"></div>
+    <button class="tab-btn active" data-idx="0" onclick="show(0)">
+      <span class="tab-icon">💡</span>
+      <span class="tab-word">Concepto</span>
+    </button>
+    <button class="tab-btn" data-idx="1" onclick="show(1)">
+      <span class="tab-icon">🔒</span>
+      <span class="tab-word">Qué ocultar</span>
+    </button>
+    <button class="tab-btn" data-idx="2" onclick="show(2)">
+      <span class="tab-icon">💻</span>
+      <span class="tab-word">En el código</span>
+    </button>
+    <button class="tab-btn" data-idx="3" onclick="show(3)">
+      <span class="tab-icon">🔬</span>
+      <span class="tab-word">Encapsulación vs IH</span>
+    </button>
+    <button class="tab-btn" data-idx="4" onclick="show(4)">
+      <span class="tab-icon">⚠️</span>
+      <span class="tab-word">Trampas</span>
+    </button>
+  </div>
+</div>
+
+<main>
+
+  <!-- ── CONCEPTO ── -->
+  <div class="panel active" id="panel-0">
+    <div class="p-header">
+      <div>
+        <div class="p-name">¿Qué es Information Hiding?</div>
+        <span class="p-tagline">Lo que no ves no te puede romper</span>
+        <p class="p-desc">Information Hiding dice que cada módulo debería <strong>ocultar sus decisiones de diseño internas</strong> detrás de una interfaz estable. Los detalles de implementación —cómo almacena datos, qué algoritmo usa, qué estructura interna tiene— no deberían ser visibles para nadie más.</p>
+        <p class="p-desc" style="margin-top:10px">El principio lo formuló <strong>David Parnas en 1972</strong> como criterio para modularizar sistemas: cada módulo debería ser responsable de ocultar una <em>decisión de diseño que es probable que cambie</em>. Si algo cambia, solo ese módulo debería verse afectado.</p>
+      </div>
+      <div class="p-letter">I</div>
+    </div>
+
+    <div class="interface-diagram">
+      <div class="diag-side">
+        <div class="diag-label" style="color:var(--accent)">Módulo interno</div>
+        <div class="diag-item diag-item-pub">● getTotal()</div>
+        <div class="diag-item diag-item-pub">● save(data)</div>
+        <div class="diag-item diag-item-pub">● isValid()</div>
+        <div style="margin-top:8px;opacity:.5">
+          <div class="diag-item diag-item-priv">◌ #items[]</div>
+          <div class="diag-item diag-item-priv">◌ #calcVat()</div>
+          <div class="diag-item diag-item-priv">◌ #dbConn</div>
+          <div class="diag-item diag-item-priv">◌ #parseRow()</div>
+        </div>
+      </div>
+      <div class="diag-center">
+        <div class="diag-wall-label">interfaz</div>
+        <div class="diag-wall"></div>
+        <div style="font-size:11px;font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:6px">pública</div>
+      </div>
+      <div class="diag-side">
+        <div class="diag-label" style="color:var(--pub)">Lo que el mundo ve</div>
+        <div class="diag-client-item">✓ getTotal()</div>
+        <div class="diag-client-item">✓ save(data)</div>
+        <div class="diag-client-item">✓ isValid()</div>
+        <div style="margin-top:12px;font-size:13px;color:var(--muted);line-height:1.65">El resto no existe para el cliente. Cambiar la implementación interna no le afecta.</div>
+      </div>
+    </div>
+
+    <div class="analogy">
+      <span class="analogy-icon">☕</span>
+      <span>Cuando usás un café de cápsula no sabés qué temperatura exacta calienta el agua, qué presión de extracción usa ni qué materiales tienen los conductos internos. Usás la interfaz —botón, taza, cápsula— y el resto está oculto. <em>Si el fabricante cambia el sistema de calentamiento en la próxima versión, vos seguís usando el mismo botón.</em></span>
+    </div>
+
+    <div class="analogy">
+      <span class="analogy-icon">🔑</span>
+      <span>Information Hiding no es solo sobre <code style="font-family:var(--mono);font-size:12px;background:var(--surface2);padding:1px 5px;border-radius:3px">private</code> y <code style="font-family:var(--mono);font-size:12px;background:var(--surface2);padding:1px 5px;border-radius:3px">public</code>. Es una <em>decisión de diseño</em>: qué aspectos del módulo son su contrato estable con el mundo, y cuáles son detalles que pueden cambiar libremente sin romper a nadie.</span>
+    </div>
+
+    <div class="tip">
+      <strong>La pregunta de Parnas</strong>
+      Al diseñar un módulo, preguntate: <em>"¿Qué decisiones de diseño podrían cambiar en el futuro?"</em> Esas son exactamente las cosas que deberías ocultar. Lo que exponés es tu contrato: debería ser estable. Lo que ocultás son tus detalles de implementación: pueden cambiar libremente.
+    </div>
+  </div>
+
+  <!-- ── QUÉ OCULTAR ── -->
+  <div class="panel" id="panel-1">
+    <div class="p-header">
+      <div>
+        <div class="p-name">¿Qué se oculta?</div>
+        <span class="p-tagline">Las decisiones que probablemente van a cambiar</span>
+        <p class="p-desc">Parnas fue muy específico: lo que hay que ocultar son las <strong>decisiones de diseño que son propensas a cambiar</strong>. No todo lo interno merece ocultarse por el principio en sí —se oculta lo que, si estuviera expuesto, crearía acoplamiento que hace costosos los cambios futuros.</p>
+      </div>
+      <div class="p-letter">H</div>
+    </div>
+
+    <div class="hide-grid">
+      <div class="hide-card">
+        <div class="hide-header">
+          <span class="hide-icon">🗄️</span>
+          <span class="hide-title">Mecanismo de almacenamiento</span>
+        </div>
+        <div class="hide-desc">Si el código externo conoce que usás PostgreSQL, una migración a MongoDB rompe todo lo que depende de ese detalle. <em>Exponé operaciones de dominio, no consultas SQL.</em></div>
+        <div class="hide-examples">
+          <div class="hide-ex"><span class="no">✗ exponer</span> db.query('SELECT * FROM orders WHERE...')</div>
+          <div class="hide-ex"><span class="yes">✓ ocultar</span> orderRepo.findByStatus('pending')</div>
+        </div>
+      </div>
+      <div class="hide-card">
+        <div class="hide-header">
+          <span class="hide-icon">⚙️</span>
+          <span class="hide-title">Algoritmos y estructuras internas</span>
+        </div>
+        <div class="hide-desc">El algoritmo de ordenamiento, la estructura de datos elegida, la fórmula de cálculo. Si cambiás de bubble sort a quicksort, nadie debería saberlo. <em>Exponé el resultado, no el proceso.</em></div>
+        <div class="hide-examples">
+          <div class="hide-ex"><span class="no">✗ exponer</span> this.#items (el array interno)</div>
+          <div class="hide-ex"><span class="yes">✓ ocultar</span> getItems() retorna copia inmutable</div>
+        </div>
+      </div>
+      <div class="hide-card">
+        <div class="hide-header">
+          <span class="hide-icon">🔌</span>
+          <span class="hide-title">Dependencias externas concretas</span>
+        </div>
+        <div class="hide-desc">La librería de email, el SDK del proveedor de pagos, el cliente de caché. Si cambiás de SendGrid a SES, solo debería cambiar el adaptador. <em>Nadie más debería enterarse.</em></div>
+        <div class="hide-examples">
+          <div class="hide-ex"><span class="no">✗ exponer</span> sendgrid.send({ to, subject, html })</div>
+          <div class="hide-ex"><span class="yes">✓ ocultar</span> mailer.sendWelcome(user)</div>
+        </div>
+      </div>
+      <div class="hide-card">
+        <div class="hide-header">
+          <span class="hide-icon">📐</span>
+          <span class="hide-title">Formato y representación de datos</span>
+        </div>
+        <div class="hide-desc">Cómo se serializa internamente un objeto, en qué unidades se almacenan los valores, qué formato tienen los IDs. <em>El contrato externo puede ser estable aunque el formato interno cambie.</em></div>
+        <div class="hide-examples">
+          <div class="hide-ex"><span class="no">✗ exponer</span> { price_cents: 4999 }</div>
+          <div class="hide-ex"><span class="yes">✓ ocultar</span> product.getPrice() → { amount, currency }</div>
+        </div>
+      </div>
+      <div class="hide-card">
+        <div class="hide-header">
+          <span class="hide-icon">🔒</span>
+          <span class="hide-title">Estado de implementación mutable</span>
+        </div>
+        <div class="hide-desc">Los campos internos de un objeto que forman su estado. Exponerlos directamente permite que código externo manipule el estado sin pasar por las reglas del objeto. <em>El estado se modifica a través de comportamiento, no de asignación directa.</em></div>
+        <div class="hide-examples">
+          <div class="hide-ex"><span class="no">✗ exponer</span> order.status = 'cancelled'</div>
+          <div class="hide-ex"><span class="yes">✓ ocultar</span> order.cancel() — valida y cambia</div>
+        </div>
+      </div>
+      <div class="hide-card">
+        <div class="hide-header">
+          <span class="hide-icon">🔧</span>
+          <span class="hide-title">Configuración y parámetros técnicos</span>
+        </div>
+        <div class="hide-desc">Timeouts, tamaños de pool, reintentos, thresholds. Son detalles operacionales que no deberían ser parte del contrato público del módulo. <em>El cliente pide comportamiento, no configura infraestructura.</em></div>
+        <div class="hide-examples">
+          <div class="hide-ex"><span class="no">✗ exponer</span> new HttpClient(timeout=5000, retries=3)</div>
+          <div class="hide-ex"><span class="yes">✓ ocultar</span> apiClient.fetchUser(id)</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>El criterio de Parnas</strong>
+      No se oculta todo lo que es "privado" mecánicamente. Se oculta lo que es una <em>decisión de diseño probable de cambiar</em>. Si un detalle es estable y exponerlo simplifica el uso del módulo, puede estar justificado. El criterio no es "¿es interno?" sino "¿qué pasa si esto cambia?"
+    </div>
+  </div>
+
+  <!-- ── EN EL CÓDIGO ── -->
+  <div class="panel" id="panel-2">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Information Hiding en el código</div>
+        <span class="p-tagline">Diseñar interfaces, no implementaciones</span>
+        <p class="p-desc">Information Hiding se aplica en cada capa: en el modificador de acceso de un campo, en el diseño de una API, en la estructura de un módulo. La pregunta siempre es la misma: <strong>¿quién necesita saber esto y por qué?</strong></p>
+      </div>
+      <div class="p-letter">i</div>
+    </div>
+
+    <div class="comparison">
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-bad"></span> Viola IH — estado expuesto</div>
+        <pre><span class="kw">class</span> <span class="cl">ShoppingCart</span> {
+  <span class="pub">items</span> = []       <span class="cm">// público 😬</span>
+  <span class="pub">total</span> = <span class="num">0</span>       <span class="cm">// público 😬</span>
+  <span class="pub">discount</span> = <span class="num">0</span>    <span class="cm">// público 😬</span>
+}
+
+<span class="cm">// El cliente puede hacer:</span>
+cart.items.<span class="fn">push</span>({ price: -<span class="num">999</span> })
+cart.total = <span class="num">0</span>  <span class="cm">// bypass gratis</span></pre>
+      </div>
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-good"></span> Respeta IH — estado encapsulado</div>
+        <pre><span class="kw">class</span> <span class="cl">ShoppingCart</span> {
+  <span class="priv">#items</span> = []     <span class="cm">// privado ✓</span>
+  <span class="priv">#discount</span> = <span class="num">0</span>   <span class="cm">// privado ✓</span>
+
+  <span class="fn">addItem</span>(item) {
+    <span class="kw">this</span>.<span class="priv">#items</span>.<span class="fn">push</span>(item)
+  }
+  <span class="fn">getTotal</span>() {
+    <span class="kw">return</span> <span class="kw">this</span>.<span class="priv">#items</span>
+      .<span class="fn">reduce</span>((s,i)=>s+i.price,<span class="num">0</span>)
+      * (<span class="num">1</span> - <span class="kw">this</span>.<span class="priv">#discount</span>)
+  }
+}</pre>
+      </div>
+    </div>
+
+    <div class="comparison">
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-bad"></span> Viola IH — implementación filtrada</div>
+        <pre><span class="cm">// El módulo expone</span>
+<span class="cm">// detalles de SQL</span>
+<span class="kw">async function</span> <span class="fn">getOrders</span>(filters) {
+  <span class="kw">return</span> db.<span class="fn">query</span>(`
+    SELECT o.*, c.name, c.email
+    FROM orders o
+    JOIN customers c ON c.id = o.cid
+    WHERE o.status = $<span class="num">1</span>
+  `, [filters.status])
+}
+<span class="cm">// el llamador recibe filas crudas</span>
+<span class="cm">// y sabe del esquema de BD 😬</span></pre>
+      </div>
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-good"></span> Respeta IH — interfaz de dominio</div>
+        <pre><span class="cm">// El módulo retorna objetos</span>
+<span class="cm">// de dominio, no filas SQL</span>
+<span class="kw">async function</span> <span class="fn">getOrders</span>(filters) {
+  <span class="kw">const</span> rows = <span class="kw">await</span> db.<span class="fn">query</span>(...)
+  <span class="kw">return</span> rows.<span class="fn">map</span>(<span class="fn">toOrder</span>)
+}
+
+<span class="cm">// toOrder() es privado al módulo
+// El esquema SQL no se filtra ✓</span></pre>
+      </div>
+    </div>
+
+    <div style="margin: 28px 0 12px;font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Modificadores de visibilidad — cuándo usar cada uno</div>
+    <table class="vis-table">
+      <thead>
+        <tr>
+          <th>Visibilidad</th>
+          <th>Quién accede</th>
+          <th>Cuándo usarla</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="badge badge-priv">private</span></td>
+          <td style="color:var(--muted)">Solo la propia clase</td>
+          <td style="color:var(--muted)">Estado interno, algoritmos, implementación. Es el default que debería usarse salvo razón explícita para ser más permisivo.</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-prot">protected</span></td>
+          <td style="color:var(--muted)">La clase y sus subclases</td>
+          <td style="color:var(--muted)">Comportamiento que las subclases necesitan extender pero que no es parte del contrato público. Usarlo con criterio —es una forma de acoplamiento con la jerarquía.</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-mod">internal / package</span></td>
+          <td style="color:var(--muted)">El mismo módulo o paquete</td>
+          <td style="color:var(--muted)">Colaboración entre clases del mismo módulo que no debería cruzar fronteras de paquete. Muy útil para Information Hiding a nivel de módulo.</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-pub">public</span></td>
+          <td style="color:var(--muted)">Cualquier código</td>
+          <td style="color:var(--muted)">El contrato estable del módulo. Solo lo que el cliente <em>necesita</em> para usar el módulo. Cuanto menos, mejor.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="tip">
+      <strong>La regla de la visibilidad mínima</strong>
+      Empezá siempre con <code>private</code>. Hacé algo más visible solo cuando tenés una razón concreta para hacerlo. Es mucho más fácil hacer algo público después que volverlo privado una vez que hay código que depende de él.
+    </div>
+  </div>
+
+  <!-- ── ENCAPSULACIÓN VS IH ── -->
+  <div class="panel" id="panel-3">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Encapsulación vs Information Hiding</div>
+        <span class="p-tagline">No son lo mismo — aunque van siempre juntos</span>
+        <p class="p-desc">Son conceptos distintos que se confunden habitualmente. <strong>Encapsulación</strong> es el mecanismo del lenguaje para agrupar datos y comportamiento. <strong>Information Hiding</strong> es el principio de diseño que decide qué ocultar y por qué. La encapsulación es la herramienta; IH es la intención.</p>
+      </div>
+      <div class="p-letter">n</div>
+    </div>
+
+    <div class="versus-grid">
+      <div class="versus-card enc-card">
+        <div class="versus-label" style="color:var(--pub)">Encapsulación</div>
+        <div class="versus-name" style="color:var(--pub)">El mecanismo</div>
+        <div class="versus-desc">
+          Agrupar datos y las operaciones que los manejan en una misma unidad —la clase. Es una <strong>característica del lenguaje</strong>: clases, objetos, métodos, campos.
+          <br><br>
+          La encapsulación te <em>da la capacidad</em> de ocultar cosas. No te dice qué ocultar ni por qué. Podés tener encapsulación perfecta (todo en clases) y violar completamente Information Hiding (todo público).
+        </div>
+        <div class="versus-footer">Lenguaje → Clases, objetos, modificadores de acceso</div>
+      </div>
+      <div class="versus-card ih-card">
+        <div class="versus-label" style="color:var(--accent)">Information Hiding</div>
+        <div class="versus-name" style="color:var(--accent)">El principio</div>
+        <div class="versus-desc">
+          Decidir conscientemente qué aspectos del módulo son públicos y cuáles son detalles de implementación que deben estar ocultos. Es una <strong>decisión de diseño</strong>.
+          <br><br>
+          IH te dice <em>qué</em> ocultar y <em>por qué</em>: las decisiones que pueden cambiar. Puede aplicarse incluso sin POO —en módulos, en APIs, en interfaces de microservicios.
+        </div>
+        <div class="versus-footer">Diseño → Contratos estables, detalles variables ocultos</div>
+      </div>
+    </div>
+
+    <div class="leaky-grid">
+      <div class="leaky-card" style="border-color:rgba(248,113,113,.2)">
+        <div class="leaky-label" style="color:#f87171">Encapsulación sin IH</div>
+        <div class="leaky-title">Todo en una clase, todo público</div>
+        <div class="leaky-desc">Los datos están agrupados en una clase pero todos los campos son públicos. <em>La herramienta existe, el principio no se aplicó.</em></div>
+      </div>
+      <div class="leaky-card" style="border-color:rgba(251,146,60,.2)">
+        <div class="leaky-label" style="color:#fb923c">IH sin encapsulación</div>
+        <div class="leaky-title">Módulos con interfaz bien definida</div>
+        <div class="leaky-desc">Un módulo de Go o de C con funciones exportadas e internas. <em>El principio aplica aunque no haya clases ni POO.</em></div>
+      </div>
+      <div class="leaky-card" style="border-color:rgba(74,222,128,.2)">
+        <div class="leaky-label" style="color:var(--accent)">Encapsulación + IH</div>
+        <div class="leaky-title">El objetivo real</div>
+        <div class="leaky-desc">Clase bien diseñada: los campos son privados, la interfaz pública es mínima y estable. <em>El mecanismo sirve al principio.</em></div>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>La distinción en una sola oración</strong>
+      Encapsulación te permite poner un candado en la puerta. Information Hiding te dice qué poner detrás de ese candado —y más importante: <em>por qué</em>.
+    </div>
+  </div>
+
+  <!-- ── TRAMPAS ── -->
+  <div class="panel" id="panel-4">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Trampas comunes</div>
+        <span class="p-tagline">Cuando la interfaz pública filtra más de lo que debería</span>
+        <p class="p-desc">Las violaciones de Information Hiding se llaman <strong>"leaky abstractions"</strong> —abstracciones que filtran detalles de implementación hacia afuera. El código que depende de esos detalles se rompe cuando la implementación cambia.</p>
+      </div>
+      <div class="p-letter">!</div>
+    </div>
+
+    <ul class="trap-list">
+      <li>
+        <span class="trap-icon">🔓</span>
+        <div>
+          <strong>Getters y setters para todos los campos</strong>
+          Agregar automáticamente <code>getX()</code> y <code>setX()</code> para cada campo de la clase no es Information Hiding —es exponer todos los campos con nombres más largos. Un setter que solo asigna un valor hace que el campo sea efectivamente público. Los métodos deberían exponer <em>comportamiento</em>, no acceso al estado interno.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">💉</span>
+        <div>
+          <strong>Tipos de implementación en la interfaz pública</strong>
+          Cuando el método público retorna un <code>ArrayList</code> en lugar de una <code>List</code>, o un <code>HashMap</code> en lugar de un <code>Map</code>, el llamador empieza a depender de que sea específicamente esa implementación. Cuando cambiás a <code>LinkedList</code> o a <code>TreeMap</code>, el código del llamador puede romperse aunque el comportamiento sea equivalente.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">📡</span>
+        <div>
+          <strong>Exponer excepciones de implementación</strong>
+          Si tu módulo de dominio lanza <code>SQLException</code> o <code>RedisException</code>, el llamador ahora sabe qué tecnología de persistencia usás. Cuando cambiás de base de datos, tenés que cambiar también el manejo de errores en todos los clientes. Las excepciones que cruzan fronteras de módulo deberían ser excepciones de dominio, no de infraestructura.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🗂️</span>
+        <div>
+          <strong>Estructura del módulo expuesta en los imports</strong>
+          Si los clientes hacen <code>import { calcVat } from './order/internal/tax/vatCalculator'</code>, conocen la estructura interna del módulo. Si reorganizás la carpeta <code>internal/</code>, rompés a todos. Los módulos deberían tener un punto de entrada único que reexporte lo que es público, ocultando la estructura interna.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🌊</span>
+        <div>
+          <strong>Retornar referencias mutables a estado interno</strong>
+          Retornar el array interno directamente permite que el llamador lo modifique sin pasar por los métodos del objeto. <code>getItems()</code> que devuelve <code>this.#items</code> rompe el encapsulamiento aunque <code>#items</code> sea privado. La solución es retornar una copia inmutable o una vista de solo lectura.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🏷️</span>
+        <div>
+          <strong>Nombres que filtran la implementación</strong>
+          Métodos como <code>saveToPostgres()</code>, <code>fetchFromRedis()</code> o <code>serializeToJSON()</code> en la interfaz pública revelan detalles de implementación en el nombre. Si cambiás de Postgres a MongoDB, el nombre del método queda mentiroso. Los contratos públicos deberían hablar el lenguaje del dominio: <code>persist()</code>, <code>getFromCache()</code>, <code>serialize()</code>.
+        </div>
+      </li>
+    </ul>
+
+    <div class="tip">
+      <strong>El test del reemplazo libre</strong>
+      Si podés cambiar la implementación interna de un módulo —el algoritmo, la base de datos, la librería, la estructura de datos— sin que ningún código externo note la diferencia ni necesite modificarse, Information Hiding está bien aplicado. Si algún cliente se rompe por un cambio puramente interno, hay una abstracción con pérdidas.
+    </div>
+  </div>
+
+  <!-- context -->
+  <div style="margin-top:36px;padding-top:32px;border-top:1px solid var(--border)">
+    <div class="context-inner">
+      <div>
+        <div class="context-section-label">Origen</div>
+        <p class="context-text">
+          Information Hiding fue formulado por <strong>David Parnas</strong> en su seminal paper <em>"On the Criteria To Be Used in Decomposing Systems into Modules"</em> (1972), uno de los textos más influyentes de la ingeniería de software. Parnas propuso que el criterio correcto para modularizar no era agrupar código relacionado funcionalmente, sino <strong>ocultar decisiones de diseño propensas a cambiar</strong>. El paper sigue siendo tan relevante hoy como cuando se publicó.
+        </p>
+      </div>
+      <div class="context-divider"></div>
+      <div>
+        <div class="context-section-label">¿Solo aplica a POO?</div>
+        <p class="context-text">Es uno de los principios más universales. Aplica a cualquier nivel donde haya una frontera entre módulos.</p>
+        <div class="scope-pills">
+          <span class="pill yes">POO</span>
+          <span class="pill yes">Módulos funcionales</span>
+          <span class="pill yes">APIs REST / GraphQL</span>
+          <span class="pill yes">Microservicios</span>
+          <span class="pill yes">SDKs y librerías</span>
+          <span class="pill partial">Bases de datos — vistas/procs</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="progress" id="progress">
+    <div class="prog-dot active" onclick="show(0)"></div>
+    <div class="prog-dot" onclick="show(1)"></div>
+    <div class="prog-dot" onclick="show(2)"></div>
+    <div class="prog-dot" onclick="show(3)"></div>
+    <div class="prog-dot" onclick="show(4)"></div>
+  </div>
+  <div class="nav-btns">
+    <button class="nav-btn" id="btnPrev" onclick="navigate(-1)">← Anterior</button>
+    <button class="nav-btn" id="btnNext" onclick="navigate(1)">Siguiente →</button>
+  </div>
+</main>
+
+<footer>
+  <span>Information Hiding · David L. Parnas · 1972 · principio de diseño de software</span>
+  <span>Gustavo Adrián Salvini · <a href="https://github.com/guspatagonico" target="_blank">@guspatagonico</a></span>
+</footer>
+
+<script>
+  let current = 0;
+  const total = 5;
+
+  function show(idx) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.prog-dot').forEach((d, i) => d.classList.toggle('active', i === idx));
+    document.getElementById('panel-' + idx).classList.add('active');
+    document.querySelectorAll('.tab-btn')[idx].classList.add('active');
+    current = idx;
+    movePill(idx);
+    document.getElementById('btnPrev').style.opacity = idx === 0 ? '.3' : '1';
+    document.getElementById('btnPrev').style.pointerEvents = idx === 0 ? 'none' : 'auto';
+    document.getElementById('btnNext').style.opacity = idx === total - 1 ? '.3' : '1';
+    document.getElementById('btnNext').style.pointerEvents = idx === total - 1 ? 'none' : 'auto';
+  }
+
+  function navigate(dir) { show(Math.max(0, Math.min(total - 1, current + dir))); }
+
+  function movePill(idx) {
+    const tabs = document.querySelectorAll('.tab-btn');
+    const pill = document.getElementById('navPill');
+    const tab = tabs[idx];
+    pill.style.left = tab.offsetLeft + 'px';
+    pill.style.width = tab.offsetWidth + 'px';
+  }
+
+  window.addEventListener('load', () => { movePill(0); show(0); });
+  window.addEventListener('resize', () => movePill(current));
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight') navigate(1);
+    if (e.key === 'ArrowLeft')  navigate(-1);
+  });
+</script>
+
+
+
+<!-- SNAV-BOT -->
+<nav class="snav snav-bot">
+  <a class="snav-prev" href="05_soc-principle.html" style="color:#fdba74;background:rgba(253,186,116,.12);border-color:rgba(253,186,116,.32)"><span>←</span><span class="snav-label">SoC</span></a>
+  <div class="snav-spacer"></div>
+  <div class="snav-center">
+    <a class="snav-home" href="00_index.html" >↑&nbsp;&nbsp;Índice</a>
+    <span class="snav-pos">06&thinsp;/&thinsp;12</span>
+  </div>
+  <div class="snav-spacer"></div>
+  <a class="snav-next" href="07_lod-principle.html" style="color:#7dd3fc;background:rgba(125,211,252,.12);border-color:rgba(125,211,252,.32)"><span class="snav-label">Law of Demeter</span><span>→</span></a>
+</nav>
+<!-- /SNAV-BOT -->
+</body>
+</html>

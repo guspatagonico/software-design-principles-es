@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Principios de Paquetes — La versión macro de SOLID</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,400;0,500;1,400&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;1,9..144,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:        #0f0a0d;
+    --surface:   #161018;
+    --surface2:  #1e1522;
+    --border:    rgba(255,255,255,0.07);
+    --border2:   rgba(255,255,255,0.13);
+    --text:      #ece6f0;
+    --muted:     #7a6880;
+    --accent:    #e879f9;
+    --accent2:   #c026d3;
+    --accent-r:  rgba(232,121,249,.1);
+    --accent-rb: rgba(232,121,249,.28);
+    --coh:       #f472b6;
+    --coh-r:     rgba(244,114,182,.1);
+    --coh-rb:    rgba(244,114,182,.3);
+    --cop:       #a78bfa;
+    --cop-r:     rgba(167,139,250,.1);
+    --cop-rb:    rgba(167,139,250,.3);
+    --mono:      'DM Mono', monospace;
+    --sans:      'DM Sans', sans-serif;
+    --serif:     'Fraunces', serif;
+    --radius:    10px;
+    --transition: .22s cubic-bezier(.4,0,.2,1);
+  }
+
+  html { scroll-behavior: smooth;
+  /* ── GLOBAL SCALE ── */
+  zoom: 1.3;
+ }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans); font-weight: 300; min-height: 100vh; line-height: 1.65; -webkit-font-smoothing: antialiased; }
+
+  /* ── HEADER ── */
+  header { padding: 72px 48px 56px; max-width: 960px; margin: 0 auto; }
+  .header-label { font-family: var(--mono); font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: var(--muted); margin-bottom: 20px; }
+  header h1 { font-family: var(--serif); font-size: clamp(38px, 6vw, 68px); font-weight: 300; line-height: 1.05; letter-spacing: -.02em; }
+  header h1 em { font-style: italic; font-weight: 300; color: var(--muted); }
+  header p { margin-top: 24px; font-size: 15px; color: var(--muted); max-width: 560px; line-height: 1.75; }
+
+  /* ── NAV ── */
+  .nav-wrap { max-width: 960px; margin: 0 auto; padding: 0 48px; }
+  .nav { display: flex; gap: 2px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 4px; position: relative; }
+  .nav-pill { position: absolute; top: 4px; height: calc(100% - 8px); border-radius: 10px; background: var(--accent-r); transition: left var(--transition), width var(--transition); pointer-events: none; z-index: 0; }
+  .tab-btn { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 14px 8px; background: none; border: none; cursor: pointer; border-radius: 10px; color: var(--muted); transition: color var(--transition); position: relative; z-index: 1; font-family: var(--sans); }
+  .tab-btn.active { color: var(--accent); }
+  .tab-icon { font-size: 18px; line-height: 1; }
+  .tab-word { font-family: var(--mono); font-size: 10px; letter-spacing: .06em; text-transform: uppercase; }
+
+  /* ── PANELS ── */
+  main { max-width: 960px; margin: 32px auto 0; padding: 0 48px 96px; }
+  .panel { display: none; animation: fadeUp .28s ease both; }
+  .panel.active { display: block; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+  .p-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 24px; margin-bottom: 32px; padding-bottom: 28px; border-bottom: 1px solid var(--border); }
+  .p-letter { font-family: var(--serif); font-size: 96px; font-weight: 600; line-height: .85; opacity: .1; flex-shrink: 0; user-select: none; color: var(--accent); }
+  .p-name { font-family: var(--serif); font-size: clamp(24px, 3.5vw, 36px); font-weight: 300; line-height: 1.1; margin-bottom: 10px; }
+  .p-tagline { display: inline-flex; align-items: center; font-family: var(--mono); font-size: 12px; padding: 5px 14px; border-radius: 999px; border: 1px solid var(--accent-rb); background: var(--accent-r); color: var(--accent); letter-spacing: .04em; }
+  .p-desc { margin-top: 20px; font-size: 15px; color: var(--muted); max-width: 640px; line-height: 1.75; }
+  .p-desc strong { color: var(--text); font-weight: 400; }
+
+  /* ── ANALOGY ── */
+  .analogy { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px 22px; margin: 28px 0; font-size: 14px; color: var(--muted); display: flex; gap: 14px; align-items: flex-start; }
+  .analogy-icon { font-size: 20px; flex-shrink: 0; line-height: 1.4; }
+  .analogy em { font-style: italic; color: var(--text); }
+
+  /* ── GROUP LABEL ── */
+  .group-label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 32px 0 16px;
+  }
+  .group-label-text {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    font-weight: 500;
+  }
+  .group-label-line { flex: 1; height: 1px; background: var(--border); }
+  .group-label-count { font-family: var(--mono); font-size: 10px; color: var(--muted); }
+
+  /* ── PRINCIPLE CARDS ── */
+  .principles-stack { display: flex; flex-direction: column; gap: 16px; }
+
+  .principle-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: border-color var(--transition);
+    cursor: pointer;
+  }
+  .principle-card:hover { border-color: var(--border2); }
+  .principle-card.expanded { border-color: var(--border2); }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 18px 20px;
+  }
+  .card-abbr {
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 4px 10px;
+    border-radius: 6px;
+    flex-shrink: 0;
+    letter-spacing: .04em;
+    min-width: 52px;
+    text-align: center;
+  }
+  .card-title { font-size: 15px; font-weight: 400; flex: 1; }
+  .card-subtitle { font-size: 12px; color: var(--muted); font-family: var(--mono); }
+  .card-chevron {
+    font-size: 14px;
+    color: var(--muted);
+    transition: transform var(--transition);
+    flex-shrink: 0;
+    user-select: none;
+  }
+  .principle-card.expanded .card-chevron { transform: rotate(180deg); }
+
+  .card-body {
+    display: none;
+    padding: 0 20px 20px;
+    border-top: 1px solid var(--border);
+  }
+  .principle-card.expanded .card-body { display: block; }
+
+  .card-body-inner { padding-top: 18px; }
+  .card-body p { font-size: 14px; color: var(--muted); line-height: 1.75; margin-bottom: 14px; }
+  .card-body p strong { color: var(--text); font-weight: 400; }
+  .card-body p:last-child { margin-bottom: 0; }
+
+  /* ── CODE ── */
+  .comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin: 16px 0; }
+  @media (max-width: 620px) { .comparison { grid-template-columns: 1fr; } }
+  .code-card { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+  .code-card-header { display: flex; align-items: center; gap: 8px; padding: 9px 14px; font-family: var(--mono); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; border-bottom: 1px solid var(--border); color: var(--muted); }
+  .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .dot-bad  { background: #f87171; }
+  .dot-good { background: #4ade80; }
+  pre { padding: 14px 16px; font-family: var(--mono); font-size: 12px; line-height: 1.7; overflow-x: auto; tab-size: 2; white-space: pre; }
+  .kw  { color: #c084fc; }
+  .cl  { color: #e879f9; }
+  .fn  { color: #60a5fa; }
+  .str { color: #fb923c; }
+  .cm  { color: #3a2540; font-style: italic; }
+
+  /* ── TIP ── */
+  .tip { border-radius: var(--radius); padding: 16px 20px; font-size: 14px; line-height: 1.7; border-left: 3px solid var(--accent); background: var(--surface); margin-top: 20px; color: var(--muted); }
+  .tip strong { font-weight: 500; display: block; margin-bottom: 4px; font-size: 11px; font-family: var(--mono); letter-spacing: .05em; text-transform: uppercase; color: var(--accent); }
+  .tip code { font-family: var(--mono); font-size: 12px; background: var(--surface2); padding: 1px 6px; border-radius: 4px; color: var(--text); }
+
+  /* ── MATRIX (panel 3) ── */
+  .matrix { width: 100%; border-collapse: separate; border-spacing: 0; margin: 24px 0; font-size: 13px; }
+  .matrix th { font-family: var(--mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); font-weight: 400; }
+  .matrix td { padding: 13px 14px; border-bottom: 1px solid var(--border); vertical-align: top; color: var(--muted); line-height: 1.55; }
+  .matrix td:first-child { font-family: var(--mono); font-size: 12px; font-weight: 500; white-space: nowrap; }
+  .matrix tr:last-child td { border-bottom: none; }
+  .matrix tr:hover td { background: var(--surface2); }
+  .badge-good { display: inline-block; font-family: var(--mono); font-size: 10px; padding: 2px 8px; border-radius: 999px; background: rgba(74,222,128,.08); border: 1px solid rgba(74,222,128,.25); color: #4ade80; }
+  .badge-bad  { display: inline-block; font-family: var(--mono); font-size: 10px; padding: 2px 8px; border-radius: 999px; background: rgba(248,113,113,.08); border: 1px solid rgba(248,113,113,.25); color: #f87171; }
+
+  .trap-list { list-style: none; margin: 20px 0; display: flex; flex-direction: column; gap: 14px; }
+  .trap-list li { display: flex; gap: 14px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px 18px; font-size: 14px; color: var(--muted); line-height: 1.65; align-items: flex-start; }
+  .trap-icon { font-size: 18px; flex-shrink: 0; }
+  .trap-list li strong { color: var(--text); font-weight: 400; display: block; margin-bottom: 4px; }
+
+  /* ── CONTEXT ── */
+  .context-inner { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 24px 28px; display: grid; grid-template-columns: 1fr 1px 1fr; gap: 24px; }
+  @media (max-width: 620px) { .context-inner { grid-template-columns: 1fr; } }
+  .context-divider { background: var(--border); }
+  .context-section-label { font-family: var(--mono); font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+  .context-text { font-size: 13.5px; color: var(--muted); line-height: 1.75; }
+  .context-text strong { color: var(--text); font-weight: 400; }
+  .scope-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .pill { font-family: var(--mono); font-size: 11px; padding: 4px 12px; border-radius: 999px; border: 1px solid var(--border2); color: var(--muted); letter-spacing: .04em; }
+  .pill.yes { border-color: rgba(232,121,249,.3); background: rgba(232,121,249,.06); color: var(--accent); }
+  .pill.partial { border-color: rgba(251,146,60,.3); background: rgba(251,146,60,.06); color: #fb923c; }
+
+  /* ── PROGRESS / NAV ── */
+  .progress { display: flex; gap: 6px; margin-top: 40px; }
+  .prog-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--border2); transition: background var(--transition), transform var(--transition); cursor: pointer; }
+  .prog-dot.active { transform: scale(1.4); background: var(--accent); }
+  .nav-btns { display: flex; gap: 10px; margin-top: 16px; }
+  .nav-btn { display: flex; align-items: center; gap: 6px; background: var(--surface); border: 1px solid var(--border); color: var(--muted); font-family: var(--mono); font-size: 12px; letter-spacing: .04em; padding: 10px 18px; border-radius: 8px; cursor: pointer; transition: color var(--transition), border-color var(--transition), background var(--transition); }
+  .nav-btn:hover { color: var(--text); border-color: var(--border2); background: var(--surface2); }
+
+  footer { border-top: 1px solid var(--border); padding: 32px 48px; max-width: 960px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; font-family: var(--mono); font-size: 11px; color: var(--muted); letter-spacing: .05em; flex-wrap: wrap; gap: 8px; }
+  footer a { color: var(--muted); text-decoration: none; transition: color var(--transition); }
+  footer a:hover { color: var(--text); }
+
+
+
+
+/* ── SITE NAV ── */
+body { padding-top: 56px; padding-bottom: 64px; }
+
+.snav {
+  position: fixed;
+  left: 0; right: 0;
+  top: 0;
+  z-index: 1000;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 20px;
+  background: rgba(9,9,11,.94);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(255,255,255,.09);
+  font-family: 'DM Mono', monospace;
+}
+.snav-bot {
+  top: auto;
+  bottom: 0;
+  border-bottom: none;
+  border-top: 1px solid rgba(255,255,255,.09);
+  height: 52px;
+}
+.snav-prev, .snav-next {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  text-decoration: none;
+  font-size: 11px;
+  letter-spacing: .05em;
+  padding: 7px 14px;
+  border-radius: 8px;
+  border: 1px solid;
+  transition: opacity .16s, background .16s;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 220px;
+}
+.snav-prev:hover, .snav-next:hover { opacity: .7; }
+.snav-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.snav-spacer { flex: 1; }
+.snav-center {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.snav-home {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  font-size: 11px;
+  letter-spacing: .07em;
+  padding: 7px 16px;
+  border-radius: 8px;
+  color: #f0ede8;
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.14);
+  transition: background .16s, border-color .16s;
+  white-space: nowrap;
+  font-weight: 500;
+}
+.snav-home:hover {
+  background: rgba(255,255,255,.13);
+  border-color: rgba(255,255,255,.24);
+}
+.snav-pos {
+  font-size: 10px;
+  letter-spacing: .12em;
+  color: rgba(255,255,255,.28);
+  padding: 0 2px;
+  white-space: nowrap;
+}
+.snav-ghost { width: 80px; flex-shrink: 0; }
+@media (max-width: 600px) {
+  .snav-label { display: none; }
+  .snav { padding: 0 10px; gap: 5px; }
+  .snav-prev, .snav-next { padding: 7px 11px; }
+  .snav-home { padding: 7px 12px; }
+  .snav-ghost { width: 40px; }
+}
+
+</style>
+</head>
+<body>
+<!-- SNAV-TOP -->
+<nav class="snav snav-top">
+  <a class="snav-prev" href="08_fail-fast.html" style="color:#fb7185;background:rgba(251,113,133,.12);border-color:rgba(251,113,133,.32)"><span>←</span><span class="snav-label">Fail Fast</span></a>
+  <div class="snav-spacer"></div>
+  <div class="snav-center">
+    <a class="snav-home" href="00_index.html" >↑&nbsp;&nbsp;Índice de secciones</a>
+    <span class="snav-pos">09&thinsp;/&thinsp;12</span>
+  </div>
+  <div class="snav-spacer"></div>
+  <a class="snav-next" href="10_screaming-architecture.html" style="color:#bef264;background:rgba(190,242,100,.12);border-color:rgba(190,242,100,.32)"><span class="snav-label">Screaming</span><span>→</span></a>
+</nav>
+<!-- /SNAV-TOP -->
+
+<header>
+  <div class="header-label">Principios de diseño · Referencia para devs</div>
+  <h1><em>Cohesión y Acoplamiento</em><br>de Paquetes</h1>
+  <p>Seis principios de Robert C. Martin que operan a nivel de módulos y paquetes enteros —la versión macro de SOLID. Determinan cómo agrupar clases y cómo controlar las dependencias entre grupos.</p>
+</header>
+
+<div class="nav-wrap">
+  <div class="nav" id="nav">
+    <div class="nav-pill" id="navPill"></div>
+    <button class="tab-btn active" data-idx="0" onclick="show(0)">
+      <span class="tab-icon">🗺️</span>
+      <span class="tab-word">Concepto</span>
+    </button>
+    <button class="tab-btn" data-idx="1" onclick="show(1)">
+      <span class="tab-icon">🧲</span>
+      <span class="tab-word">Cohesión</span>
+    </button>
+    <button class="tab-btn" data-idx="2" onclick="show(2)">
+      <span class="tab-icon">🔗</span>
+      <span class="tab-word">Acoplamiento</span>
+    </button>
+    <button class="tab-btn" data-idx="3" onclick="show(3)">
+      <span class="tab-icon">⚖️</span>
+      <span class="tab-word">Tensiones</span>
+    </button>
+    <button class="tab-btn" data-idx="4" onclick="show(4)">
+      <span class="tab-icon">⚠️</span>
+      <span class="tab-word">Trampas</span>
+    </button>
+  </div>
+</div>
+
+<main>
+
+  <!-- ── CONCEPTO ── -->
+  <div class="panel active" id="panel-0">
+    <div class="p-header">
+      <div>
+        <div class="p-name">¿Qué son los principios de paquetes?</div>
+        <span class="p-tagline">SOLID para módulos, paquetes y servicios</span>
+        <p class="p-desc">SOLID te dice cómo diseñar clases individuales. Estos seis principios te dicen cómo <strong>agrupar esas clases en paquetes</strong> y cómo manejar las dependencias entre paquetes. Son la diferencia entre un sistema que escala y uno que colapsa bajo su propio peso.</p>
+        <p class="p-desc" style="margin-top:10px">Se dividen en dos familias: <strong>cohesión</strong> (qué va junto) y <strong>acoplamiento</strong> (cómo se conectan los paquetes entre sí).</p>
+      </div>
+      <div class="p-letter">P</div>
+    </div>
+
+    <div class="analogy">
+      <span class="analogy-icon">🏙️</span>
+      <span>Pensalo como el diseño de una ciudad. SOLID diseña los edificios individuales. Los principios de paquetes diseñan los <em>barrios</em>: qué tipos de edificios van juntos, cómo se conectan los barrios, cuáles deben ser más estables que otros. Sin zonificación, la ciudad es un caos.</span>
+    </div>
+
+    <div class="analogy">
+      <span class="analogy-icon">📦</span>
+      <span>Un "paquete" puede ser una carpeta, un módulo, una librería, un microservicio, o cualquier unidad de código que se despliega o versiona de forma independiente. <em>La escala cambia; los principios no.</em></span>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:28px 0">
+      <div style="background:var(--surface);border:1px solid var(--coh-rb);border-radius:12px;padding:20px 22px">
+        <div style="font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--coh);margin-bottom:12px">Principios de cohesión</div>
+        <div style="font-size:14px;color:var(--muted);line-height:1.75">Responden a: <em style="color:var(--text)">¿Qué clases van en el mismo paquete?</em><br><br>
+          <span style="font-family:var(--mono);font-size:12px;color:var(--coh)">REP</span> — Reuse/Release Equivalence<br>
+          <span style="font-family:var(--mono);font-size:12px;color:var(--coh)">CCP</span> — Common Closure<br>
+          <span style="font-family:var(--mono);font-size:12px;color:var(--coh)">CRP</span> — Common Reuse
+        </div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--cop-rb);border-radius:12px;padding:20px 22px">
+        <div style="font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--cop);margin-bottom:12px">Principios de acoplamiento</div>
+        <div style="font-size:14px;color:var(--muted);line-height:1.75">Responden a: <em style="color:var(--text)">¿Cómo se relacionan los paquetes?</em><br><br>
+          <span style="font-family:var(--mono);font-size:12px;color:var(--cop)">ADP</span> — Acyclic Dependencies<br>
+          <span style="font-family:var(--mono);font-size:12px;color:var(--cop)">SDP</span> — Stable Dependencies<br>
+          <span style="font-family:var(--mono);font-size:12px;color:var(--cop)">SAP</span> — Stable Abstractions
+        </div>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>¿Por qué importan en un proyecto nuevo?</strong>
+      Ignorar estos principios al inicio no duele. Duele cuando el proyecto tiene seis meses: un cambio en un módulo rompe tres más, no podés testear nada de forma aislada, y cada release es un evento estresante. Estos principios evitan exactamente ese escenario.
+    </div>
+  </div>
+
+  <!-- ── COHESIÓN ── -->
+  <div class="panel" id="panel-1">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Principios de cohesión</div>
+        <span class="p-tagline" style="border-color:var(--coh-rb);background:var(--coh-r);color:var(--coh)">¿Qué clases van juntas en un paquete?</span>
+        <p class="p-desc">Estos tres principios te ayudan a tomar la decisión más difícil del diseño modular: <strong>qué código agrupa con qué otro código</strong>. No hay una respuesta única —los tres principios están en tensión entre sí y reflejan distintas prioridades.</p>
+      </div>
+      <div class="p-letter" style="color:var(--coh)">C</div>
+    </div>
+
+    <div class="group-label">
+      <span class="group-label-text" style="color:var(--coh)">Principios de cohesión</span>
+      <span class="group-label-line"></span>
+      <span class="group-label-count">3 principios</span>
+    </div>
+
+    <div class="principles-stack">
+
+      <div class="principle-card expanded" onclick="toggle(this)">
+        <div class="card-header">
+          <span class="card-abbr" style="background:var(--coh-r);border:1px solid var(--coh-rb);color:var(--coh)">REP</span>
+          <div>
+            <div class="card-title">Reuse/Release Equivalence Principle</div>
+            <div class="card-subtitle">La unidad de reutilización es la unidad de release</div>
+          </div>
+          <span class="card-chevron">▾</span>
+        </div>
+        <div class="card-body">
+          <div class="card-body-inner">
+            <p>Las clases o módulos que agrupás juntos en un paquete <strong>deben ser reutilizables juntas</strong>. Si alguien quiere usar una clase de tu paquete, debería tener sentido que use las otras también. No mezcles cosas no relacionadas solo porque "están en el mismo proyecto".</p>
+            <p>La consecuencia es que <strong>un paquete debe poder versionarse y releasarse como unidad</strong>. Si tenés que releasar solo parte del paquete, es señal de que debería ser dos paquetes.</p>
+            <div class="comparison">
+              <div class="code-card">
+                <div class="code-card-header"><span class="dot dot-bad"></span> Viola REP</div>
+                <pre><span class="cm">// paquete: utils</span>
+<span class="fn">parseDate</span>()      <span class="cm">// fechas</span>
+<span class="fn">sendEmail</span>()      <span class="cm">// emails</span>
+<span class="fn">calcTax</span>()        <span class="cm">// impuestos</span>
+<span class="fn">resizeImage</span>()    <span class="cm">// imágenes</span>
+<span class="cm">// "utils" no es un concepto
+// nadie lo reutiliza completo</span></pre>
+              </div>
+              <div class="code-card">
+                <div class="code-card-header"><span class="dot dot-good"></span> Respeta REP</div>
+                <pre><span class="cm">// paquete: date-utils</span>
+<span class="fn">parseDate</span>()
+<span class="fn">formatDate</span>()
+<span class="fn">diffDays</span>()
+
+<span class="cm">// paquete: tax-engine</span>
+<span class="fn">calcTax</span>()
+<span class="fn">applyExemption</span>()
+<span class="cm">// cada uno se reutiliza solo ✓</span></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="principle-card" onclick="toggle(this)">
+        <div class="card-header">
+          <span class="card-abbr" style="background:var(--coh-r);border:1px solid var(--coh-rb);color:var(--coh)">CCP</span>
+          <div>
+            <div class="card-title">Common Closure Principle</div>
+            <div class="card-subtitle">Lo que cambia junto, va junto</div>
+          </div>
+          <span class="card-chevron">▾</span>
+        </div>
+        <div class="card-body">
+          <div class="card-body-inner">
+            <p>Las clases que <strong>cambian por las mismas razones y al mismo tiempo</strong> deben estar en el mismo paquete. Es el SRP aplicado a paquetes: un paquete debería tener una sola razón para cambiar.</p>
+            <p>Si un cambio de requisito obliga a tocar seis paquetes distintos, la cohesión es mala. Cuando el cambio se localiza en un solo paquete, el impacto es contenido, los tests son más fáciles y el deploy es menos riesgoso.</p>
+            <div class="comparison">
+              <div class="code-card">
+                <div class="code-card-header"><span class="dot dot-bad"></span> Viola CCP</div>
+                <pre><span class="cm">// Cambiar la regla de IVA</span>
+<span class="cm">// obliga a tocar:</span>
+orders/calcTotal.js
+billing/invoice.js
+reports/taxSummary.js
+exports/taxExport.js
+<span class="cm">// 4 paquetes, 1 cambio 😬</span></pre>
+              </div>
+              <div class="code-card">
+                <div class="code-card-header"><span class="dot dot-good"></span> Respeta CCP</div>
+                <pre><span class="cm">// Toda la lógica fiscal</span>
+<span class="cm">// vive en un solo paquete:</span>
+tax-engine/rules.js
+tax-engine/calc.js
+tax-engine/exemptions.js
+<span class="cm">// Cambiar IVA = 1 paquete ✓</span></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="principle-card" onclick="toggle(this)">
+        <div class="card-header">
+          <span class="card-abbr" style="background:var(--coh-r);border:1px solid var(--coh-rb);color:var(--coh)">CRP</span>
+          <div>
+            <div class="card-title">Common Reuse Principle</div>
+            <div class="card-subtitle">No forzar dependencias innecesarias</div>
+          </div>
+          <span class="card-chevron">▾</span>
+        </div>
+        <div class="card-body">
+          <div class="card-body-inner">
+            <p>Las clases que <strong>no se usan juntas no deberían estar en el mismo paquete</strong>. Si dependés de un paquete, dependés de todo él —incluyendo las partes que no usás. Eso significa que cambios en cosas que no te interesan pueden romper tu build.</p>
+            <p>CRP es la contracara de CCP: mientras CCP agrupa lo que cambia junto, CRP separa lo que no se usa junto. La tensión entre ambos es normal y hay que gestionarla según las prioridades del proyecto.</p>
+            <div class="tip" style="margin-top:0">
+              <strong>Señal de violación de CRP</strong>
+              Si actualizás una dependencia y tenés que adaptar código que no usa nada de lo que cambió, es probable que el paquete del que dependés tiene baja cohesión según CRP. Mezcla cosas no relacionadas que cambian por distintas razones.
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── ACOPLAMIENTO ── -->
+  <div class="panel" id="panel-2">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Principios de acoplamiento</div>
+        <span class="p-tagline" style="border-color:var(--cop-rb);background:var(--cop-r);color:var(--cop)">¿Cómo se relacionan los paquetes entre sí?</span>
+        <p class="p-desc">Una vez que definiste qué va en cada paquete, necesitás controlar <strong>cómo se conectan</strong>. Un grafo de dependencias mal diseñado es la causa principal de que los proyectos se vuelvan imposibles de modificar sin efectos en cascada.</p>
+      </div>
+      <div class="p-letter" style="color:var(--cop)">A</div>
+    </div>
+
+    <div class="group-label">
+      <span class="group-label-text" style="color:var(--cop)">Principios de acoplamiento</span>
+      <span class="group-label-line"></span>
+      <span class="group-label-count">3 principios</span>
+    </div>
+
+    <div class="principles-stack">
+
+      <div class="principle-card expanded" onclick="toggle(this)">
+        <div class="card-header">
+          <span class="card-abbr" style="background:var(--cop-r);border:1px solid var(--cop-rb);color:var(--cop)">ADP</span>
+          <div>
+            <div class="card-title">Acyclic Dependencies Principle</div>
+            <div class="card-subtitle">Sin ciclos en el grafo de dependencias</div>
+          </div>
+          <span class="card-chevron">▾</span>
+        </div>
+        <div class="card-body">
+          <div class="card-body-inner">
+            <p>El grafo de dependencias entre paquetes <strong>no debe tener ciclos</strong>. Si A depende de B, B depende de C, y C depende de A, ninguno de los tres se puede cambiar, testear o deployar de forma independiente. Son un bloque monolítico disfrazado de módulos.</p>
+            <div class="comparison">
+              <div class="code-card">
+                <div class="code-card-header"><span class="dot dot-bad"></span> Ciclo detectado</div>
+                <pre>orders → billing
+billing → users
+users → orders  <span class="cm">← ciclo 💥</span>
+
+<span class="cm">// Para testear orders
+// necesitás billing y users
+// Para testear users
+// necesitás orders. Deadlock.</span></pre>
+              </div>
+              <div class="code-card">
+                <div class="code-card-header"><span class="dot dot-good"></span> Sin ciclos</div>
+                <pre>orders → billing → users
+         ↓
+      payments
+
+<span class="cm">// Grafo acíclico dirigido (DAG)
+// Cada paquete se puede
+// testear de forma aislada ✓</span></pre>
+              </div>
+            </div>
+            <p style="margin-top:14px">Para romper un ciclo, la solución más común es extraer la dependencia circular a un tercer paquete del que ambos dependan, o introducir una interfaz que invierta la dependencia (aplicando DIP de SOLID a nivel de paquetes).</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="principle-card" onclick="toggle(this)">
+        <div class="card-header">
+          <span class="card-abbr" style="background:var(--cop-r);border:1px solid var(--cop-rb);color:var(--cop)">SDP</span>
+          <div>
+            <div class="card-title">Stable Dependencies Principle</div>
+            <div class="card-subtitle">Dependé de lo que es más estable que vos</div>
+          </div>
+          <span class="card-chevron">▾</span>
+        </div>
+        <div class="card-body">
+          <div class="card-body-inner">
+            <p>Un paquete debería depender solo de paquetes <strong>más estables que él mismo</strong>. La estabilidad se mide por cuánto cuesta cambiar un paquete: un paquete del que dependen muchos otros es difícil de cambiar —es estable. Uno del que nadie depende es fácil de cambiar —es inestable.</p>
+            <p>Si un paquete volátil (que cambia seguido) depende de un paquete estable, está bien. Si un paquete estable depende de uno volátil, cualquier cambio en el volátil fuerza cambios en cascada en todo lo que depende del estable.</p>
+            <div class="comparison">
+              <div class="code-card">
+                <div class="code-card-header"><span class="dot dot-bad"></span> Viola SDP</div>
+                <pre><span class="cm">// core-domain (estable,</span>
+<span class="cm">// 10 paquetes dependen de él)</span>
+<span class="cm">// depende de:</span>
+ui-components  <span class="cm">← cambia cada sprint</span>
+feature-flags  <span class="cm">← cambia cada semana</span>
+<span class="cm">// Un cambio en UI rompe core 💥</span></pre>
+              </div>
+              <div class="code-card">
+                <div class="code-card-header"><span class="dot dot-good"></span> Respeta SDP</div>
+                <pre><span class="cm">// core-domain (estable)</span>
+<span class="cm">// depende de:</span>
+shared-types   <span class="cm">← muy estable</span>
+base-errors    <span class="cm">← muy estable</span>
+
+<span class="cm">// ui-components (volátil)
+// depende de core-domain ✓</span></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="principle-card" onclick="toggle(this)">
+        <div class="card-header">
+          <span class="card-abbr" style="background:var(--cop-r);border:1px solid var(--cop-rb);color:var(--cop)">SAP</span>
+          <div>
+            <div class="card-title">Stable Abstractions Principle</div>
+            <div class="card-subtitle">Los paquetes estables deben ser abstractos</div>
+          </div>
+          <span class="card-chevron">▾</span>
+        </div>
+        <div class="card-body">
+          <div class="card-body-inner">
+            <p>Un paquete <strong>estable debe ser abstracto</strong> para que su estabilidad no impida su extensión. Un paquete estable lleno de implementaciones concretas es rígido: no se puede cambiar (muchos dependen de él) y tampoco se puede extender (es concreto).</p>
+            <p>SAP combina SDP con el principio Open/Closed de SOLID a nivel de paquetes: <strong>cuanto más estable es un paquete, más abstracto debería ser</strong>. Los paquetes inestables pueden ser concretos porque es fácil cambiarlos.</p>
+            <div class="tip" style="margin-top:0">
+              <strong>La métrica de abstracción</strong>
+              Martin define la abstracción de un paquete como la proporción de interfaces y clases abstractas sobre el total de clases. Un paquete del que todos dependen debería tener una abstracción cercana a 1 (todo interfaces). Un paquete hoja (nadie depende de él) puede tener abstracción cercana a 0.
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── TENSIONES ── -->
+  <div class="panel" id="panel-3">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Tensiones entre principios</div>
+        <span class="p-tagline">Los seis principios no siempre apuntan en la misma dirección</span>
+        <p class="p-desc">Los tres principios de cohesión están <strong>en tensión permanente</strong> entre sí. No podés maximizar los tres a la vez; el diseño es una decisión sobre qué priorizar según el tipo de proyecto.</p>
+      </div>
+      <div class="p-letter">T</div>
+    </div>
+
+    <div class="analogy">
+      <span class="analogy-icon">⚖️</span>
+      <span>REP dice "agrupá lo que se reutiliza junto". CCP dice "agrupá lo que cambia junto". CRP dice "no agrupés lo que no se usa junto". <em>Un paquete perfecto según los tres principios no existe en la práctica —hay que elegir qué importa más.</em></span>
+    </div>
+
+    <table class="matrix">
+      <thead>
+        <tr>
+          <th>Principio</th>
+          <th>Prioriza</th>
+          <th>Penaliza</th>
+          <th>Mejor para</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="color:var(--coh)">REP</td>
+          <td><span class="badge-good">Reutilización</span></td>
+          <td><span class="badge-bad">Demasiados paquetes</span></td>
+          <td style="color:var(--muted)">Librerías y SDKs publicados</td>
+        </tr>
+        <tr>
+          <td style="color:var(--coh)">CCP</td>
+          <td><span class="badge-good">Mantenibilidad</span></td>
+          <td><span class="badge-bad">Menor reutilización</span></td>
+          <td style="color:var(--muted)">Aplicaciones con cambios frecuentes</td>
+        </tr>
+        <tr>
+          <td style="color:var(--coh)">CRP</td>
+          <td><span class="badge-good">Independencia</span></td>
+          <td><span class="badge-bad">Más fragmentación</span></td>
+          <td style="color:var(--muted)">Sistemas con muchos consumidores</td>
+        </tr>
+        <tr>
+          <td style="color:var(--cop)">ADP</td>
+          <td><span class="badge-good">Testeabilidad</span></td>
+          <td><span class="badge-bad">Requiere refactors</span></td>
+          <td style="color:var(--muted)">Todo sistema que crezca</td>
+        </tr>
+        <tr>
+          <td style="color:var(--cop)">SDP</td>
+          <td><span class="badge-good">Estabilidad</span></td>
+          <td><span class="badge-bad">Restricciones de diseño</span></td>
+          <td style="color:var(--muted)">Sistemas con núcleo de negocio estable</td>
+        </tr>
+        <tr>
+          <td style="color:var(--cop)">SAP</td>
+          <td><span class="badge-good">Extensibilidad</span></td>
+          <td><span class="badge-bad">Más abstracciones</span></td>
+          <td style="color:var(--muted)">Núcleos de dominio compartidos</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="tip">
+      <strong>Regla práctica para proyectos nuevos</strong>
+      En etapas tempranas, priorizá <strong>CCP sobre REP</strong>: es más fácil dividir un paquete cohesivo cuando el sistema crece que reparar un sistema donde los cambios se propagan a seis lugares. Una vez que el sistema estabiliza su estructura, REP y CRP cobran más importancia.
+    </div>
+  </div>
+
+  <!-- ── TRAMPAS ── -->
+  <div class="panel" id="panel-4">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Trampas comunes</div>
+        <span class="p-tagline">Los errores que aparecen cuando el proyecto escala</span>
+        <p class="p-desc">Las violaciones de estos principios <strong>no duelen al principio</strong>. Se acumulan silenciosamente hasta que el proyecto tiene seis meses y cada cambio tarda el doble porque nadie entiende bien las dependencias.</p>
+      </div>
+      <div class="p-letter">X</div>
+    </div>
+
+    <ul class="trap-list">
+      <li>
+        <span class="trap-icon">🧺</span>
+        <div>
+          <strong>El paquete "utils" o "common" que lo tiene todo</strong>
+          Es la violación más universal. Un paquete llamado <code style="font-family:var(--mono);font-size:12px;background:var(--surface2);padding:1px 5px;border-radius:3px">utils</code> o <code style="font-family:var(--mono);font-size:12px;background:var(--surface2);padding:1px 5px;border-radius:3px">shared</code> que crece sin control viola REP (nadie lo reutiliza completo), CCP (cambia por mil razones distintas) y CRP (fuerza dependencias no relacionadas). La solución es partirlo en paquetes con nombres de dominio reales.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🔄</span>
+        <div>
+          <strong>Dependencias circulares ocultas</strong>
+          Los ciclos raramente son obvios. Aparecen con el tiempo: A importa de B, B importa de C, y C necesita algo de A "solo para un caso especial". Herramientas como <code style="font-family:var(--mono);font-size:12px;background:var(--surface2);padding:1px 5px;border-radius:3px">madge</code> (JS), <code style="font-family:var(--mono);font-size:12px;background:var(--surface2);padding:1px 5px;border-radius:3px">pydeps</code> (Python) o <code style="font-family:var(--mono);font-size:12px;background:var(--surface2);padding:1px 5px;border-radius:3px">deptrac</code> (PHP) visualizan el grafo de dependencias y detectan ciclos antes de que sean un problema.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🏔️</span>
+        <div>
+          <strong>El núcleo de dominio que depende de la infraestructura</strong>
+          Cuando el módulo de lógica de negocio importa directamente el ORM, el cliente HTTP o el logger, viola SDP: el módulo más estable y crítico del sistema depende de detalles de implementación que cambian con frecuencia. La solución es DIP a nivel de paquetes: el dominio define interfaces; la infraestructura las implementa.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">📐</span>
+        <div>
+          <strong>Organizar por capa técnica en lugar de por dominio</strong>
+          Una estructura <code style="font-family:var(--mono);font-size:12px;background:var(--surface2);padding:1px 5px;border-radius:3px">controllers / services / repositories</code> viola CCP: un cambio en la lógica de "órdenes" toca un archivo en cada una de las tres carpetas. Una estructura <code style="font-family:var(--mono);font-size:12px;background:var(--surface2);padding:1px 5px;border-radius:3px">orders / billing / users</code> —organizada por dominio— localiza los cambios.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🔍</span>
+        <div>
+          <strong>No medir la estabilidad de los paquetes</strong>
+          La estabilidad de un paquete es calculable: <em>estabilidad = dependencias salientes / (dependencias entrantes + salientes)</em>. Un paquete con muchos consumidores y pocas dependencias externas tiene estabilidad cercana a 1. Si ese paquete tiene alto acoplamiento con detalles volátiles, hay un problema de diseño que se puede detectar antes de que cause daño.
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <!-- context -->
+  <div style="margin-top:36px;padding-top:32px;border-top:1px solid var(--border)">
+    <div class="context-inner">
+      <div>
+        <div class="context-section-label">Origen</div>
+        <p class="context-text">
+          Estos seis principios fueron desarrollados por <strong>Robert C. Martin</strong> ("Uncle Bob") en los años 90 y publicados en <em>Agile Software Development: Principles, Patterns, and Practices</em> (2002). Son la extensión natural de SOLID al nivel de módulos y paquetes, y forman parte del mismo marco teórico de diseño orientado a objetos escalable.
+        </p>
+      </div>
+      <div class="context-divider"></div>
+      <div>
+        <div class="context-section-label">¿Solo para POO?</div>
+        <p class="context-text">Los principios aplican a cualquier sistema con unidades de código independientes.</p>
+        <div class="scope-pills">
+          <span class="pill yes">Monolitos modulares</span>
+          <span class="pill yes">Microservicios</span>
+          <span class="pill yes">Librerías / npm / pip</span>
+          <span class="pill yes">Monorepos</span>
+          <span class="pill partial">Sistemas pequeños — opcional</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="progress" id="progress">
+    <div class="prog-dot active" onclick="show(0)"></div>
+    <div class="prog-dot" onclick="show(1)"></div>
+    <div class="prog-dot" onclick="show(2)"></div>
+    <div class="prog-dot" onclick="show(3)"></div>
+    <div class="prog-dot" onclick="show(4)"></div>
+  </div>
+  <div class="nav-btns">
+    <button class="nav-btn" id="btnPrev" onclick="navigate(-1)">← Anterior</button>
+    <button class="nav-btn" id="btnNext" onclick="navigate(1)">Siguiente →</button>
+  </div>
+</main>
+
+<footer>
+  <span>Principios de paquetes · Robert C. Martin · Agile S/W Development · 2002</span>
+  <span>Gustavo Adrián Salvini · <a href="https://github.com/guspatagonico" target="_blank">@guspatagonico</a></span>
+</footer>
+
+<script>
+  let current = 0;
+  const total = 5;
+
+  function toggle(card) {
+    card.classList.toggle('expanded');
+  }
+
+  function show(idx) {
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.prog-dot').forEach((d, i) => d.classList.toggle('active', i === idx));
+    document.getElementById('panel-' + idx).classList.add('active');
+    document.querySelectorAll('.tab-btn')[idx].classList.add('active');
+    current = idx;
+    movePill(idx);
+    document.getElementById('btnPrev').style.opacity = idx === 0 ? '.3' : '1';
+    document.getElementById('btnPrev').style.pointerEvents = idx === 0 ? 'none' : 'auto';
+    document.getElementById('btnNext').style.opacity = idx === total - 1 ? '.3' : '1';
+    document.getElementById('btnNext').style.pointerEvents = idx === total - 1 ? 'none' : 'auto';
+  }
+
+  function navigate(dir) { show(Math.max(0, Math.min(total - 1, current + dir))); }
+
+  function movePill(idx) {
+    const tabs = document.querySelectorAll('.tab-btn');
+    const pill = document.getElementById('navPill');
+    const tab = tabs[idx];
+    pill.style.left = tab.offsetLeft + 'px';
+    pill.style.width = tab.offsetWidth + 'px';
+  }
+
+  window.addEventListener('load', () => { movePill(0); show(0); });
+  window.addEventListener('resize', () => movePill(current));
+  document.addEventListener('keydown', e => {
+    if (e.key === 'ArrowRight') navigate(1);
+    if (e.key === 'ArrowLeft')  navigate(-1);
+  });
+</script>
+
+
+
+<!-- SNAV-BOT -->
+<nav class="snav snav-bot">
+  <a class="snav-prev" href="08_fail-fast.html" style="color:#fb7185;background:rgba(251,113,133,.12);border-color:rgba(251,113,133,.32)"><span>←</span><span class="snav-label">Fail Fast</span></a>
+  <div class="snav-spacer"></div>
+  <div class="snav-center">
+    <a class="snav-home" href="00_index.html" >↑&nbsp;&nbsp;Índice</a>
+    <span class="snav-pos">09&thinsp;/&thinsp;12</span>
+  </div>
+  <div class="snav-spacer"></div>
+  <a class="snav-next" href="10_screaming-architecture.html" style="color:#bef264;background:rgba(190,242,100,.12);border-color:rgba(190,242,100,.32)"><span class="snav-label">Screaming</span><span>→</span></a>
+</nav>
+<!-- /SNAV-BOT -->
+</body>
+</html>
