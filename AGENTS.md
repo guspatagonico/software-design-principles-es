@@ -1,26 +1,77 @@
 # AGENTS.md
 
 ## Project
-Spanish-language static reference site covering 12 software design principles. Currently rebuilding from a prototype into a modular, professional version.
+Spanish-language static reference site covering 12 software design principles. Built with **Astro 6.3** in SSG mode, deployed at `https://principles.harness.ar/principles/`.
 
 ## Current phase
-- `_seed/` is a **prototype** — self-contained HTML files (inline CSS/JS, zero dependencies). Content and visual design are correct; structure is throwaway.
-- The seed is reference material — never edit it.
-- **Phase 1 (complete):** Modular static site — shared CSS (`css/base.css`, `css/layout.css`), shared JS (`js/tabs.js`), JSON data files (`data/`), template + build script (`templates/`, `build.js`). Output in `principios/` + root `index.html`.
-- **Phase 2 (current):** Migration to Astro (see Future section).
+- **Phase 1 (complete):** Modular static build script — preserved as `build.js`, `templates/`, `css/`, `js/`, `data/`. These are legacy artifacts, kept for reference.
+- **Phase 2 (complete):** Astro 6.3 migration. All pages render via Astro content collections and `.astro` components.
+- `_seed/` is the **prototype** — reference material, never edit it.
 
-## Architecture requirements
-- DRY: extract shared styles (CSS vars, nav bars, typography, layout) into shared files. Each page should only carry principle-specific content and its accent color.
-- SoC: HTML / CSS / JS in separate files (or a clear module structure). No more monolithic inline-everything.
-- Low coupling, high cohesion: shared nav and layout should not depend on page-specific content.
-- CSS vars defined once, imported everywhere. Per-principle accent colors injected via a mechanism that doesn't force CSS duplication.
-- Tab navigation script in a single shared file, not copy-pasted 12 times.
+## Stack
+- **Astro 6.3** — static output (`output: 'static'`)
+- **`pnpm`** — package manager (do NOT use npm)
+- **Zod** — content schema validation
+- **CSS Modules pattern** (plain `.css`, imported via Astro)
+- **No React in production pages** (reserved for future interactive features)
 
-## Future
-This project now moves to **Phase 2: migration to Astro**.
-- Use **Astro 6.3** (latest stable in the 6.3.x line).
-- Use **`pnpm`** as the package manager.
-- Do **not** use `npm` for dependency management or project scripts.
+## Project structure
+```
+src/
+├── components/           # Reusable .astro components
+│   ├── ContextSection.astro   # Origin + scope block
+│   ├── ProgressNav.astro      # Bottom prev/next + progress dots
+│   ├── SiteNav.astro          # Fixed top/bottom SNAV bars
+│   └── TabNav.astro           # Tab bar with animated pill
+├── content/
+│   └── principle/        # 12 JSON data files (content collection)
+├── data/
+│   └── accents.mjs       # Centralized ACCENT_HEX map, rgba(), accentStyle()
+├── layouts/
+│   └── BaseLayout.astro  # HTML shell (<head>, fonts, CSS, tabs.js)
+├── pages/
+│   ├── index.astro       # Landing page (card grid + reading strip)
+│   └── principios/
+│       └── [slug].astro  # Dynamic route for all 12 principles
+├── styles/
+│   ├── base.css          # Reset, fonts, all 12 accent palettes, breakpoints
+│   └── layout.css        # All shared component styles (SNAV, tabs, panels, cards)
+└── content.config.ts     # Glob loader + Zod schema for principle collection
+public/
+└── js/
+    └── tabs.js           # Shared tab-nav script (keyboard, pill, dots)
+```
+
+## Content flow
+1. **Data source:** 12 JSON files in `src/content/principle/` — one per principle.
+2. **Schema:** `src/content.config.ts` validates via `defineCollection` + `glob` loader + Zod.
+3. **Pages:** `[slug].astro` calls `getCollection('principle')` → renders each principle page.
+4. **Index:** `index.astro` loads the same collection for card metadata; reads `data/index.json` for intro text.
+5. **Components:** `[slug].astro` delegates to `SiteNav.astro`, `TabNav.astro`, `ProgressNav.astro`, `ContextSection.astro`.
+
+## Accent color system
+- **Central map:** `src/data/accents.mjs` exports `ACCENT_HEX` (12 principles + index neutral) and helpers `rgba(hex, alpha)` / `accentStyle(accent, alphaBg, alphaBorder)`.
+- **CSS palettes:** `src/styles/base.css` defines `[data-accent="kiss"]`, `[data-accent="solid"]`, etc. with full `--bg`, `--surface`, `--text`, `--muted`, `--accent`, `--accent-r`, `--accent-rb` plus page-specific special vars (SOLID tabs, SoC `--what`/`--how`/`--when`, Info Hiding `--pub`/`--priv`/`--iface`, etc.).
+- **Injection:** `BaseLayout.astro` sets `data-accent` on `<body>`. Components use `accentStyle()` for inline link colors.
+
+## Key patterns
+- **Base URL:** Use `import.meta.env.BASE_URL` (not `Astro.base`, which is undefined in template expressions). Always normalize trailing slash: `link.replace(/\/$/, '')`.
+- **Script loading:** `public/js/tabs.js` loaded with `is:inline` to preserve its plain-JS nature.
+- **Build:** `pnpm astro build` → `dist/` output, `pnpm astro dev` for local dev.
+- **Width variants:** JSON `width: "standard"` → `max-width: 900px`, `"wide"` → `960px`.
+
+## Architecture requirements (met)
+- DRY ✓ — shared `base.css` + `layout.css`, no duplicated styles across pages.
+- SoC ✓ — HTML (.astro) / CSS (.css) / JS (.js) in separate files.
+- Low coupling ✓ — components accept props, don't depend on page-specific content.
+- CSS vars once ✓ — all accent palettes in `base.css`, injected via `data-accent` attribute.
+- Shared tab script ✓ — `public/js/tabs.js` auto-detects tab count from DOM.
+
+## Page phases (reading order)
+1. **Mindset** — KISS (01), YAGNI (02), DRY (03)
+2. **Code Design** — SOLID (04), SoC (05), Information Hiding (06), Law of Demeter (07), Fail Fast (08)
+3. **Module Design** — Package Principles (09)
+4. **Architecture** — Screaming Architecture (10), Clean Architecture (11), Hexagonal (12)
 
 ## Seed reference
 - `_seed/00_index.html` — landing page with card grid (4 phases) and reading-order strip.
@@ -28,12 +79,6 @@ This project now moves to **Phase 2: migration to Astro**.
 - Page template: header → tabbed nav (Concepto / En el código / Reglas / Trampas) → origin+scope context → fixed top/bottom snav bars.
 - All pages use `zoom: 1.3` on `html`.
 - Google Fonts: DM Mono, Fraunces, DM Sans.
-
-## Page phases (reading order)
-1. **Mindset** — KISS (01), YAGNI (02), DRY (03)
-2. **Code Design** — SOLID (04), SoC (05), Information Hiding (06), Law of Demeter (07), Fail Fast (08)
-3. **Module Design** — Package Principles (09)
-4. **Architecture** — Screaming Architecture (10), Clean Architecture (11), Hexagonal (12)
 
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
