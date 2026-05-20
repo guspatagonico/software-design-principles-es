@@ -1,0 +1,20 @@
+---
+const { tabs } = Astro.props;
+const hasIcons = tabs.some(t => t.icon);
+---
+
+<div class="nav-wrap">
+	<div class="nav" id="nav">
+		<div class="nav-pill" id="navPill"></div>
+		{tabs.map((tab, i) => (
+			<button class={`tab-btn${i === 0 ? ' active' : ''}`} data-idx={i} style={tab.tabColorVar ? `--tab-accent: var(${tab.tabColorVar})` : ''}>
+				{hasIcons ? (
+					<span class="tab-icon">{tab.icon}</span>
+				) : (
+					<span class="tab-letter" style={tab.tabColorVar ? `color: var(${tab.tabColorVar})` : ''}>{tab.letter}</span>
+				)}
+				<span class="tab-word">{tab.label}</span>
+			</button>
+		))}
+	</div>
+</div>

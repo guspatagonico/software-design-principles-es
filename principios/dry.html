@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="es" data-accent="dry">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DRY — Principios de diseño de software</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="../css/base.css">
+<link rel="stylesheet" href="../css/layout.css">
+</head>
+<body>
+<nav class="snav snav-top">
+	<a class="snav-prev" href="yagni.html" style="color:#f59e0b;background:rgba(245,158,11,0.12);border-color:rgba(245,158,11,0.32)"><span>←</span><span class="snav-label">YAGNI</span></a>
+	<div class="snav-spacer"></div>
+	<div class="snav-center">
+		<a class="snav-home" href="../index.html">↑&nbsp;&nbsp;Índice</a>
+		<span class="snav-pos">03&thinsp;/&thinsp;12</span>
+	</div>
+	<div class="snav-spacer"></div>
+	<a class="snav-next" href="solid.html" style="color:#a78bfa;background:rgba(167,139,250,0.12);border-color:rgba(167,139,250,0.32)"><span class="snav-label">SOLID</span><span>→</span></a>
+</nav>
+
+<header>
+	<div class="header-label">Principios de diseño · Referencia para devs</div>
+	<h1><em>Don't</em><br>Repeat Yourself</h1>
+	<p>Cada pieza de conocimiento debe tener una única, inequívoca y autoritativa representación dentro de un sistema.</p>
+</header>
+
+<div class="nav-wrap">
+	<div class="nav" id="nav">
+		<div class="nav-pill" id="navPill"></div>
+		<button class="tab-btn active" data-idx="0">
+	<span class="tab-icon">💡</span>
+	<span class="tab-word">Concepto</span>
+</button>
+		<button class="tab-btn" data-idx="1">
+	<span class="tab-icon">💻</span>
+	<span class="tab-word">En el código</span>
+</button>
+		<button class="tab-btn" data-idx="2">
+	<span class="tab-icon">⚖️</span>
+	<span class="tab-word">DRY vs WET vs DAMP</span>
+</button>
+		<button class="tab-btn" data-idx="3">
+	<span class="tab-icon">⚠️</span>
+	<span class="tab-word">Trampas</span>
+</button>
+	</div>
+</div>
+
+<main>
+	<div class="panel active" id="panel-0">
+	<div class="p-header">
+      <div>
+        <div class="p-name">¿Qué significa DRY?</div>
+        <span class="p-tagline">Una sola fuente de verdad</span>
+        <p class="p-desc">DRY viene de <em>The Pragmatic Programmer</em> (Hunt &amp; Thomas, 1999) y dice que <strong>cada pieza de conocimiento del sistema debe tener una única representación</strong>. Cuando algo cambia, debería cambiar en un solo lugar. Si cambia en varios, alguno se va a olvidar.</p>
+      </div>
+      <div class="p-letter">D</div>
+    </div>
+
+    <div class="analogy">
+      <span class="analogy-icon">🗺️</span>
+      <span>Imaginá que el precio de un producto está hardcodeado en la página de listado, en el carrito, en el email de confirmación y en la factura. Cuando el precio cambia, hay que actualizar cuatro lugares. Y siempre hay uno que se olvida. <em>DRY dice: el precio vive en un solo lugar; todos los demás lo leen de ahí.</em></span>
+    </div>
+
+    <div class="analogy">
+      <span class="analogy-icon">📖</span>
+      <span>DRY no habla solo de código duplicado. Habla de <strong>conocimiento duplicado</strong>: la misma lógica de negocio en dos lugares, la misma validación en el frontend y el backend sin compartir la fuente, la misma estructura de datos definida dos veces. <em>El riesgo no es el copy-paste, es la divergencia silenciosa.</em></span>
+    </div>
+
+    <div class="tip">
+      <strong>La pregunta clave de DRY</strong>
+      "Si esta regla cambia, ¿en cuántos lugares tengo que cambiar código?" Si la respuesta es más de uno, probablemente estás violando DRY. El objetivo es que la respuesta siempre sea exactamente uno.
+    </div>
+  </div>
+
+  <!-- EN EL CÓDIGO -->
+  <div class="panel" id="panel-1">
+    <div class="p-header">
+      <div>
+        <div class="p-name">DRY en el código</div>
+        <span class="p-tagline">El problema real no es el copy-paste, es la sincronización</span>
+        <p class="p-desc">La duplicación de código es un síntoma. El problema de fondo es que cuando la lógica cambia en un lugar pero no en el otro, el sistema queda en un <strong>estado inconsistente que es difícil de detectar</strong>.</p>
+      </div>
+      <div class="p-letter">R</div>
+    </div>
+
+    <div class="comparison">
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-bad"></span> Viola DRY — lógica repetida</div>
+        <pre><span class="kw">function</span> <span class="fn">createOrder</span>(items) {
+  <span class="kw">const</span> total = items
+    .<span class="fn">reduce</span>((s, i) => s + i.price, <span class="num">0</span>)
+  <span class="kw">const</span> tax = total * <span class="num">0.21</span>
+  <span class="kw">return</span> { total, tax }
+}
+
+<span class="kw">function</span> <span class="fn">createQuote</span>(items) {
+  <span class="kw">const</span> total = items
+    .<span class="fn">reduce</span>((s, i) => s + i.price, <span class="num">0</span>)
+  <span class="kw">const</span> tax = total * <span class="num">0.21</span>
+  <span class="cm">// IVA duplicado en dos lugares</span>
+  <span class="kw">return</span> { total, tax, valid: <span class="kw">true</span> }
+}</pre>
+      </div>
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-good"></span> Respeta DRY</div>
+        <pre><span class="kw">const</span> TAX_RATE = <span class="num">0.21</span>
+
+<span class="kw">function</span> <span class="fn">calcTotals</span>(items) {
+  <span class="kw">const</span> total = items
+    .<span class="fn">reduce</span>((s, i) => s + i.price, <span class="num">0</span>)
+  <span class="kw">return</span> { total, tax: total * TAX_RATE }
+}
+
+<span class="kw">function</span> <span class="fn">createOrder</span>(items) {
+  <span class="kw">return</span> <span class="fn">calcTotals</span>(items)
+}
+<span class="kw">function</span> <span class="fn">createQuote</span>(items) {
+  <span class="kw">return</span> { ...<span class="fn">calcTotals</span>(items), valid: <span class="kw">true</span> }
+}</pre>
+      </div>
+    </div>
+
+    <div class="comparison">
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-bad"></span> Viola DRY — schema duplicado</div>
+        <pre><span class="cm">// En la BD (migration)</span>
+users: name VARCHAR(100)
+
+<span class="cm">// En el backend (validación)</span>
+<span class="kw">if</span> (name.length > <span class="num">100</span>) error()
+
+<span class="cm">// En el frontend (form)</span>
+maxlength=<span class="str">"100"</span>
+
+<span class="cm">// La regla "100 chars" vive
+// en 3 lugares distintos 😬</span></pre>
+      </div>
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-good"></span> Respeta DRY</div>
+        <pre><span class="cm">// Una fuente de verdad</span>
+<span class="kw">const</span> USER_SCHEMA = {
+  name: { maxLength: <span class="num">100</span> }
+}
+
+<span class="cm">// Backend lee de ahí</span>
+<span class="fn">validate</span>(name, USER_SCHEMA.name)
+
+<span class="cm">// Frontend genera el form
+// a partir de USER_SCHEMA ✓</span>
+<span class="fn">renderForm</span>(USER_SCHEMA)</pre>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>DRY aplica también a configuración y documentación</strong>
+      Una constante mágica como <code>0.21</code> hardcodeada en tres archivos es una violación de DRY. Una descripción de API que existe tanto en el código como en un documento Word separado también lo es. Cuando algo cambie, uno de los dos va a quedar desactualizado.
+    </div>
+  </div>
+
+  <!-- DRY vs WET vs DAMP -->
+  <div class="panel" id="panel-2">
+    <div class="p-header">
+      <div>
+        <div class="p-name">DRY, WET y DAMP</div>
+        <span class="p-tagline">No toda duplicación es mala</span>
+        <p class="p-desc">DRY tiene dos opuestos conocidos. <strong>WET</strong> (Write Everything Twice) es la violación directa. <strong>DAMP</strong> (Descriptive And Meaningful Phrases) es una alternativa deliberada para contextos donde la claridad importa más que la deduplicación —especialmente en tests.</p>
+      </div>
+      <div class="p-letter">Y</div>
+    </div>
+
+    <div class="three-col">
+      <div class="concept-card">
+        <div class="concept-label" style="color:var(--accent)">DRY</div>
+        <div class="concept-name">Don't Repeat Yourself</div>
+        <div class="concept-desc">Una sola fuente de verdad para cada pieza de conocimiento. Cambios en un lugar se propagan automáticamente. <em>Ideal para lógica de negocio, validaciones, esquemas.</em></div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-label" style="color:#f87171">WET</div>
+        <div class="concept-name">Write Everything Twice</div>
+        <div class="concept-desc">Código duplicado sin justificación. Cuando la lógica cambia, hay que recordar actualizar cada copia. La fuente de innumerables bugs silenciosos. <em>Siempre es un problema.</em></div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-label" style="color:#f59e0b">DAMP</div>
+        <div class="concept-name">Descriptive And Meaningful Phrases</div>
+        <div class="concept-desc">Duplicación aceptada cuando hace el código más legible. <em>Especialmente en tests:</em> un test debe poder leerse sin saltar a helpers externos. La claridad tiene más valor que la deduplicación.</div>
+      </div>
+    </div>
+
+    <div class="comparison">
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-warn"></span> DRY extremo en tests — problema</div>
+        <pre><span class="cm">// Helper compartido, "DRY"</span>
+<span class="kw">function</span> <span class="fn">makeUser</span>(overrides) {
+  <span class="kw">return</span> { id: <span class="num">1</span>, role: <span class="str">'user'</span>, ...overrides }
+}
+
+<span class="fn">test</span>(<span class="str">'admin can delete'</span>, () => {
+  <span class="kw">const</span> u = <span class="fn">makeUser</span>({ role: <span class="str">'admin'</span> })
+  <span class="cm">// ¿Qué tiene este usuario?
+  // Hay que ir a leer makeUser()</span>
+})</pre>
+      </div>
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-good"></span> DAMP en tests — preferible</div>
+        <pre><span class="fn">test</span>(<span class="str">'admin can delete'</span>, () => {
+  <span class="kw">const</span> user = {
+    id: <span class="num">42</span>,
+    role: <span class="str">'admin'</span>,
+    active: <span class="kw">true</span>
+  }
+  <span class="cm">// Todo el contexto está acá,
+  // el test se lee solo ✓</span>
+  <span class="fn">expect</span>(<span class="fn">canDelete</span>(user)).<span class="fn">toBe</span>(<span class="kw">true</span>)
+})</pre>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>Regla práctica</strong>
+      Usá DRY en código de producción: lógica de negocio, validaciones, constantes, esquemas. Usá DAMP en tests: cada test debería ser autocontenido y legible sin contexto externo. Los tests son documentación —la claridad es más importante que evitar la repetición.
+    </div>
+  </div>
+
+  <!-- TRAMPAS -->
+  <div class="panel" id="panel-3">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Trampas comunes</div>
+        <span class="p-tagline">DRY mal aplicado crea acoplamiento innecesario</span>
+        <p class="p-desc">El error más común con DRY es <strong>abstraer demasiado temprano</strong> basándose en similitud de código, cuando en realidad son dos conceptos distintos que hoy se parecen pero van a divergir. La deduplicación incorrecta crea acoplamiento entre cosas que deberían ser independientes.</p>
+      </div>
+      <div class="p-letter">D</div>
+    </div>
+
+    <ul class="trap-list">
+      <li>
+        <span class="trap-icon">🪤</span>
+        <div>
+          <strong>Abstraer por similitud de código, no de concepto</strong>
+          Dos funciones que hacen cosas parecidas hoy no necesariamente representan el mismo conocimiento. Si el código de "calcular descuento para cliente VIP" y "calcular descuento en liquidación" se parece, no las unas en una función genérica: cuando los criterios de uno cambien, van a afectar al otro.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🔗</span>
+        <div>
+          <strong>Crear acoplamiento entre módulos no relacionados</strong>
+          Para evitar repetir código, a veces se crea una función utilitaria compartida entre dos módulos que no deberían conocerse. El resultado es que cambiar esa utilidad afecta a ambos, y los módulos quedan acoplados por accidente.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🌀</span>
+        <div>
+          <strong>La abstracción prematura por la regla de tres</strong>
+          Hay una heurística popular que dice "cuando copias algo por tercera vez, abstraelo". Es razonable como punto de partida, pero el número de copias no determina si algo merece una abstracción —lo determina si representan el mismo conocimiento o no.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🧩</span>
+        <div>
+          <strong>Un helper que hace demasiado para evitar repetición</strong>
+          A veces se agregan parámetros a una función existente para reutilizarla en un nuevo contexto, en vez de crear una nueva función. El resultado es una función con muchas responsabilidades y lógica condicional compleja. Dos funciones simples son mejores que una función flexible.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">📋</span>
+        <div>
+          <strong>Ignorar DRY en la documentación y configuración</strong>
+          DRY se viola constantemente fuera del código: la misma información en el README, en la wiki y en los comentarios del código. Cuando algo cambia, las tres fuentes divergen y ninguna es confiable. Una sola fuente de verdad, con links desde las otras.
+        </div>
+      </li>
+    </ul>
+</div>
+
+	<div class="panel" id="panel-1">
+	<div class="p-header">
+      <div>
+        <div class="p-name">DRY en el código</div>
+        <span class="p-tagline">El problema real no es el copy-paste, es la sincronización</span>
+        <p class="p-desc">La duplicación de código es un síntoma. El problema de fondo es que cuando la lógica cambia en un lugar pero no en el otro, el sistema queda en un <strong>estado inconsistente que es difícil de detectar</strong>.</p>
+      </div>
+      <div class="p-letter">R</div>
+    </div>
+
+    <div class="comparison">
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-bad"></span> Viola DRY — lógica repetida</div>
+        <pre><span class="kw">function</span> <span class="fn">createOrder</span>(items) {
+  <span class="kw">const</span> total = items
+    .<span class="fn">reduce</span>((s, i) => s + i.price, <span class="num">0</span>)
+  <span class="kw">const</span> tax = total * <span class="num">0.21</span>
+  <span class="kw">return</span> { total, tax }
+}
+
+<span class="kw">function</span> <span class="fn">createQuote</span>(items) {
+  <span class="kw">const</span> total = items
+    .<span class="fn">reduce</span>((s, i) => s + i.price, <span class="num">0</span>)
+  <span class="kw">const</span> tax = total * <span class="num">0.21</span>
+  <span class="cm">// IVA duplicado en dos lugares</span>
+  <span class="kw">return</span> { total, tax, valid: <span class="kw">true</span> }
+}</pre>
+      </div>
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-good"></span> Respeta DRY</div>
+        <pre><span class="kw">const</span> TAX_RATE = <span class="num">0.21</span>
+
+<span class="kw">function</span> <span class="fn">calcTotals</span>(items) {
+  <span class="kw">const</span> total = items
+    .<span class="fn">reduce</span>((s, i) => s + i.price, <span class="num">0</span>)
+  <span class="kw">return</span> { total, tax: total * TAX_RATE }
+}
+
+<span class="kw">function</span> <span class="fn">createOrder</span>(items) {
+  <span class="kw">return</span> <span class="fn">calcTotals</span>(items)
+}
+<span class="kw">function</span> <span class="fn">createQuote</span>(items) {
+  <span class="kw">return</span> { ...<span class="fn">calcTotals</span>(items), valid: <span class="kw">true</span> }
+}</pre>
+      </div>
+    </div>
+
+    <div class="comparison">
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-bad"></span> Viola DRY — schema duplicado</div>
+        <pre><span class="cm">// En la BD (migration)</span>
+users: name VARCHAR(100)
+
+<span class="cm">// En el backend (validación)</span>
+<span class="kw">if</span> (name.length > <span class="num">100</span>) error()
+
+<span class="cm">// En el frontend (form)</span>
+maxlength=<span class="str">"100"</span>
+
+<span class="cm">// La regla "100 chars" vive
+// en 3 lugares distintos 😬</span></pre>
+      </div>
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-good"></span> Respeta DRY</div>
+        <pre><span class="cm">// Una fuente de verdad</span>
+<span class="kw">const</span> USER_SCHEMA = {
+  name: { maxLength: <span class="num">100</span> }
+}
+
+<span class="cm">// Backend lee de ahí</span>
+<span class="fn">validate</span>(name, USER_SCHEMA.name)
+
+<span class="cm">// Frontend genera el form
+// a partir de USER_SCHEMA ✓</span>
+<span class="fn">renderForm</span>(USER_SCHEMA)</pre>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>DRY aplica también a configuración y documentación</strong>
+      Una constante mágica como <code>0.21</code> hardcodeada en tres archivos es una violación de DRY. Una descripción de API que existe tanto en el código como en un documento Word separado también lo es. Cuando algo cambie, uno de los dos va a quedar desactualizado.
+    </div>
+  </div>
+
+  <!-- DRY vs WET vs DAMP -->
+  <div class="panel" id="panel-2">
+    <div class="p-header">
+      <div>
+        <div class="p-name">DRY, WET y DAMP</div>
+        <span class="p-tagline">No toda duplicación es mala</span>
+        <p class="p-desc">DRY tiene dos opuestos conocidos. <strong>WET</strong> (Write Everything Twice) es la violación directa. <strong>DAMP</strong> (Descriptive And Meaningful Phrases) es una alternativa deliberada para contextos donde la claridad importa más que la deduplicación —especialmente en tests.</p>
+      </div>
+      <div class="p-letter">Y</div>
+    </div>
+
+    <div class="three-col">
+      <div class="concept-card">
+        <div class="concept-label" style="color:var(--accent)">DRY</div>
+        <div class="concept-name">Don't Repeat Yourself</div>
+        <div class="concept-desc">Una sola fuente de verdad para cada pieza de conocimiento. Cambios en un lugar se propagan automáticamente. <em>Ideal para lógica de negocio, validaciones, esquemas.</em></div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-label" style="color:#f87171">WET</div>
+        <div class="concept-name">Write Everything Twice</div>
+        <div class="concept-desc">Código duplicado sin justificación. Cuando la lógica cambia, hay que recordar actualizar cada copia. La fuente de innumerables bugs silenciosos. <em>Siempre es un problema.</em></div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-label" style="color:#f59e0b">DAMP</div>
+        <div class="concept-name">Descriptive And Meaningful Phrases</div>
+        <div class="concept-desc">Duplicación aceptada cuando hace el código más legible. <em>Especialmente en tests:</em> un test debe poder leerse sin saltar a helpers externos. La claridad tiene más valor que la deduplicación.</div>
+      </div>
+    </div>
+
+    <div class="comparison">
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-warn"></span> DRY extremo en tests — problema</div>
+        <pre><span class="cm">// Helper compartido, "DRY"</span>
+<span class="kw">function</span> <span class="fn">makeUser</span>(overrides) {
+  <span class="kw">return</span> { id: <span class="num">1</span>, role: <span class="str">'user'</span>, ...overrides }
+}
+
+<span class="fn">test</span>(<span class="str">'admin can delete'</span>, () => {
+  <span class="kw">const</span> u = <span class="fn">makeUser</span>({ role: <span class="str">'admin'</span> })
+  <span class="cm">// ¿Qué tiene este usuario?
+  // Hay que ir a leer makeUser()</span>
+})</pre>
+      </div>
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-good"></span> DAMP en tests — preferible</div>
+        <pre><span class="fn">test</span>(<span class="str">'admin can delete'</span>, () => {
+  <span class="kw">const</span> user = {
+    id: <span class="num">42</span>,
+    role: <span class="str">'admin'</span>,
+    active: <span class="kw">true</span>
+  }
+  <span class="cm">// Todo el contexto está acá,
+  // el test se lee solo ✓</span>
+  <span class="fn">expect</span>(<span class="fn">canDelete</span>(user)).<span class="fn">toBe</span>(<span class="kw">true</span>)
+})</pre>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>Regla práctica</strong>
+      Usá DRY en código de producción: lógica de negocio, validaciones, constantes, esquemas. Usá DAMP en tests: cada test debería ser autocontenido y legible sin contexto externo. Los tests son documentación —la claridad es más importante que evitar la repetición.
+    </div>
+  </div>
+
+  <!-- TRAMPAS -->
+  <div class="panel" id="panel-3">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Trampas comunes</div>
+        <span class="p-tagline">DRY mal aplicado crea acoplamiento innecesario</span>
+        <p class="p-desc">El error más común con DRY es <strong>abstraer demasiado temprano</strong> basándose en similitud de código, cuando en realidad son dos conceptos distintos que hoy se parecen pero van a divergir. La deduplicación incorrecta crea acoplamiento entre cosas que deberían ser independientes.</p>
+      </div>
+      <div class="p-letter">D</div>
+    </div>
+
+    <ul class="trap-list">
+      <li>
+        <span class="trap-icon">🪤</span>
+        <div>
+          <strong>Abstraer por similitud de código, no de concepto</strong>
+          Dos funciones que hacen cosas parecidas hoy no necesariamente representan el mismo conocimiento. Si el código de "calcular descuento para cliente VIP" y "calcular descuento en liquidación" se parece, no las unas en una función genérica: cuando los criterios de uno cambien, van a afectar al otro.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🔗</span>
+        <div>
+          <strong>Crear acoplamiento entre módulos no relacionados</strong>
+          Para evitar repetir código, a veces se crea una función utilitaria compartida entre dos módulos que no deberían conocerse. El resultado es que cambiar esa utilidad afecta a ambos, y los módulos quedan acoplados por accidente.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🌀</span>
+        <div>
+          <strong>La abstracción prematura por la regla de tres</strong>
+          Hay una heurística popular que dice "cuando copias algo por tercera vez, abstraelo". Es razonable como punto de partida, pero el número de copias no determina si algo merece una abstracción —lo determina si representan el mismo conocimiento o no.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🧩</span>
+        <div>
+          <strong>Un helper que hace demasiado para evitar repetición</strong>
+          A veces se agregan parámetros a una función existente para reutilizarla en un nuevo contexto, en vez de crear una nueva función. El resultado es una función con muchas responsabilidades y lógica condicional compleja. Dos funciones simples son mejores que una función flexible.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">📋</span>
+        <div>
+          <strong>Ignorar DRY en la documentación y configuración</strong>
+          DRY se viola constantemente fuera del código: la misma información en el README, en la wiki y en los comentarios del código. Cuando algo cambia, las tres fuentes divergen y ninguna es confiable. Una sola fuente de verdad, con links desde las otras.
+        </div>
+      </li>
+    </ul>
+</div>
+
+	<div class="panel" id="panel-2">
+	<div class="p-header">
+      <div>
+        <div class="p-name">DRY, WET y DAMP</div>
+        <span class="p-tagline">No toda duplicación es mala</span>
+        <p class="p-desc">DRY tiene dos opuestos conocidos. <strong>WET</strong> (Write Everything Twice) es la violación directa. <strong>DAMP</strong> (Descriptive And Meaningful Phrases) es una alternativa deliberada para contextos donde la claridad importa más que la deduplicación —especialmente en tests.</p>
+      </div>
+      <div class="p-letter">Y</div>
+    </div>
+
+    <div class="three-col">
+      <div class="concept-card">
+        <div class="concept-label" style="color:var(--accent)">DRY</div>
+        <div class="concept-name">Don't Repeat Yourself</div>
+        <div class="concept-desc">Una sola fuente de verdad para cada pieza de conocimiento. Cambios en un lugar se propagan automáticamente. <em>Ideal para lógica de negocio, validaciones, esquemas.</em></div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-label" style="color:#f87171">WET</div>
+        <div class="concept-name">Write Everything Twice</div>
+        <div class="concept-desc">Código duplicado sin justificación. Cuando la lógica cambia, hay que recordar actualizar cada copia. La fuente de innumerables bugs silenciosos. <em>Siempre es un problema.</em></div>
+      </div>
+      <div class="concept-card">
+        <div class="concept-label" style="color:#f59e0b">DAMP</div>
+        <div class="concept-name">Descriptive And Meaningful Phrases</div>
+        <div class="concept-desc">Duplicación aceptada cuando hace el código más legible. <em>Especialmente en tests:</em> un test debe poder leerse sin saltar a helpers externos. La claridad tiene más valor que la deduplicación.</div>
+      </div>
+    </div>
+
+    <div class="comparison">
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-warn"></span> DRY extremo en tests — problema</div>
+        <pre><span class="cm">// Helper compartido, "DRY"</span>
+<span class="kw">function</span> <span class="fn">makeUser</span>(overrides) {
+  <span class="kw">return</span> { id: <span class="num">1</span>, role: <span class="str">'user'</span>, ...overrides }
+}
+
+<span class="fn">test</span>(<span class="str">'admin can delete'</span>, () => {
+  <span class="kw">const</span> u = <span class="fn">makeUser</span>({ role: <span class="str">'admin'</span> })
+  <span class="cm">// ¿Qué tiene este usuario?
+  // Hay que ir a leer makeUser()</span>
+})</pre>
+      </div>
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-good"></span> DAMP en tests — preferible</div>
+        <pre><span class="fn">test</span>(<span class="str">'admin can delete'</span>, () => {
+  <span class="kw">const</span> user = {
+    id: <span class="num">42</span>,
+    role: <span class="str">'admin'</span>,
+    active: <span class="kw">true</span>
+  }
+  <span class="cm">// Todo el contexto está acá,
+  // el test se lee solo ✓</span>
+  <span class="fn">expect</span>(<span class="fn">canDelete</span>(user)).<span class="fn">toBe</span>(<span class="kw">true</span>)
+})</pre>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>Regla práctica</strong>
+      Usá DRY en código de producción: lógica de negocio, validaciones, constantes, esquemas. Usá DAMP en tests: cada test debería ser autocontenido y legible sin contexto externo. Los tests son documentación —la claridad es más importante que evitar la repetición.
+    </div>
+  </div>
+
+  <!-- TRAMPAS -->
+  <div class="panel" id="panel-3">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Trampas comunes</div>
+        <span class="p-tagline">DRY mal aplicado crea acoplamiento innecesario</span>
+        <p class="p-desc">El error más común con DRY es <strong>abstraer demasiado temprano</strong> basándose en similitud de código, cuando en realidad son dos conceptos distintos que hoy se parecen pero van a divergir. La deduplicación incorrecta crea acoplamiento entre cosas que deberían ser independientes.</p>
+      </div>
+      <div class="p-letter">D</div>
+    </div>
+
+    <ul class="trap-list">
+      <li>
+        <span class="trap-icon">🪤</span>
+        <div>
+          <strong>Abstraer por similitud de código, no de concepto</strong>
+          Dos funciones que hacen cosas parecidas hoy no necesariamente representan el mismo conocimiento. Si el código de "calcular descuento para cliente VIP" y "calcular descuento en liquidación" se parece, no las unas en una función genérica: cuando los criterios de uno cambien, van a afectar al otro.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🔗</span>
+        <div>
+          <strong>Crear acoplamiento entre módulos no relacionados</strong>
+          Para evitar repetir código, a veces se crea una función utilitaria compartida entre dos módulos que no deberían conocerse. El resultado es que cambiar esa utilidad afecta a ambos, y los módulos quedan acoplados por accidente.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🌀</span>
+        <div>
+          <strong>La abstracción prematura por la regla de tres</strong>
+          Hay una heurística popular que dice "cuando copias algo por tercera vez, abstraelo". Es razonable como punto de partida, pero el número de copias no determina si algo merece una abstracción —lo determina si representan el mismo conocimiento o no.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🧩</span>
+        <div>
+          <strong>Un helper que hace demasiado para evitar repetición</strong>
+          A veces se agregan parámetros a una función existente para reutilizarla en un nuevo contexto, en vez de crear una nueva función. El resultado es una función con muchas responsabilidades y lógica condicional compleja. Dos funciones simples son mejores que una función flexible.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">📋</span>
+        <div>
+          <strong>Ignorar DRY en la documentación y configuración</strong>
+          DRY se viola constantemente fuera del código: la misma información en el README, en la wiki y en los comentarios del código. Cuando algo cambia, las tres fuentes divergen y ninguna es confiable. Una sola fuente de verdad, con links desde las otras.
+        </div>
+      </li>
+    </ul>
+</div>
+
+	<div class="panel" id="panel-3">
+	<div class="p-header">
+      <div>
+        <div class="p-name">Trampas comunes</div>
+        <span class="p-tagline">DRY mal aplicado crea acoplamiento innecesario</span>
+        <p class="p-desc">El error más común con DRY es <strong>abstraer demasiado temprano</strong> basándose en similitud de código, cuando en realidad son dos conceptos distintos que hoy se parecen pero van a divergir. La deduplicación incorrecta crea acoplamiento entre cosas que deberían ser independientes.</p>
+      </div>
+      <div class="p-letter">D</div>
+    </div>
+
+    <ul class="trap-list">
+      <li>
+        <span class="trap-icon">🪤</span>
+        <div>
+          <strong>Abstraer por similitud de código, no de concepto</strong>
+          Dos funciones que hacen cosas parecidas hoy no necesariamente representan el mismo conocimiento. Si el código de "calcular descuento para cliente VIP" y "calcular descuento en liquidación" se parece, no las unas en una función genérica: cuando los criterios de uno cambien, van a afectar al otro.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🔗</span>
+        <div>
+          <strong>Crear acoplamiento entre módulos no relacionados</strong>
+          Para evitar repetir código, a veces se crea una función utilitaria compartida entre dos módulos que no deberían conocerse. El resultado es que cambiar esa utilidad afecta a ambos, y los módulos quedan acoplados por accidente.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🌀</span>
+        <div>
+          <strong>La abstracción prematura por la regla de tres</strong>
+          Hay una heurística popular que dice "cuando copias algo por tercera vez, abstraelo". Es razonable como punto de partida, pero el número de copias no determina si algo merece una abstracción —lo determina si representan el mismo conocimiento o no.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🧩</span>
+        <div>
+          <strong>Un helper que hace demasiado para evitar repetición</strong>
+          A veces se agregan parámetros a una función existente para reutilizarla en un nuevo contexto, en vez de crear una nueva función. El resultado es una función con muchas responsabilidades y lógica condicional compleja. Dos funciones simples son mejores que una función flexible.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">📋</span>
+        <div>
+          <strong>Ignorar DRY en la documentación y configuración</strong>
+          DRY se viola constantemente fuera del código: la misma información en el README, en la wiki y en los comentarios del código. Cuando algo cambia, las tres fuentes divergen y ninguna es confiable. Una sola fuente de verdad, con links desde las otras.
+        </div>
+      </li>
+    </ul>
+</div>
+
+	<div style="margin-top:36px;padding-top:32px;border-top:1px solid var(--border)">
+		<div class="context-inner">
+	<div>
+		<div class="context-section-label">Origen del principio</div>
+		<p class="context-text"></p>
+	</div>
+	<div class="context-divider"></div>
+	<div>
+		<div class="context-section-label">¿Solo aplica a código?</div>
+		<p class="context-text"></p>
+		<div class="scope-pills">
+			<span class="pill yes">Lógica de negocio</span>
+			<span class="pill yes">Validaciones</span>
+			<span class="pill yes">Schemas / modelos</span>
+			<span class="pill yes">Configuración</span>
+			<span class="pill yes">Documentación</span>
+			<span class="pill yes">Tests — usar DAMP</span>
+		</div>
+	</div>
+</div>
+	</div>
+
+	<div class="progress" id="progress">
+		<div class="prog-dot active"></div>
+		<div class="prog-dot"></div>
+		<div class="prog-dot"></div>
+		<div class="prog-dot"></div>
+	</div>
+	<div class="nav-btns">
+		<button class="nav-btn" id="btnPrev">← Anterior</button>
+		<button class="nav-btn" id="btnNext">Siguiente →</button>
+	</div>
+</main>
+
+<footer>
+	<span>DRY · Hunt &amp; Thomas · The Pragmatic Programmer · 1999</span>
+	<span>Gustavo Adrián Salvini · <a href="https://github.com/guspatagonico" target="_blank">@guspatagonico</a></span>
+</footer>
+
+<nav class="snav snav-bot">
+	<a class="snav-prev" href="yagni.html" style="color:#f59e0b;background:rgba(245,158,11,0.12);border-color:rgba(245,158,11,0.32)"><span>←</span><span class="snav-label">YAGNI</span></a>
+	<div class="snav-spacer"></div>
+	<div class="snav-center">
+		<a class="snav-home" href="../index.html">↑&nbsp;&nbsp;Índice</a>
+		<span class="snav-pos">03&thinsp;/&thinsp;12</span>
+	</div>
+	<div class="snav-spacer"></div>
+	<a class="snav-next" href="solid.html" style="color:#a78bfa;background:rgba(167,139,250,0.12);border-color:rgba(167,139,250,0.32)"><span class="snav-label">SOLID</span><span>→</span></a>
+</nav>
+
+<script src="../js/tabs.js"></script>
+</body>
+</html>

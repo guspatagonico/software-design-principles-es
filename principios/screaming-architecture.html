@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="es" data-accent="screaming-architecture">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Screaming — Principios de diseño de software</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="../css/base.css">
+<link rel="stylesheet" href="../css/layout.css">
+</head>
+<body>
+<nav class="snav snav-top">
+	<a class="snav-prev" href="pkg.html" style="color:#e879f9;background:rgba(232,121,249,0.12);border-color:rgba(232,121,249,0.32)"><span>←</span><span class="snav-label">Paquetes</span></a>
+	<div class="snav-spacer"></div>
+	<div class="snav-center">
+		<a class="snav-home" href="../index.html">↑&nbsp;&nbsp;Índice</a>
+		<span class="snav-pos">10&thinsp;/&thinsp;12</span>
+	</div>
+	<div class="snav-spacer"></div>
+	<a class="snav-next" href="clean-architecture.html" style="color:#a855f7;background:rgba(168,85,247,0.12);border-color:rgba(168,85,247,0.32)"><span class="snav-label">Clean Arch</span><span>→</span></a>
+</nav>
+
+<header>
+	<div class="header-label">Principios de diseño · Referencia para devs</div>
+	<h1><em>Screaming</em><br>Architecture</h1>
+	<p>La estructura de un proyecto debería gritar qué hace el sistema, no qué framework usa. Si abrís el código y lo primero que ves es "Rails" o "Spring", algo está mal.</p>
+</header>
+
+<div class="nav-wrap">
+	<div class="nav" id="nav">
+		<div class="nav-pill" id="navPill"></div>
+		<button class="tab-btn active" data-idx="0">
+	<span class="tab-icon">💡</span>
+	<span class="tab-word">Concepto</span>
+</button>
+		<button class="tab-btn" data-idx="1">
+	<span class="tab-icon">📁</span>
+	<span class="tab-word">La estructura</span>
+</button>
+		<button class="tab-btn" data-idx="2">
+	<span class="tab-icon">📐</span>
+	<span class="tab-word">Los principios</span>
+</button>
+		<button class="tab-btn" data-idx="3">
+	<span class="tab-icon">⚠️</span>
+	<span class="tab-word">Trampas</span>
+</button>
+	</div>
+</div>
+
+<main>
+	<div class="panel active" id="panel-0">
+	<div class="p-header">
+      <div>
+        <div class="p-name">¿Qué grita tu arquitectura?</div>
+        <span class="p-tagline">El proyecto debe revelar su propósito, no su tecnología</span>
+        <p class="p-desc">Robert C. Martin acuñó el término en 2011: si entrás a un proyecto nuevo y las carpetas de primer nivel dicen <code style="font-family:var(--mono);font-size:13px;background:var(--surface2);padding:1px 6px;border-radius:4px">controllers / models / views</code>, lo único que sabés es que usaron MVC. No sabés si es una tienda, un sistema de salud o un banco. <strong>La arquitectura debería gritar el dominio del negocio.</strong></p>
+      </div>
+      <div class="p-letter">S</div>
+    </div>
+    <div class="analogy">
+      <span class="analogy-icon">🏥</span>
+      <span>Los planos de un hospital gritan "hospital": salas de operaciones, guardia, UCI, farmacia. No dicen "edificio con puertas y ventanas de la empresa Acme Construction". <em>La estructura revela el propósito, no el proveedor de materiales.</em></span>
+    </div>
+    <div class="analogy">
+      <span class="analogy-icon">📚</span>
+      <span>Una biblioteca bien organizada grita "biblioteca": secciones de ficción, ciencia, historia, referencia. No dice "estanterías de madera, sistema de catalogación Dewey". <em>El sistema de organización es un detalle. El dominio es lo que importa.</em></span>
+    </div>
+    <div class="tip">
+      <strong>La prueba del taxi</strong>
+      Mostrále la estructura de carpetas de tu proyecto a alguien que no lo conoce durante 10 segundos. Si no puede adivinar a grandes rasgos qué hace el sistema —si lo único que puede decir es "usa Express" o "usa Laravel"— tu arquitectura está gritando el framework, no el dominio.
+    </div>
+  </div>
+
+  <!-- LA ESTRUCTURA -->
+  <div class="panel" id="panel-1">
+    <div class="p-header">
+      <div>
+        <div class="p-name">La estructura que grita</div>
+        <span class="p-tagline">Carpetas de dominio vs carpetas técnicas</span>
+        <p class="p-desc">El cambio concreto es simple: las carpetas de primer nivel dejan de representar capas técnicas y pasan a representar <strong>conceptos del dominio de negocio</strong>. La tecnología queda dentro de cada módulo de dominio, como un detalle de implementación.</p>
+      </div>
+      <div class="p-letter">c</div>
+    </div>
+
+    <div class="tree-comparison">
+      <div class="tree-card">
+        <div class="tree-header"><span class="dot dot-bad"></span> Grita el framework</div>
+        <div class="tree-body">
+          <span class="t-dir">src/</span>
+          <span class="t-indent t-dir">controllers/</span>
+          <span class="t-indent2 t-file">UserController.js</span>
+          <span class="t-indent2 t-file">OrderController.js</span>
+          <span class="t-indent2 t-file">ProductController.js</span>
+          <span class="t-indent t-dir">models/</span>
+          <span class="t-indent2 t-file">User.js</span>
+          <span class="t-indent2 t-file">Order.js</span>
+          <span class="t-indent2 t-file">Product.js</span>
+          <span class="t-indent t-dir">services/</span>
+          <span class="t-indent2 t-file">UserService.js</span>
+          <span class="t-indent2 t-file">OrderService.js</span>
+          <span class="t-indent t-dir">repositories/</span>
+          <span class="t-indent2 t-file">UserRepo.js</span>
+          <span class="t-note t-indent">↑ ¿Qué hace el sistema?</span>
+          <span class="t-note t-indent">Impossible de saberlo.</span>
+        </div>
+      </div>
+      <div class="tree-card">
+        <div class="tree-header"><span class="dot dot-good"></span> Grita el dominio</div>
+        <div class="tree-body">
+          <span class="t-dir">src/</span>
+          <span class="t-indent t-dir">orders/ </span><span class="t-note">← caso de uso central</span>
+          <span class="t-indent2 t-file">Order.js</span>
+          <span class="t-indent2 t-file">OrderService.js</span>
+          <span class="t-indent2 t-file">OrderRepository.js</span>
+          <span class="t-indent t-dir">billing/ </span><span class="t-note">← área de negocio</span>
+          <span class="t-indent2 t-file">Invoice.js</span>
+          <span class="t-indent2 t-file">PaymentService.js</span>
+          <span class="t-indent t-dir">catalog/ </span><span class="t-note">← área de negocio</span>
+          <span class="t-indent2 t-file">Product.js</span>
+          <span class="t-indent t-dir">users/</span>
+          <span class="t-indent2 t-file">User.js</span>
+          <span class="t-note t-indent">↑ Un e-commerce. Obvio.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tree-comparison">
+      <div class="tree-card">
+        <div class="tree-header"><span class="dot dot-bad"></span> Sistema de salud — grita MVC</div>
+        <div class="tree-body">
+          <span class="t-dir">app/</span>
+          <span class="t-indent t-bad">Http/Controllers/</span>
+          <span class="t-indent2 t-file">PatientController.php</span>
+          <span class="t-indent2 t-file">DoctorController.php</span>
+          <span class="t-indent t-bad">Models/</span>
+          <span class="t-indent2 t-file">Patient.php</span>
+          <span class="t-indent2 t-file">Appointment.php</span>
+          <span class="t-indent t-bad">Repositories/</span>
+          <span class="t-note t-indent">Podría ser cualquier cosa.</span>
+        </div>
+      </div>
+      <div class="tree-card">
+        <div class="tree-header"><span class="dot dot-good"></span> Sistema de salud — grita el dominio</div>
+        <div class="tree-body">
+          <span class="t-dir">src/</span>
+          <span class="t-indent t-dir">patients/</span>
+          <span class="t-indent2 t-file">Patient.php</span>
+          <span class="t-indent2 t-file">MedicalHistory.php</span>
+          <span class="t-indent t-dir">appointments/</span>
+          <span class="t-indent2 t-file">Appointment.php</span>
+          <span class="t-indent2 t-file">Scheduler.php</span>
+          <span class="t-indent t-dir">prescriptions/</span>
+          <span class="t-indent t-dir">billing/</span>
+          <span class="t-note t-indent">Sistema de salud. Obvio.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>Los frameworks van adentro, no afuera</strong>
+      Express, Django, Laravel —son detalles de implementación. Pueden vivir en una carpeta <code>infrastructure/</code> o <code>adapters/</code> dentro de cada módulo de dominio, pero no deberían dictar la estructura de primer nivel del proyecto. El dominio manda; la tecnología sirve.
+    </div>
+  </div>
+
+  <!-- LOS PRINCIPIOS -->
+  <div class="panel" id="panel-2">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Los principios concretos</div>
+        <span class="p-tagline">Cinco decisiones que hacen que la arquitectura grite</span>
+        <p class="p-desc">Screaming Architecture no es solo una convención de carpetas. Es una actitud hacia el código que se manifiesta en cinco decisiones concretas de diseño.</p>
+      </div>
+      <div class="p-letter">r</div>
+    </div>
+    <div class="principle-list">
+      <div class="principle-item">
+        <div class="pi-num">01</div>
+        <div class="pi-content">
+          <div class="pi-title">Los casos de uso son ciudadanos de primera clase</div>
+          <div class="pi-desc">Los <em>casos de uso del negocio</em> —"crear pedido", "aprobar solicitud", "cancelar suscripción"— deben ser visibles en la estructura del código. Si tenés que leer el README para entender qué hace el sistema, los casos de uso están enterrados en capas técnicas.</div>
+        </div>
+      </div>
+      <div class="principle-item">
+        <div class="pi-num">02</div>
+        <div class="pi-content">
+          <div class="pi-title">Los frameworks son herramientas, no identidad</div>
+          <div class="pi-desc">El framework web, el ORM, el motor de templates —son <em>detalles de implementación</em>. Deberían poder reemplazarse sin cambiar la lógica de negocio. Si un cambio de ORM requiere reescribir casos de uso, el framework colonizó el dominio.</div>
+        </div>
+      </div>
+      <div class="principle-item">
+        <div class="pi-num">03</div>
+        <div class="pi-content">
+          <div class="pi-title">La base de datos es un detalle</div>
+          <div class="pi-desc">PostgreSQL, MongoDB, Redis —son mecanismos de persistencia, no el sistema. El esquema de la base de datos no debería dictar la forma de las entidades del dominio. La decisión de qué base de datos usar debería poder postergarse.</div>
+        </div>
+      </div>
+      <div class="principle-item">
+        <div class="pi-num">04</div>
+        <div class="pi-content">
+          <div class="pi-title">La UI es un detalle</div>
+          <div class="pi-desc">Web, mobile, CLI, API REST —son formas de entregar la funcionalidad. La lógica de negocio no debería saber nada de HTML, JSON o gRPC. Podés cambiar la interfaz de usuario sin tocar el dominio, y deberías poder <em>testear el dominio sin ninguna interfaz.</em></div>
+        </div>
+      </div>
+      <div class="principle-item">
+        <div class="pi-num">05</div>
+        <div class="pi-content">
+          <div class="pi-title">La estructura comunica intención</div>
+          <div class="pi-desc">Cada decisión de organización —nombres de carpetas, de archivos, de módulos— debería comunicar algo sobre el dominio. <code>src/orders/CreateOrderUseCase.js</code> dice mucho más que <code>src/services/OrderService.js</code>. El código se lee más de lo que se escribe.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRAMPAS -->
+  <div class="panel" id="panel-3">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Trampas comunes</div>
+        <span class="p-tagline">Cuando la estructura sigue gritando "framework"</span>
+        <p class="p-desc">La mayoría de los frameworks de desarrollo web generan una estructura de carpetas por defecto que viola Screaming Architecture. Seguir esa estructura sin cuestionarla es la trampa más común.</p>
+      </div>
+      <div class="p-letter">!</div>
+    </div>
+    <ul class="trap-list">
+      <li><span class="trap-icon">📦</span><div><strong>Seguir la estructura por defecto del framework sin cuestionarla</strong>Rails genera <code>app/controllers</code>, <code>app/models</code>, <code>app/views</code>. Laravel genera algo similar. Django también. Esas estructuras están optimizadas para onboarding rápido, no para comunicar el dominio. Son puntos de partida, no destinos.</div></li>
+      <li><span class="trap-icon">🗂️</span><div><strong>Carpetas técnicas en el primer nivel</strong>Si el primer nivel de <code>src/</code> tiene <code>helpers/</code>, <code>utils/</code>, <code>middlewares/</code>, <code>validators/</code> —todo lo visible es tecnología, no dominio. Esas carpetas deberían vivir dentro de los módulos de dominio que las usan, no en el nivel raíz.</div></li>
+      <li><span class="trap-icon">🏷️</span><div><strong>Nombrar por tipo técnico en lugar de por rol de dominio</strong><code>UserManager</code>, <code>OrderProcessor</code>, <code>ProductHandler</code> dicen poco sobre qué hacen exactamente. <code>CreateOrderUseCase</code>, <code>ApproveRefundPolicy</code>, <code>InventoryChecker</code> comunican intención de negocio clara y son buscables.</div></li>
+      <li><span class="trap-icon">🌀</span><div><strong>Módulos de dominio con dependencias cruzadas sin control</strong>Organizar por dominio no significa que los módulos puedan depender libremente entre sí. <code>orders/</code> puede depender de <code>catalog/</code>, pero si <code>catalog/</code> también depende de <code>orders/</code>, hay un ciclo que viola ADP. La estructura de dominio debe respetarse también en el grafo de dependencias.</div></li>
+      <li><span class="trap-icon">📋</span><div><strong>Confundir Screaming Architecture con carpetas gigantes por dominio</strong>Organizar por dominio no significa un archivo de 2000 líneas por módulo. Cada módulo de dominio puede tener su propia estructura interna —entidades, casos de uso, repositorios— siempre que la estructura raíz grite el negocio.</div></li>
+    </ul>
+  </div>
+
+  <div style="margin-top:36px;padding-top:32px;border-top:1px solid var(--border)">
+    <div class="context-inner">
+      <div>
+        <div class="context-section-label">Origen</div>
+        <p class="context-text">Screaming Architecture fue articulado por <strong>Robert C. Martin</strong> ("Uncle Bob") en su blog en 2011, como parte del marco más amplio de Clean Architecture. La idea central es que la arquitectura de un sistema debe comunicar la intención del sistema, no los detalles de su implementación técnica.</p>
+      </div>
+      <div class="context-divider"></div>
+      <div>
+        <div class="context-section-label">Relación con otros principios</div>
+        <p class="context-text">Es la consecuencia visible de aplicar SoC y CCP a la estructura de carpetas.</p>
+        <div class="scope-pills">
+          <span class="pill yes">Complementa Clean Architecture</span>
+          <span class="pill yes">Aplica CCP a carpetas</span>
+          <span class="pill yes">Refuerza SoC</span>
+          <span class="pill partial">Requiere adaptar conv. del framework</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="progress" id="progress">
+    <div class="prog-dot active" onclick="show(0)"></div>
+    <div class="prog-dot" onclick="show(1)"></div>
+    <div class="prog-dot" onclick="show(2)"></div>
+    <div class="prog-dot" onclick="show(3)"></div>
+  </div>
+  <div class="nav-btns">
+    <button class="nav-btn" id="btnPrev" onclick="navigate(-1)">← Anterior</button>
+    <button class="nav-btn" id="btnNext" onclick="navigate(1)">Siguiente →</button>
+</div>
+
+	<div class="panel" id="panel-1">
+	<div class="p-header">
+      <div>
+        <div class="p-name">La estructura que grita</div>
+        <span class="p-tagline">Carpetas de dominio vs carpetas técnicas</span>
+        <p class="p-desc">El cambio concreto es simple: las carpetas de primer nivel dejan de representar capas técnicas y pasan a representar <strong>conceptos del dominio de negocio</strong>. La tecnología queda dentro de cada módulo de dominio, como un detalle de implementación.</p>
+      </div>
+      <div class="p-letter">c</div>
+    </div>
+
+    <div class="tree-comparison">
+      <div class="tree-card">
+        <div class="tree-header"><span class="dot dot-bad"></span> Grita el framework</div>
+        <div class="tree-body">
+          <span class="t-dir">src/</span>
+          <span class="t-indent t-dir">controllers/</span>
+          <span class="t-indent2 t-file">UserController.js</span>
+          <span class="t-indent2 t-file">OrderController.js</span>
+          <span class="t-indent2 t-file">ProductController.js</span>
+          <span class="t-indent t-dir">models/</span>
+          <span class="t-indent2 t-file">User.js</span>
+          <span class="t-indent2 t-file">Order.js</span>
+          <span class="t-indent2 t-file">Product.js</span>
+          <span class="t-indent t-dir">services/</span>
+          <span class="t-indent2 t-file">UserService.js</span>
+          <span class="t-indent2 t-file">OrderService.js</span>
+          <span class="t-indent t-dir">repositories/</span>
+          <span class="t-indent2 t-file">UserRepo.js</span>
+          <span class="t-note t-indent">↑ ¿Qué hace el sistema?</span>
+          <span class="t-note t-indent">Impossible de saberlo.</span>
+        </div>
+      </div>
+      <div class="tree-card">
+        <div class="tree-header"><span class="dot dot-good"></span> Grita el dominio</div>
+        <div class="tree-body">
+          <span class="t-dir">src/</span>
+          <span class="t-indent t-dir">orders/ </span><span class="t-note">← caso de uso central</span>
+          <span class="t-indent2 t-file">Order.js</span>
+          <span class="t-indent2 t-file">OrderService.js</span>
+          <span class="t-indent2 t-file">OrderRepository.js</span>
+          <span class="t-indent t-dir">billing/ </span><span class="t-note">← área de negocio</span>
+          <span class="t-indent2 t-file">Invoice.js</span>
+          <span class="t-indent2 t-file">PaymentService.js</span>
+          <span class="t-indent t-dir">catalog/ </span><span class="t-note">← área de negocio</span>
+          <span class="t-indent2 t-file">Product.js</span>
+          <span class="t-indent t-dir">users/</span>
+          <span class="t-indent2 t-file">User.js</span>
+          <span class="t-note t-indent">↑ Un e-commerce. Obvio.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tree-comparison">
+      <div class="tree-card">
+        <div class="tree-header"><span class="dot dot-bad"></span> Sistema de salud — grita MVC</div>
+        <div class="tree-body">
+          <span class="t-dir">app/</span>
+          <span class="t-indent t-bad">Http/Controllers/</span>
+          <span class="t-indent2 t-file">PatientController.php</span>
+          <span class="t-indent2 t-file">DoctorController.php</span>
+          <span class="t-indent t-bad">Models/</span>
+          <span class="t-indent2 t-file">Patient.php</span>
+          <span class="t-indent2 t-file">Appointment.php</span>
+          <span class="t-indent t-bad">Repositories/</span>
+          <span class="t-note t-indent">Podría ser cualquier cosa.</span>
+        </div>
+      </div>
+      <div class="tree-card">
+        <div class="tree-header"><span class="dot dot-good"></span> Sistema de salud — grita el dominio</div>
+        <div class="tree-body">
+          <span class="t-dir">src/</span>
+          <span class="t-indent t-dir">patients/</span>
+          <span class="t-indent2 t-file">Patient.php</span>
+          <span class="t-indent2 t-file">MedicalHistory.php</span>
+          <span class="t-indent t-dir">appointments/</span>
+          <span class="t-indent2 t-file">Appointment.php</span>
+          <span class="t-indent2 t-file">Scheduler.php</span>
+          <span class="t-indent t-dir">prescriptions/</span>
+          <span class="t-indent t-dir">billing/</span>
+          <span class="t-note t-indent">Sistema de salud. Obvio.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>Los frameworks van adentro, no afuera</strong>
+      Express, Django, Laravel —son detalles de implementación. Pueden vivir en una carpeta <code>infrastructure/</code> o <code>adapters/</code> dentro de cada módulo de dominio, pero no deberían dictar la estructura de primer nivel del proyecto. El dominio manda; la tecnología sirve.
+    </div>
+  </div>
+
+  <!-- LOS PRINCIPIOS -->
+  <div class="panel" id="panel-2">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Los principios concretos</div>
+        <span class="p-tagline">Cinco decisiones que hacen que la arquitectura grite</span>
+        <p class="p-desc">Screaming Architecture no es solo una convención de carpetas. Es una actitud hacia el código que se manifiesta en cinco decisiones concretas de diseño.</p>
+      </div>
+      <div class="p-letter">r</div>
+    </div>
+    <div class="principle-list">
+      <div class="principle-item">
+        <div class="pi-num">01</div>
+        <div class="pi-content">
+          <div class="pi-title">Los casos de uso son ciudadanos de primera clase</div>
+          <div class="pi-desc">Los <em>casos de uso del negocio</em> —"crear pedido", "aprobar solicitud", "cancelar suscripción"— deben ser visibles en la estructura del código. Si tenés que leer el README para entender qué hace el sistema, los casos de uso están enterrados en capas técnicas.</div>
+        </div>
+      </div>
+      <div class="principle-item">
+        <div class="pi-num">02</div>
+        <div class="pi-content">
+          <div class="pi-title">Los frameworks son herramientas, no identidad</div>
+          <div class="pi-desc">El framework web, el ORM, el motor de templates —son <em>detalles de implementación</em>. Deberían poder reemplazarse sin cambiar la lógica de negocio. Si un cambio de ORM requiere reescribir casos de uso, el framework colonizó el dominio.</div>
+        </div>
+      </div>
+      <div class="principle-item">
+        <div class="pi-num">03</div>
+        <div class="pi-content">
+          <div class="pi-title">La base de datos es un detalle</div>
+          <div class="pi-desc">PostgreSQL, MongoDB, Redis —son mecanismos de persistencia, no el sistema. El esquema de la base de datos no debería dictar la forma de las entidades del dominio. La decisión de qué base de datos usar debería poder postergarse.</div>
+        </div>
+      </div>
+      <div class="principle-item">
+        <div class="pi-num">04</div>
+        <div class="pi-content">
+          <div class="pi-title">La UI es un detalle</div>
+          <div class="pi-desc">Web, mobile, CLI, API REST —son formas de entregar la funcionalidad. La lógica de negocio no debería saber nada de HTML, JSON o gRPC. Podés cambiar la interfaz de usuario sin tocar el dominio, y deberías poder <em>testear el dominio sin ninguna interfaz.</em></div>
+        </div>
+      </div>
+      <div class="principle-item">
+        <div class="pi-num">05</div>
+        <div class="pi-content">
+          <div class="pi-title">La estructura comunica intención</div>
+          <div class="pi-desc">Cada decisión de organización —nombres de carpetas, de archivos, de módulos— debería comunicar algo sobre el dominio. <code>src/orders/CreateOrderUseCase.js</code> dice mucho más que <code>src/services/OrderService.js</code>. El código se lee más de lo que se escribe.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRAMPAS -->
+  <div class="panel" id="panel-3">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Trampas comunes</div>
+        <span class="p-tagline">Cuando la estructura sigue gritando "framework"</span>
+        <p class="p-desc">La mayoría de los frameworks de desarrollo web generan una estructura de carpetas por defecto que viola Screaming Architecture. Seguir esa estructura sin cuestionarla es la trampa más común.</p>
+      </div>
+      <div class="p-letter">!</div>
+    </div>
+    <ul class="trap-list">
+      <li><span class="trap-icon">📦</span><div><strong>Seguir la estructura por defecto del framework sin cuestionarla</strong>Rails genera <code>app/controllers</code>, <code>app/models</code>, <code>app/views</code>. Laravel genera algo similar. Django también. Esas estructuras están optimizadas para onboarding rápido, no para comunicar el dominio. Son puntos de partida, no destinos.</div></li>
+      <li><span class="trap-icon">🗂️</span><div><strong>Carpetas técnicas en el primer nivel</strong>Si el primer nivel de <code>src/</code> tiene <code>helpers/</code>, <code>utils/</code>, <code>middlewares/</code>, <code>validators/</code> —todo lo visible es tecnología, no dominio. Esas carpetas deberían vivir dentro de los módulos de dominio que las usan, no en el nivel raíz.</div></li>
+      <li><span class="trap-icon">🏷️</span><div><strong>Nombrar por tipo técnico en lugar de por rol de dominio</strong><code>UserManager</code>, <code>OrderProcessor</code>, <code>ProductHandler</code> dicen poco sobre qué hacen exactamente. <code>CreateOrderUseCase</code>, <code>ApproveRefundPolicy</code>, <code>InventoryChecker</code> comunican intención de negocio clara y son buscables.</div></li>
+      <li><span class="trap-icon">🌀</span><div><strong>Módulos de dominio con dependencias cruzadas sin control</strong>Organizar por dominio no significa que los módulos puedan depender libremente entre sí. <code>orders/</code> puede depender de <code>catalog/</code>, pero si <code>catalog/</code> también depende de <code>orders/</code>, hay un ciclo que viola ADP. La estructura de dominio debe respetarse también en el grafo de dependencias.</div></li>
+      <li><span class="trap-icon">📋</span><div><strong>Confundir Screaming Architecture con carpetas gigantes por dominio</strong>Organizar por dominio no significa un archivo de 2000 líneas por módulo. Cada módulo de dominio puede tener su propia estructura interna —entidades, casos de uso, repositorios— siempre que la estructura raíz grite el negocio.</div></li>
+    </ul>
+  </div>
+
+  <div style="margin-top:36px;padding-top:32px;border-top:1px solid var(--border)">
+    <div class="context-inner">
+      <div>
+        <div class="context-section-label">Origen</div>
+        <p class="context-text">Screaming Architecture fue articulado por <strong>Robert C. Martin</strong> ("Uncle Bob") en su blog en 2011, como parte del marco más amplio de Clean Architecture. La idea central es que la arquitectura de un sistema debe comunicar la intención del sistema, no los detalles de su implementación técnica.</p>
+      </div>
+      <div class="context-divider"></div>
+      <div>
+        <div class="context-section-label">Relación con otros principios</div>
+        <p class="context-text">Es la consecuencia visible de aplicar SoC y CCP a la estructura de carpetas.</p>
+        <div class="scope-pills">
+          <span class="pill yes">Complementa Clean Architecture</span>
+          <span class="pill yes">Aplica CCP a carpetas</span>
+          <span class="pill yes">Refuerza SoC</span>
+          <span class="pill partial">Requiere adaptar conv. del framework</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="progress" id="progress">
+    <div class="prog-dot active" onclick="show(0)"></div>
+    <div class="prog-dot" onclick="show(1)"></div>
+    <div class="prog-dot" onclick="show(2)"></div>
+    <div class="prog-dot" onclick="show(3)"></div>
+  </div>
+  <div class="nav-btns">
+    <button class="nav-btn" id="btnPrev" onclick="navigate(-1)">← Anterior</button>
+    <button class="nav-btn" id="btnNext" onclick="navigate(1)">Siguiente →</button>
+</div>
+
+	<div class="panel" id="panel-2">
+	<div class="p-header">
+      <div>
+        <div class="p-name">Los principios concretos</div>
+        <span class="p-tagline">Cinco decisiones que hacen que la arquitectura grite</span>
+        <p class="p-desc">Screaming Architecture no es solo una convención de carpetas. Es una actitud hacia el código que se manifiesta en cinco decisiones concretas de diseño.</p>
+      </div>
+      <div class="p-letter">r</div>
+    </div>
+    <div class="principle-list">
+      <div class="principle-item">
+        <div class="pi-num">01</div>
+        <div class="pi-content">
+          <div class="pi-title">Los casos de uso son ciudadanos de primera clase</div>
+          <div class="pi-desc">Los <em>casos de uso del negocio</em> —"crear pedido", "aprobar solicitud", "cancelar suscripción"— deben ser visibles en la estructura del código. Si tenés que leer el README para entender qué hace el sistema, los casos de uso están enterrados en capas técnicas.</div>
+        </div>
+      </div>
+      <div class="principle-item">
+        <div class="pi-num">02</div>
+        <div class="pi-content">
+          <div class="pi-title">Los frameworks son herramientas, no identidad</div>
+          <div class="pi-desc">El framework web, el ORM, el motor de templates —son <em>detalles de implementación</em>. Deberían poder reemplazarse sin cambiar la lógica de negocio. Si un cambio de ORM requiere reescribir casos de uso, el framework colonizó el dominio.</div>
+        </div>
+      </div>
+      <div class="principle-item">
+        <div class="pi-num">03</div>
+        <div class="pi-content">
+          <div class="pi-title">La base de datos es un detalle</div>
+          <div class="pi-desc">PostgreSQL, MongoDB, Redis —son mecanismos de persistencia, no el sistema. El esquema de la base de datos no debería dictar la forma de las entidades del dominio. La decisión de qué base de datos usar debería poder postergarse.</div>
+        </div>
+      </div>
+      <div class="principle-item">
+        <div class="pi-num">04</div>
+        <div class="pi-content">
+          <div class="pi-title">La UI es un detalle</div>
+          <div class="pi-desc">Web, mobile, CLI, API REST —son formas de entregar la funcionalidad. La lógica de negocio no debería saber nada de HTML, JSON o gRPC. Podés cambiar la interfaz de usuario sin tocar el dominio, y deberías poder <em>testear el dominio sin ninguna interfaz.</em></div>
+        </div>
+      </div>
+      <div class="principle-item">
+        <div class="pi-num">05</div>
+        <div class="pi-content">
+          <div class="pi-title">La estructura comunica intención</div>
+          <div class="pi-desc">Cada decisión de organización —nombres de carpetas, de archivos, de módulos— debería comunicar algo sobre el dominio. <code>src/orders/CreateOrderUseCase.js</code> dice mucho más que <code>src/services/OrderService.js</code>. El código se lee más de lo que se escribe.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRAMPAS -->
+  <div class="panel" id="panel-3">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Trampas comunes</div>
+        <span class="p-tagline">Cuando la estructura sigue gritando "framework"</span>
+        <p class="p-desc">La mayoría de los frameworks de desarrollo web generan una estructura de carpetas por defecto que viola Screaming Architecture. Seguir esa estructura sin cuestionarla es la trampa más común.</p>
+      </div>
+      <div class="p-letter">!</div>
+    </div>
+    <ul class="trap-list">
+      <li><span class="trap-icon">📦</span><div><strong>Seguir la estructura por defecto del framework sin cuestionarla</strong>Rails genera <code>app/controllers</code>, <code>app/models</code>, <code>app/views</code>. Laravel genera algo similar. Django también. Esas estructuras están optimizadas para onboarding rápido, no para comunicar el dominio. Son puntos de partida, no destinos.</div></li>
+      <li><span class="trap-icon">🗂️</span><div><strong>Carpetas técnicas en el primer nivel</strong>Si el primer nivel de <code>src/</code> tiene <code>helpers/</code>, <code>utils/</code>, <code>middlewares/</code>, <code>validators/</code> —todo lo visible es tecnología, no dominio. Esas carpetas deberían vivir dentro de los módulos de dominio que las usan, no en el nivel raíz.</div></li>
+      <li><span class="trap-icon">🏷️</span><div><strong>Nombrar por tipo técnico en lugar de por rol de dominio</strong><code>UserManager</code>, <code>OrderProcessor</code>, <code>ProductHandler</code> dicen poco sobre qué hacen exactamente. <code>CreateOrderUseCase</code>, <code>ApproveRefundPolicy</code>, <code>InventoryChecker</code> comunican intención de negocio clara y son buscables.</div></li>
+      <li><span class="trap-icon">🌀</span><div><strong>Módulos de dominio con dependencias cruzadas sin control</strong>Organizar por dominio no significa que los módulos puedan depender libremente entre sí. <code>orders/</code> puede depender de <code>catalog/</code>, pero si <code>catalog/</code> también depende de <code>orders/</code>, hay un ciclo que viola ADP. La estructura de dominio debe respetarse también en el grafo de dependencias.</div></li>
+      <li><span class="trap-icon">📋</span><div><strong>Confundir Screaming Architecture con carpetas gigantes por dominio</strong>Organizar por dominio no significa un archivo de 2000 líneas por módulo. Cada módulo de dominio puede tener su propia estructura interna —entidades, casos de uso, repositorios— siempre que la estructura raíz grite el negocio.</div></li>
+    </ul>
+  </div>
+
+  <div style="margin-top:36px;padding-top:32px;border-top:1px solid var(--border)">
+    <div class="context-inner">
+      <div>
+        <div class="context-section-label">Origen</div>
+        <p class="context-text">Screaming Architecture fue articulado por <strong>Robert C. Martin</strong> ("Uncle Bob") en su blog en 2011, como parte del marco más amplio de Clean Architecture. La idea central es que la arquitectura de un sistema debe comunicar la intención del sistema, no los detalles de su implementación técnica.</p>
+      </div>
+      <div class="context-divider"></div>
+      <div>
+        <div class="context-section-label">Relación con otros principios</div>
+        <p class="context-text">Es la consecuencia visible de aplicar SoC y CCP a la estructura de carpetas.</p>
+        <div class="scope-pills">
+          <span class="pill yes">Complementa Clean Architecture</span>
+          <span class="pill yes">Aplica CCP a carpetas</span>
+          <span class="pill yes">Refuerza SoC</span>
+          <span class="pill partial">Requiere adaptar conv. del framework</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="progress" id="progress">
+    <div class="prog-dot active" onclick="show(0)"></div>
+    <div class="prog-dot" onclick="show(1)"></div>
+    <div class="prog-dot" onclick="show(2)"></div>
+    <div class="prog-dot" onclick="show(3)"></div>
+  </div>
+  <div class="nav-btns">
+    <button class="nav-btn" id="btnPrev" onclick="navigate(-1)">← Anterior</button>
+    <button class="nav-btn" id="btnNext" onclick="navigate(1)">Siguiente →</button>
+</div>
+
+	<div class="panel" id="panel-3">
+	<div class="p-header">
+      <div>
+        <div class="p-name">Trampas comunes</div>
+        <span class="p-tagline">Cuando la estructura sigue gritando "framework"</span>
+        <p class="p-desc">La mayoría de los frameworks de desarrollo web generan una estructura de carpetas por defecto que viola Screaming Architecture. Seguir esa estructura sin cuestionarla es la trampa más común.</p>
+      </div>
+      <div class="p-letter">!</div>
+    </div>
+    <ul class="trap-list">
+      <li><span class="trap-icon">📦</span><div><strong>Seguir la estructura por defecto del framework sin cuestionarla</strong>Rails genera <code>app/controllers</code>, <code>app/models</code>, <code>app/views</code>. Laravel genera algo similar. Django también. Esas estructuras están optimizadas para onboarding rápido, no para comunicar el dominio. Son puntos de partida, no destinos.</div></li>
+      <li><span class="trap-icon">🗂️</span><div><strong>Carpetas técnicas en el primer nivel</strong>Si el primer nivel de <code>src/</code> tiene <code>helpers/</code>, <code>utils/</code>, <code>middlewares/</code>, <code>validators/</code> —todo lo visible es tecnología, no dominio. Esas carpetas deberían vivir dentro de los módulos de dominio que las usan, no en el nivel raíz.</div></li>
+      <li><span class="trap-icon">🏷️</span><div><strong>Nombrar por tipo técnico en lugar de por rol de dominio</strong><code>UserManager</code>, <code>OrderProcessor</code>, <code>ProductHandler</code> dicen poco sobre qué hacen exactamente. <code>CreateOrderUseCase</code>, <code>ApproveRefundPolicy</code>, <code>InventoryChecker</code> comunican intención de negocio clara y son buscables.</div></li>
+      <li><span class="trap-icon">🌀</span><div><strong>Módulos de dominio con dependencias cruzadas sin control</strong>Organizar por dominio no significa que los módulos puedan depender libremente entre sí. <code>orders/</code> puede depender de <code>catalog/</code>, pero si <code>catalog/</code> también depende de <code>orders/</code>, hay un ciclo que viola ADP. La estructura de dominio debe respetarse también en el grafo de dependencias.</div></li>
+      <li><span class="trap-icon">📋</span><div><strong>Confundir Screaming Architecture con carpetas gigantes por dominio</strong>Organizar por dominio no significa un archivo de 2000 líneas por módulo. Cada módulo de dominio puede tener su propia estructura interna —entidades, casos de uso, repositorios— siempre que la estructura raíz grite el negocio.</div></li>
+    </ul>
+  </div>
+
+  <div style="margin-top:36px;padding-top:32px;border-top:1px solid var(--border)">
+    <div class="context-inner">
+      <div>
+        <div class="context-section-label">Origen</div>
+        <p class="context-text">Screaming Architecture fue articulado por <strong>Robert C. Martin</strong> ("Uncle Bob") en su blog en 2011, como parte del marco más amplio de Clean Architecture. La idea central es que la arquitectura de un sistema debe comunicar la intención del sistema, no los detalles de su implementación técnica.</p>
+      </div>
+      <div class="context-divider"></div>
+      <div>
+        <div class="context-section-label">Relación con otros principios</div>
+        <p class="context-text">Es la consecuencia visible de aplicar SoC y CCP a la estructura de carpetas.</p>
+        <div class="scope-pills">
+          <span class="pill yes">Complementa Clean Architecture</span>
+          <span class="pill yes">Aplica CCP a carpetas</span>
+          <span class="pill yes">Refuerza SoC</span>
+          <span class="pill partial">Requiere adaptar conv. del framework</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="progress" id="progress">
+    <div class="prog-dot active" onclick="show(0)"></div>
+    <div class="prog-dot" onclick="show(1)"></div>
+    <div class="prog-dot" onclick="show(2)"></div>
+    <div class="prog-dot" onclick="show(3)"></div>
+  </div>
+  <div class="nav-btns">
+    <button class="nav-btn" id="btnPrev" onclick="navigate(-1)">← Anterior</button>
+    <button class="nav-btn" id="btnNext" onclick="navigate(1)">Siguiente →</button>
+</div>
+
+	<div style="margin-top:36px;padding-top:32px;border-top:1px solid var(--border)">
+		<div class="context-inner">
+	<div>
+		<div class="context-section-label">Origen del principio</div>
+		<p class="context-text"></p>
+	</div>
+	<div class="context-divider"></div>
+	<div>
+		<div class="context-section-label">¿Solo aplica a código?</div>
+		<p class="context-text"></p>
+		<div class="scope-pills">
+			<span class="pill yes">Complementa Clean Architecture</span>
+			<span class="pill yes">Aplica CCP a carpetas</span>
+			<span class="pill yes">Refuerza SoC</span>
+			<span class="pill yes">Requiere adaptar conv. del framework</span>
+		</div>
+	</div>
+</div>
+	</div>
+
+	<div class="progress" id="progress">
+		<div class="prog-dot active"></div>
+		<div class="prog-dot"></div>
+		<div class="prog-dot"></div>
+		<div class="prog-dot"></div>
+	</div>
+	<div class="nav-btns">
+		<button class="nav-btn" id="btnPrev">← Anterior</button>
+		<button class="nav-btn" id="btnNext">Siguiente →</button>
+	</div>
+</main>
+
+<footer>
+	<span>Screaming Architecture · Robert C. Martin · 2011</span>
+	<span>Gustavo Adrián Salvini · <a href="https://github.com/guspatagonico" target="_blank">@guspatagonico</a></span>
+</footer>
+
+<nav class="snav snav-bot">
+	<a class="snav-prev" href="pkg.html" style="color:#e879f9;background:rgba(232,121,249,0.12);border-color:rgba(232,121,249,0.32)"><span>←</span><span class="snav-label">Paquetes</span></a>
+	<div class="snav-spacer"></div>
+	<div class="snav-center">
+		<a class="snav-home" href="../index.html">↑&nbsp;&nbsp;Índice</a>
+		<span class="snav-pos">10&thinsp;/&thinsp;12</span>
+	</div>
+	<div class="snav-spacer"></div>
+	<a class="snav-next" href="clean-architecture.html" style="color:#a855f7;background:rgba(168,85,247,0.12);border-color:rgba(168,85,247,0.32)"><span class="snav-label">Clean Arch</span><span>→</span></a>
+</nav>
+
+<script src="../js/tabs.js"></script>
+</body>
+</html>

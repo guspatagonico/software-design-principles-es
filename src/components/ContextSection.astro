@@ -1,0 +1,27 @@
+---
+const { origin, scope } = Astro.props;
+const noData = !origin?.description;
+if (noData) return;
+---
+
+<div style="margin-top:36px;padding-top:32px;border-top:1px solid var(--border)">
+	<div class="context-inner">
+		<div>
+			<div class="context-section-label">Origen del principio</div>
+			<p class="context-text" set:html={origin.description}></p>
+		</div>
+		<div class="context-divider"></div>
+		<div>
+			<div class="context-section-label">Solo aplica a codigo?</div>
+			{scope?.description && <p class="context-text">{scope.description}</p>}
+			{scope?.pills && scope.pills.length > 0 && (
+				<div class="scope-pills">
+					{scope.pills.map(pill => {
+						const cls = scope.type === 'full' ? 'pill yes' : 'pill partial';
+						return <span class={cls}>{pill}</span>;
+					})}
+				</div>
+			)}
+		</div>
+	</div>
+</div>

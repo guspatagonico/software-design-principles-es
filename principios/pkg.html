@@ -1,0 +1,1291 @@
+<!DOCTYPE html>
+<html lang="es" data-accent="pkg" class="layout-wide">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Paquetes — Principios de diseño de software</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="../css/base.css">
+<link rel="stylesheet" href="../css/layout.css">
+</head>
+<body>
+<nav class="snav snav-top">
+	<a class="snav-prev" href="fail-fast.html" style="color:#f43f5e;background:rgba(244,63,94,0.12);border-color:rgba(244,63,94,0.32)"><span>←</span><span class="snav-label">Fail Fast</span></a>
+	<div class="snav-spacer"></div>
+	<div class="snav-center">
+		<a class="snav-home" href="../index.html">↑&nbsp;&nbsp;Índice</a>
+		<span class="snav-pos">09&thinsp;/&thinsp;12</span>
+	</div>
+	<div class="snav-spacer"></div>
+	<a class="snav-next" href="screaming-architecture.html" style="color:#a3e635;background:rgba(163,230,53,0.12);border-color:rgba(163,230,53,0.32)"><span class="snav-label">Screaming</span><span>→</span></a>
+</nav>
+
+<header>
+	<div class="header-label">Principios de diseño · Referencia para devs</div>
+	<h1><em>Cohesión y Acoplamiento</em><br>de Paquetes</h1>
+	<p>Seis principios de Robert C. Martin que operan a nivel de módulos y paquetes enteros —la versión macro de SOLID. Determinan cómo agrupar clases y cómo controlar las dependencias entre grupos.</p>
+</header>
+
+<div class="nav-wrap">
+	<div class="nav" id="nav">
+		<div class="nav-pill" id="navPill"></div>
+		<button class="tab-btn active" data-idx="0">
+	<span class="tab-icon">🗺️</span>
+	<span class="tab-word">Concepto</span>
+</button>
+		<button class="tab-btn" data-idx="1">
+	<span class="tab-icon">🧲</span>
+	<span class="tab-word">Cohesión</span>
+</button>
+		<button class="tab-btn" data-idx="2">
+	<span class="tab-icon">🔗</span>
+	<span class="tab-word">Acoplamiento</span>
+</button>
+		<button class="tab-btn" data-idx="3">
+	<span class="tab-icon">⚖️</span>
+	<span class="tab-word">Tensiones</span>
+</button>
+		<button class="tab-btn" data-idx="4">
+	<span class="tab-icon">⚠️</span>
+	<span class="tab-word">Trampas</span>
+</button>
+	</div>
+</div>
+
+<main>
+	<div class="panel active" id="panel-0">
+	<div class="p-header">
+      <div>
+        <div class="p-name">¿Qué son los principios de paquetes?</div>
+        <span class="p-tagline">SOLID para módulos, paquetes y servicios</span>
+        <p class="p-desc">SOLID te dice cómo diseñar clases individuales. Estos seis principios te dicen cómo <strong>agrupar esas clases en paquetes</strong> y cómo manejar las dependencias entre paquetes. Son la diferencia entre un sistema que escala y uno que colapsa bajo su propio peso.</p>
+        <p class="p-desc" style="margin-top:10px">Se dividen en dos familias: <strong>cohesión</strong> (qué va junto) y <strong>acoplamiento</strong> (cómo se conectan los paquetes entre sí).</p>
+      </div>
+      <div class="p-letter">P</div>
+    </div>
+
+    <div class="analogy">
+      <span class="analogy-icon">🏙️</span>
+      <span>Pensalo como el diseño de una ciudad. SOLID diseña los edificios individuales. Los principios de paquetes diseñan los <em>barrios</em>: qué tipos de edificios van juntos, cómo se conectan los barrios, cuáles deben ser más estables que otros. Sin zonificación, la ciudad es un caos.</span>
+    </div>
+
+    <div class="analogy">
+      <span class="analogy-icon">📦</span>
+      <span>Un "paquete" puede ser una carpeta, un módulo, una librería, un microservicio, o cualquier unidad de código que se despliega o versiona de forma independiente. <em>La escala cambia; los principios no.</em></span>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:28px 0">
+      <div style="background:var(--surface);border:1px solid var(--coh-rb);border-radius:12px;padding:20px 22px">
+        <div style="font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--coh);margin-bottom:12px">Principios de cohesión</div>
+        <div style="font-size:14px;color:var(--muted);line-height:1.75">Responden a: <em style="color:var(--text)">¿Qué clases van en el mismo paquete?</em><br><br>
+          <span style="font-family:var(--mono);font-size:12px;color:var(--coh)">REP</span> — Reuse/Release Equivalence<br>
+          <span style="font-family:var(--mono);font-size:12px;color:var(--coh)">CCP</span> — Common Closure<br>
+          <span style="font-family:var(--mono);font-size:12px;color:var(--coh)">CRP</span> — Common Reuse
+        </div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--cop-rb);border-radius:12px;padding:20px 22px">
+        <div style="font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--cop);margin-bottom:12px">Principios de acoplamiento</div>
+        <div style="font-size:14px;color:var(--muted);line-height:1.75">Responden a: <em style="color:var(--text)">¿Cómo se relacionan los paquetes?</em><br><br>
+          <span style="font-family:var(--mono);font-size:12px;color:var(--cop)">ADP</span> — Acyclic Dependencies<br>
+          <span style="font-family:var(--mono);font-size:12px;color:var(--cop)">SDP</span> — Stable Dependencies<br>
+          <span style="font-family:var(--mono);font-size:12px;color:var(--cop)">SAP</span> — Stable Abstractions
+        </div>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>¿Por qué importan en un proyecto nuevo?</strong>
+      Ignorar estos principios al inicio no duele. Duele cuando el proyecto tiene seis meses: un cambio en un módulo rompe tres más, no podés testear nada de forma aislada, y cada release es un evento estresante. Estos principios evitan exactamente ese escenario.
+    </div>
+  </div>
+
+  <!-- ── COHESIÓN ── -->
+  <div class="panel" id="panel-1">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Principios de cohesión</div>
+        <span class="p-tagline" style="border-color:var(--coh-rb);background:var(--coh-r);color:var(--coh)">¿Qué clases van juntas en un paquete?</span>
+        <p class="p-desc">Estos tres principios te ayudan a tomar la decisión más difícil del diseño modular: <strong>qué código agrupa con qué otro código</strong>. No hay una respuesta única —los tres principios están en tensión entre sí y reflejan distintas prioridades.</p>
+      </div>
+      <div class="p-letter" style="color:var(--coh)">C</div>
+    </div>
+
+    <div class="group-label">
+      <span class="group-label-text" style="color:var(--coh)">Principios de cohesión</span>
+      <span class="group-label-line"></span>
+      <span class="group-label-count">3 principios</span>
+    </div>
+
+    <div class="principles-stack">
+
+      <div class="principle-card expanded" onclick="toggle(this)">
+        <div class="card-header">
+          <span class="card-abbr" style="background:var(--coh-r);border:1px solid var(--coh-rb);color:var(--coh)">REP</span>
+          <div>
+            <div class="card-title">Reuse/Release Equivalence Principle</div>
+            <div class="card-subtitle">La unidad de reutilización es la unidad de release</div>
+          </div>
+          <span class="card-chevron">▾</span>
+        </div>
+        <div class="card-body">
+          <div class="card-body-inner">
+            <p>Las clases o módulos que agrupás juntos en un paquete <strong>deben ser reutilizables juntas</strong>. Si alguien quiere usar una clase de tu paquete, debería tener sentido que use las otras también. No mezcles cosas no relacionadas solo porque "están en el mismo proyecto".</p>
+            <p>La consecuencia es que <strong>un paquete debe poder versionarse y releasarse como unidad</strong>. Si tenés que releasar solo parte del paquete, es señal de que debería ser dos paquetes.</p>
+            <div class="comparison">
+              <div class="code-card">
+                <div class="code-card-header"><span class="dot dot-bad"></span> Viola REP</div>
+                <pre><span class="cm">// paquete: utils</span>
+<span class="fn">parseDate</span>()      <span class="cm">// fechas</span>
+<span class="fn">sendEmail</span>()      <span class="cm">// emails</span>
+<span class="fn">calcTax</span>()        <span class="cm">// impuestos</span>
+<span class="fn">resizeImage</span>()    <span class="cm">// imágenes</span>
+<span class="cm">// "utils" no es un concepto
+// nadie lo reutiliza completo</span></pre>
+              </div>
+              <div class="code-card">
+                <div class="code-card-header"><span class="dot dot-good"></span> Respeta REP</div>
+                <pre><span class="cm">// paquete: date-utils</span>
+<span class="fn">parseDate</span>()
+<span class="fn">formatDate</span>()
+<span class="fn">diffDays</span>()
+
+<span class="cm">// paquete: tax-engine</span>
+<span class="fn">calcTax</span>()
+<span class="fn">applyExemption</span>()
+<span class="cm">// cada uno se reutiliza solo ✓</span></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="principle-card" onclick="toggle(this)">
+        <div class="card-header">
+          <span class="card-abbr" style="background:var(--coh-r);border:1px solid var(--coh-rb);color:var(--coh)">CCP</span>
+          <div>
+            <div class="card-title">Common Closure Principle</div>
+            <div class="card-subtitle">Lo que cambia junto, va junto</div>
+          </div>
+          <span class="card-chevron">▾</span>
+        </div>
+        <div class="card-body">
+          <div class="card-body-inner">
+            <p>Las clases que <strong>cambian por las mismas razones y al mismo tiempo</strong> deben estar en el mismo paquete. Es el SRP aplicado a paquetes: un paquete debería tener una sola razón para cambiar.</p>
+            <p>Si un cambio de requisito obliga a tocar seis paquetes distintos, la cohesión es mala. Cuando el cambio se localiza en un solo paquete, el impacto es contenido, los tests son más fáciles y el deploy es menos riesgoso.</p>
+            <div class="comparison">
+              <div class="code-card">
+                <div class="code-card-header"><span class="dot dot-bad"></span> Viola CCP</div>
+                <pre><span class="cm">// Cambiar la regla de IVA</span>
+<span class="cm">// obliga a tocar:</span>
+orders/calcTotal.js
+billing/invoice.js
+reports/taxSummary.js
+exports/taxExport.js
+<span class="cm">// 4 paquetes, 1 cambio 😬</span></pre>
+              </div>
+              <div class="code-card">
+                <div class="code-card-header"><span class="dot dot-good"></span> Respeta CCP</div>
+                <pre><span class="cm">// Toda la lógica fiscal</span>
+<span class="cm">// vive en un solo paquete:</span>
+tax-engine/rules.js
+tax-engine/calc.js
+tax-engine/exemptions.js
+<span class="cm">// Cambiar IVA = 1 paquete ✓</span></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="principle-card" onclick="toggle(this)">
+        <div class="card-header">
+          <span class="card-abbr" style="background:var(--coh-r);border:1px solid var(--coh-rb);color:var(--coh)">CRP</span>
+          <div>
+            <div class="card-title">Common Reuse Principle</div>
+            <div class="card-subtitle">No forzar dependencias innecesarias</div>
+          </div>
+          <span class="card-chevron">▾</span>
+        </div>
+        <div class="card-body">
+          <div class="card-body-inner">
+            <p>Las clases que <strong>no se usan juntas no deberían estar en el mismo paquete</strong>. Si dependés de un paquete, dependés de todo él —incluyendo las partes que no usás. Eso significa que cambios en cosas que no te interesan pueden romper tu build.</p>
+            <p>CRP es la contracara de CCP: mientras CCP agrupa lo que cambia junto, CRP separa lo que no se usa junto. La tensión entre ambos es normal y hay que gestionarla según las prioridades del proyecto.</p>
+            <div class="tip" style="margin-top:0">
+              <strong>Señal de violación de CRP</strong>
+              Si actualizás una dependencia y tenés que adaptar código que no usa nada de lo que cambió, es probable que el paquete del que dependés tiene baja cohesión según CRP. Mezcla cosas no relacionadas que cambian por distintas razones.
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── ACOPLAMIENTO ── -->
+  <div class="panel" id="panel-2">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Principios de acoplamiento</div>
+        <span class="p-tagline" style="border-color:var(--cop-rb);background:var(--cop-r);color:var(--cop)">¿Cómo se relacionan los paquetes entre sí?</span>
+        <p class="p-desc">Una vez que definiste qué va en cada paquete, necesitás controlar <strong>cómo se conectan</strong>. Un grafo de dependencias mal diseñado es la causa principal de que los proyectos se vuelvan imposibles de modificar sin efectos en cascada.</p>
+      </div>
+      <div class="p-letter" style="color:var(--cop)">A</div>
+    </div>
+
+    <div class="group-label">
+      <span class="group-label-text" style="color:var(--cop)">Principios de acoplamiento</span>
+      <span class="group-label-line"></span>
+      <span class="group-label-count">3 principios</span>
+    </div>
+
+    <div class="principles-stack">
+
+      <div class="principle-card expanded" onclick="toggle(this)">
+        <div class="card-header">
+          <span class="card-abbr" style="background:var(--cop-r);border:1px solid var(--cop-rb);color:var(--cop)">ADP</span>
+          <div>
+            <div class="card-title">Acyclic Dependencies Principle</div>
+            <div class="card-subtitle">Sin ciclos en el grafo de dependencias</div>
+          </div>
+          <span class="card-chevron">▾</span>
+        </div>
+        <div class="card-body">
+          <div class="card-body-inner">
+            <p>El grafo de dependencias entre paquetes <strong>no debe tener ciclos</strong>. Si A depende de B, B depende de C, y C depende de A, ninguno de los tres se puede cambiar, testear o deployar de forma independiente. Son un bloque monolítico disfrazado de módulos.</p>
+            <div class="comparison">
+              <div class="code-card">
+                <div class="code-card-header"><span class="dot dot-bad"></span> Ciclo detectado</div>
+                <pre>orders → billing
+billing → users
+users → orders  <span class="cm">← ciclo 💥</span>
+
+<span class="cm">// Para testear orders
+// necesitás billing y users
+// Para testear users
+// necesitás orders. Deadlock.</span></pre>
+              </div>
+              <div class="code-card">
+                <div class="code-card-header"><span class="dot dot-good"></span> Sin ciclos</div>
+                <pre>orders → billing → users
+         ↓
+      payments
+
+<span class="cm">// Grafo acíclico dirigido (DAG)
+// Cada paquete se puede
+// testear de forma aislada ✓</span></pre>
+              </div>
+            </div>
+            <p style="margin-top:14px">Para romper un ciclo, la solución más común es extraer la dependencia circular a un tercer paquete del que ambos dependan, o introducir una interfaz que invierta la dependencia (aplicando DIP de SOLID a nivel de paquetes).</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="principle-card" onclick="toggle(this)">
+        <div class="card-header">
+          <span class="card-abbr" style="background:var(--cop-r);border:1px solid var(--cop-rb);color:var(--cop)">SDP</span>
+          <div>
+            <div class="card-title">Stable Dependencies Principle</div>
+            <div class="card-subtitle">Dependé de lo que es más estable que vos</div>
+          </div>
+          <span class="card-chevron">▾</span>
+        </div>
+        <div class="card-body">
+          <div class="card-body-inner">
+            <p>Un paquete debería depender solo de paquetes <strong>más estables que él mismo</strong>. La estabilidad se mide por cuánto cuesta cambiar un paquete: un paquete del que dependen muchos otros es difícil de cambiar —es estable. Uno del que nadie depende es fácil de cambiar —es inestable.</p>
+            <p>Si un paquete volátil (que cambia seguido) depende de un paquete estable, está bien. Si un paquete estable depende de uno volátil, cualquier cambio en el volátil fuerza cambios en cascada en todo lo que depende del estable.</p>
+            <div class="comparison">
+              <div class="code-card">
+                <div class="code-card-header"><span class="dot dot-bad"></span> Viola SDP</div>
+                <pre><span class="cm">// core-domain (estable,</span>
+<span class="cm">// 10 paquetes dependen de él)</span>
+<span class="cm">// depende de:</span>
+ui-components  <span class="cm">← cambia cada sprint</span>
+feature-flags  <span class="cm">← cambia cada semana</span>
+<span class="cm">// Un cambio en UI rompe core 💥</span></pre>
+              </div>
+              <div class="code-card">
+                <div class="code-card-header"><span class="dot dot-good"></span> Respeta SDP</div>
+                <pre><span class="cm">// core-domain (estable)</span>
+<span class="cm">// depende de:</span>
+shared-types   <span class="cm">← muy estable</span>
+base-errors    <span class="cm">← muy estable</span>
+
+<span class="cm">// ui-components (volátil)
+// depende de core-domain ✓</span></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="principle-card" onclick="toggle(this)">
+        <div class="card-header">
+          <span class="card-abbr" style="background:var(--cop-r);border:1px solid var(--cop-rb);color:var(--cop)">SAP</span>
+          <div>
+            <div class="card-title">Stable Abstractions Principle</div>
+            <div class="card-subtitle">Los paquetes estables deben ser abstractos</div>
+          </div>
+          <span class="card-chevron">▾</span>
+        </div>
+        <div class="card-body">
+          <div class="card-body-inner">
+            <p>Un paquete <strong>estable debe ser abstracto</strong> para que su estabilidad no impida su extensión. Un paquete estable lleno de implementaciones concretas es rígido: no se puede cambiar (muchos dependen de él) y tampoco se puede extender (es concreto).</p>
+            <p>SAP combina SDP con el principio Open/Closed de SOLID a nivel de paquetes: <strong>cuanto más estable es un paquete, más abstracto debería ser</strong>. Los paquetes inestables pueden ser concretos porque es fácil cambiarlos.</p>
+            <div class="tip" style="margin-top:0">
+              <strong>La métrica de abstracción</strong>
+              Martin define la abstracción de un paquete como la proporción de interfaces y clases abstractas sobre el total de clases. Un paquete del que todos dependen debería tener una abstracción cercana a 1 (todo interfaces). Un paquete hoja (nadie depende de él) puede tener abstracción cercana a 0.
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── TENSIONES ── -->
+  <div class="panel" id="panel-3">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Tensiones entre principios</div>
+        <span class="p-tagline">Los seis principios no siempre apuntan en la misma dirección</span>
+        <p class="p-desc">Los tres principios de cohesión están <strong>en tensión permanente</strong> entre sí. No podés maximizar los tres a la vez; el diseño es una decisión sobre qué priorizar según el tipo de proyecto.</p>
+      </div>
+      <div class="p-letter">T</div>
+    </div>
+
+    <div class="analogy">
+      <span class="analogy-icon">⚖️</span>
+      <span>REP dice "agrupá lo que se reutiliza junto". CCP dice "agrupá lo que cambia junto". CRP dice "no agrupés lo que no se usa junto". <em>Un paquete perfecto según los tres principios no existe en la práctica —hay que elegir qué importa más.</em></span>
+    </div>
+
+    <table class="matrix">
+      <thead>
+        <tr>
+          <th>Principio</th>
+          <th>Prioriza</th>
+          <th>Penaliza</th>
+          <th>Mejor para</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="color:var(--coh)">REP</td>
+          <td><span class="badge-good">Reutilización</span></td>
+          <td><span class="badge-bad">Demasiados paquetes</span></td>
+          <td style="color:var(--muted)">Librerías y SDKs publicados</td>
+        </tr>
+        <tr>
+          <td style="color:var(--coh)">CCP</td>
+          <td><span class="badge-good">Mantenibilidad</span></td>
+          <td><span class="badge-bad">Menor reutilización</span></td>
+          <td style="color:var(--muted)">Aplicaciones con cambios frecuentes</td>
+        </tr>
+        <tr>
+          <td style="color:var(--coh)">CRP</td>
+          <td><span class="badge-good">Independencia</span></td>
+          <td><span class="badge-bad">Más fragmentación</span></td>
+          <td style="color:var(--muted)">Sistemas con muchos consumidores</td>
+        </tr>
+        <tr>
+          <td style="color:var(--cop)">ADP</td>
+          <td><span class="badge-good">Testeabilidad</span></td>
+          <td><span class="badge-bad">Requiere refactors</span></td>
+          <td style="color:var(--muted)">Todo sistema que crezca</td>
+        </tr>
+        <tr>
+          <td style="color:var(--cop)">SDP</td>
+          <td><span class="badge-good">Estabilidad</span></td>
+          <td><span class="badge-bad">Restricciones de diseño</span></td>
+          <td style="color:var(--muted)">Sistemas con núcleo de negocio estable</td>
+        </tr>
+        <tr>
+          <td style="color:var(--cop)">SAP</td>
+          <td><span class="badge-good">Extensibilidad</span></td>
+          <td><span class="badge-bad">Más abstracciones</span></td>
+          <td style="color:var(--muted)">Núcleos de dominio compartidos</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="tip">
+      <strong>Regla práctica para proyectos nuevos</strong>
+      En etapas tempranas, priorizá <strong>CCP sobre REP</strong>: es más fácil dividir un paquete cohesivo cuando el sistema crece que reparar un sistema donde los cambios se propagan a seis lugares. Una vez que el sistema estabiliza su estructura, REP y CRP cobran más importancia.
+    </div>
+  </div>
+
+  <!-- ── TRAMPAS ── -->
+  <div class="panel" id="panel-4">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Trampas comunes</div>
+        <span class="p-tagline">Los errores que aparecen cuando el proyecto escala</span>
+        <p class="p-desc">Las violaciones de estos principios <strong>no duelen al principio</strong>. Se acumulan silenciosamente hasta que el proyecto tiene seis meses y cada cambio tarda el doble porque nadie entiende bien las dependencias.</p>
+      </div>
+      <div class="p-letter">X</div>
+    </div>
+
+    <ul class="trap-list">
+      <li>
+        <span class="trap-icon">🧺</span>
+        <div>
+          <strong>El paquete "utils" o "common" que lo tiene todo</strong>
+          Es la violación más universal. Un paquete llamado <code style="font-family:var(--mono);font-size:12px;background:var(--surface2);padding:1px 5px;border-radius:3px">utils</code> o <code style="font-family:var(--mono);font-size:12px;background:var(--surface2);padding:1px 5px;border-radius:3px">shared</code> que crece sin control viola REP (nadie lo reutiliza completo), CCP (cambia por mil razones distintas) y CRP (fuerza dependencias no relacionadas). La solución es partirlo en paquetes con nombres de dominio reales.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🔄</span>
+        <div>
+          <strong>Dependencias circulares ocultas</strong>
+          Los ciclos raramente son obvios. Aparecen con el tiempo: A importa de B, B importa de C, y C necesita algo de A "solo para un caso especial". Herramientas como <code style="font-family:var(--mono);font-size:12px;background:var(--surface2);padding:1px 5px;border-radius:3px">madge</code> (JS), <code style="font-family:var(--mono);font-size:12px;background:var(--surface2);padding:1px 5px;border-radius:3px">pydeps</code> (Python) o <code style="font-family:var(--mono);font-size:12px;background:var(--surface2);padding:1px 5px;border-radius:3px">deptrac</code> (PHP) visualizan el grafo de dependencias y detectan ciclos antes de que sean un problema.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🏔️</span>
+        <div>
+          <strong>El núcleo de dominio que depende de la infraestructura</strong>
+          Cuando el módulo de lógica de negocio importa directamente el ORM, el cliente HTTP o el logger, viola SDP: el módulo más estable y crítico del sistema depende de detalles de implementación que cambian con frecuencia. La solución es DIP a nivel de paquetes: el dominio define interfaces; la infraestructura las implementa.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">📐</span>
+        <div>
+          <strong>Organizar por capa técnica en lugar de por dominio</strong>
+          Una estructura <code style="font-family:var(--mono);font-size:12px;background:var(--surface2);padding:1px 5px;border-radius:3px">controllers / services / repositories</code> viola CCP: un cambio en la lógica de "órdenes" toca un archivo en cada una de las tres carpetas. Una estructura <code style="font-family:var(--mono);font-size:12px;background:var(--surface2);padding:1px 5px;border-radius:3px">orders / billing / users</code> —organizada por dominio— localiza los cambios.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🔍</span>
+        <div>
+          <strong>No medir la estabilidad de los paquetes</strong>
+          La estabilidad de un paquete es calculable: <em>estabilidad = dependencias salientes / (dependencias entrantes + salientes)</em>. Un paquete con muchos consumidores y pocas dependencias externas tiene estabilidad cercana a 1. Si ese paquete tiene alto acoplamiento con detalles volátiles, hay un problema de diseño que se puede detectar antes de que cause daño.
+        </div>
+      </li>
+    </ul>
+</div>
+
+	<div class="panel" id="panel-1">
+	<div class="p-header">
+      <div>
+        <div class="p-name">Principios de cohesión</div>
+        <span class="p-tagline" style="border-color:var(--coh-rb);background:var(--coh-r);color:var(--coh)">¿Qué clases van juntas en un paquete?</span>
+        <p class="p-desc">Estos tres principios te ayudan a tomar la decisión más difícil del diseño modular: <strong>qué código agrupa con qué otro código</strong>. No hay una respuesta única —los tres principios están en tensión entre sí y reflejan distintas prioridades.</p>
+      </div>
+      <div class="p-letter" style="color:var(--coh)">C</div>
+    </div>
+
+    <div class="group-label">
+      <span class="group-label-text" style="color:var(--coh)">Principios de cohesión</span>
+      <span class="group-label-line"></span>
+      <span class="group-label-count">3 principios</span>
+    </div>
+
+    <div class="principles-stack">
+
+      <div class="principle-card expanded" onclick="toggle(this)">
+        <div class="card-header">
+          <span class="card-abbr" style="background:var(--coh-r);border:1px solid var(--coh-rb);color:var(--coh)">REP</span>
+          <div>
+            <div class="card-title">Reuse/Release Equivalence Principle</div>
+            <div class="card-subtitle">La unidad de reutilización es la unidad de release</div>
+          </div>
+          <span class="card-chevron">▾</span>
+        </div>
+        <div class="card-body">
+          <div class="card-body-inner">
+            <p>Las clases o módulos que agrupás juntos en un paquete <strong>deben ser reutilizables juntas</strong>. Si alguien quiere usar una clase de tu paquete, debería tener sentido que use las otras también. No mezcles cosas no relacionadas solo porque "están en el mismo proyecto".</p>
+            <p>La consecuencia es que <strong>un paquete debe poder versionarse y releasarse como unidad</strong>. Si tenés que releasar solo parte del paquete, es señal de que debería ser dos paquetes.</p>
+            <div class="comparison">
+              <div class="code-card">
+                <div class="code-card-header"><span class="dot dot-bad"></span> Viola REP</div>
+                <pre><span class="cm">// paquete: utils</span>
+<span class="fn">parseDate</span>()      <span class="cm">// fechas</span>
+<span class="fn">sendEmail</span>()      <span class="cm">// emails</span>
+<span class="fn">calcTax</span>()        <span class="cm">// impuestos</span>
+<span class="fn">resizeImage</span>()    <span class="cm">// imágenes</span>
+<span class="cm">// "utils" no es un concepto
+// nadie lo reutiliza completo</span></pre>
+              </div>
+              <div class="code-card">
+                <div class="code-card-header"><span class="dot dot-good"></span> Respeta REP</div>
+                <pre><span class="cm">// paquete: date-utils</span>
+<span class="fn">parseDate</span>()
+<span class="fn">formatDate</span>()
+<span class="fn">diffDays</span>()
+
+<span class="cm">// paquete: tax-engine</span>
+<span class="fn">calcTax</span>()
+<span class="fn">applyExemption</span>()
+<span class="cm">// cada uno se reutiliza solo ✓</span></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="principle-card" onclick="toggle(this)">
+        <div class="card-header">
+          <span class="card-abbr" style="background:var(--coh-r);border:1px solid var(--coh-rb);color:var(--coh)">CCP</span>
+          <div>
+            <div class="card-title">Common Closure Principle</div>
+            <div class="card-subtitle">Lo que cambia junto, va junto</div>
+          </div>
+          <span class="card-chevron">▾</span>
+        </div>
+        <div class="card-body">
+          <div class="card-body-inner">
+            <p>Las clases que <strong>cambian por las mismas razones y al mismo tiempo</strong> deben estar en el mismo paquete. Es el SRP aplicado a paquetes: un paquete debería tener una sola razón para cambiar.</p>
+            <p>Si un cambio de requisito obliga a tocar seis paquetes distintos, la cohesión es mala. Cuando el cambio se localiza en un solo paquete, el impacto es contenido, los tests son más fáciles y el deploy es menos riesgoso.</p>
+            <div class="comparison">
+              <div class="code-card">
+                <div class="code-card-header"><span class="dot dot-bad"></span> Viola CCP</div>
+                <pre><span class="cm">// Cambiar la regla de IVA</span>
+<span class="cm">// obliga a tocar:</span>
+orders/calcTotal.js
+billing/invoice.js
+reports/taxSummary.js
+exports/taxExport.js
+<span class="cm">// 4 paquetes, 1 cambio 😬</span></pre>
+              </div>
+              <div class="code-card">
+                <div class="code-card-header"><span class="dot dot-good"></span> Respeta CCP</div>
+                <pre><span class="cm">// Toda la lógica fiscal</span>
+<span class="cm">// vive en un solo paquete:</span>
+tax-engine/rules.js
+tax-engine/calc.js
+tax-engine/exemptions.js
+<span class="cm">// Cambiar IVA = 1 paquete ✓</span></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="principle-card" onclick="toggle(this)">
+        <div class="card-header">
+          <span class="card-abbr" style="background:var(--coh-r);border:1px solid var(--coh-rb);color:var(--coh)">CRP</span>
+          <div>
+            <div class="card-title">Common Reuse Principle</div>
+            <div class="card-subtitle">No forzar dependencias innecesarias</div>
+          </div>
+          <span class="card-chevron">▾</span>
+        </div>
+        <div class="card-body">
+          <div class="card-body-inner">
+            <p>Las clases que <strong>no se usan juntas no deberían estar en el mismo paquete</strong>. Si dependés de un paquete, dependés de todo él —incluyendo las partes que no usás. Eso significa que cambios en cosas que no te interesan pueden romper tu build.</p>
+            <p>CRP es la contracara de CCP: mientras CCP agrupa lo que cambia junto, CRP separa lo que no se usa junto. La tensión entre ambos es normal y hay que gestionarla según las prioridades del proyecto.</p>
+            <div class="tip" style="margin-top:0">
+              <strong>Señal de violación de CRP</strong>
+              Si actualizás una dependencia y tenés que adaptar código que no usa nada de lo que cambió, es probable que el paquete del que dependés tiene baja cohesión según CRP. Mezcla cosas no relacionadas que cambian por distintas razones.
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── ACOPLAMIENTO ── -->
+  <div class="panel" id="panel-2">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Principios de acoplamiento</div>
+        <span class="p-tagline" style="border-color:var(--cop-rb);background:var(--cop-r);color:var(--cop)">¿Cómo se relacionan los paquetes entre sí?</span>
+        <p class="p-desc">Una vez que definiste qué va en cada paquete, necesitás controlar <strong>cómo se conectan</strong>. Un grafo de dependencias mal diseñado es la causa principal de que los proyectos se vuelvan imposibles de modificar sin efectos en cascada.</p>
+      </div>
+      <div class="p-letter" style="color:var(--cop)">A</div>
+    </div>
+
+    <div class="group-label">
+      <span class="group-label-text" style="color:var(--cop)">Principios de acoplamiento</span>
+      <span class="group-label-line"></span>
+      <span class="group-label-count">3 principios</span>
+    </div>
+
+    <div class="principles-stack">
+
+      <div class="principle-card expanded" onclick="toggle(this)">
+        <div class="card-header">
+          <span class="card-abbr" style="background:var(--cop-r);border:1px solid var(--cop-rb);color:var(--cop)">ADP</span>
+          <div>
+            <div class="card-title">Acyclic Dependencies Principle</div>
+            <div class="card-subtitle">Sin ciclos en el grafo de dependencias</div>
+          </div>
+          <span class="card-chevron">▾</span>
+        </div>
+        <div class="card-body">
+          <div class="card-body-inner">
+            <p>El grafo de dependencias entre paquetes <strong>no debe tener ciclos</strong>. Si A depende de B, B depende de C, y C depende de A, ninguno de los tres se puede cambiar, testear o deployar de forma independiente. Son un bloque monolítico disfrazado de módulos.</p>
+            <div class="comparison">
+              <div class="code-card">
+                <div class="code-card-header"><span class="dot dot-bad"></span> Ciclo detectado</div>
+                <pre>orders → billing
+billing → users
+users → orders  <span class="cm">← ciclo 💥</span>
+
+<span class="cm">// Para testear orders
+// necesitás billing y users
+// Para testear users
+// necesitás orders. Deadlock.</span></pre>
+              </div>
+              <div class="code-card">
+                <div class="code-card-header"><span class="dot dot-good"></span> Sin ciclos</div>
+                <pre>orders → billing → users
+         ↓
+      payments
+
+<span class="cm">// Grafo acíclico dirigido (DAG)
+// Cada paquete se puede
+// testear de forma aislada ✓</span></pre>
+              </div>
+            </div>
+            <p style="margin-top:14px">Para romper un ciclo, la solución más común es extraer la dependencia circular a un tercer paquete del que ambos dependan, o introducir una interfaz que invierta la dependencia (aplicando DIP de SOLID a nivel de paquetes).</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="principle-card" onclick="toggle(this)">
+        <div class="card-header">
+          <span class="card-abbr" style="background:var(--cop-r);border:1px solid var(--cop-rb);color:var(--cop)">SDP</span>
+          <div>
+            <div class="card-title">Stable Dependencies Principle</div>
+            <div class="card-subtitle">Dependé de lo que es más estable que vos</div>
+          </div>
+          <span class="card-chevron">▾</span>
+        </div>
+        <div class="card-body">
+          <div class="card-body-inner">
+            <p>Un paquete debería depender solo de paquetes <strong>más estables que él mismo</strong>. La estabilidad se mide por cuánto cuesta cambiar un paquete: un paquete del que dependen muchos otros es difícil de cambiar —es estable. Uno del que nadie depende es fácil de cambiar —es inestable.</p>
+            <p>Si un paquete volátil (que cambia seguido) depende de un paquete estable, está bien. Si un paquete estable depende de uno volátil, cualquier cambio en el volátil fuerza cambios en cascada en todo lo que depende del estable.</p>
+            <div class="comparison">
+              <div class="code-card">
+                <div class="code-card-header"><span class="dot dot-bad"></span> Viola SDP</div>
+                <pre><span class="cm">// core-domain (estable,</span>
+<span class="cm">// 10 paquetes dependen de él)</span>
+<span class="cm">// depende de:</span>
+ui-components  <span class="cm">← cambia cada sprint</span>
+feature-flags  <span class="cm">← cambia cada semana</span>
+<span class="cm">// Un cambio en UI rompe core 💥</span></pre>
+              </div>
+              <div class="code-card">
+                <div class="code-card-header"><span class="dot dot-good"></span> Respeta SDP</div>
+                <pre><span class="cm">// core-domain (estable)</span>
+<span class="cm">// depende de:</span>
+shared-types   <span class="cm">← muy estable</span>
+base-errors    <span class="cm">← muy estable</span>
+
+<span class="cm">// ui-components (volátil)
+// depende de core-domain ✓</span></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="principle-card" onclick="toggle(this)">
+        <div class="card-header">
+          <span class="card-abbr" style="background:var(--cop-r);border:1px solid var(--cop-rb);color:var(--cop)">SAP</span>
+          <div>
+            <div class="card-title">Stable Abstractions Principle</div>
+            <div class="card-subtitle">Los paquetes estables deben ser abstractos</div>
+          </div>
+          <span class="card-chevron">▾</span>
+        </div>
+        <div class="card-body">
+          <div class="card-body-inner">
+            <p>Un paquete <strong>estable debe ser abstracto</strong> para que su estabilidad no impida su extensión. Un paquete estable lleno de implementaciones concretas es rígido: no se puede cambiar (muchos dependen de él) y tampoco se puede extender (es concreto).</p>
+            <p>SAP combina SDP con el principio Open/Closed de SOLID a nivel de paquetes: <strong>cuanto más estable es un paquete, más abstracto debería ser</strong>. Los paquetes inestables pueden ser concretos porque es fácil cambiarlos.</p>
+            <div class="tip" style="margin-top:0">
+              <strong>La métrica de abstracción</strong>
+              Martin define la abstracción de un paquete como la proporción de interfaces y clases abstractas sobre el total de clases. Un paquete del que todos dependen debería tener una abstracción cercana a 1 (todo interfaces). Un paquete hoja (nadie depende de él) puede tener abstracción cercana a 0.
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── TENSIONES ── -->
+  <div class="panel" id="panel-3">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Tensiones entre principios</div>
+        <span class="p-tagline">Los seis principios no siempre apuntan en la misma dirección</span>
+        <p class="p-desc">Los tres principios de cohesión están <strong>en tensión permanente</strong> entre sí. No podés maximizar los tres a la vez; el diseño es una decisión sobre qué priorizar según el tipo de proyecto.</p>
+      </div>
+      <div class="p-letter">T</div>
+    </div>
+
+    <div class="analogy">
+      <span class="analogy-icon">⚖️</span>
+      <span>REP dice "agrupá lo que se reutiliza junto". CCP dice "agrupá lo que cambia junto". CRP dice "no agrupés lo que no se usa junto". <em>Un paquete perfecto según los tres principios no existe en la práctica —hay que elegir qué importa más.</em></span>
+    </div>
+
+    <table class="matrix">
+      <thead>
+        <tr>
+          <th>Principio</th>
+          <th>Prioriza</th>
+          <th>Penaliza</th>
+          <th>Mejor para</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="color:var(--coh)">REP</td>
+          <td><span class="badge-good">Reutilización</span></td>
+          <td><span class="badge-bad">Demasiados paquetes</span></td>
+          <td style="color:var(--muted)">Librerías y SDKs publicados</td>
+        </tr>
+        <tr>
+          <td style="color:var(--coh)">CCP</td>
+          <td><span class="badge-good">Mantenibilidad</span></td>
+          <td><span class="badge-bad">Menor reutilización</span></td>
+          <td style="color:var(--muted)">Aplicaciones con cambios frecuentes</td>
+        </tr>
+        <tr>
+          <td style="color:var(--coh)">CRP</td>
+          <td><span class="badge-good">Independencia</span></td>
+          <td><span class="badge-bad">Más fragmentación</span></td>
+          <td style="color:var(--muted)">Sistemas con muchos consumidores</td>
+        </tr>
+        <tr>
+          <td style="color:var(--cop)">ADP</td>
+          <td><span class="badge-good">Testeabilidad</span></td>
+          <td><span class="badge-bad">Requiere refactors</span></td>
+          <td style="color:var(--muted)">Todo sistema que crezca</td>
+        </tr>
+        <tr>
+          <td style="color:var(--cop)">SDP</td>
+          <td><span class="badge-good">Estabilidad</span></td>
+          <td><span class="badge-bad">Restricciones de diseño</span></td>
+          <td style="color:var(--muted)">Sistemas con núcleo de negocio estable</td>
+        </tr>
+        <tr>
+          <td style="color:var(--cop)">SAP</td>
+          <td><span class="badge-good">Extensibilidad</span></td>
+          <td><span class="badge-bad">Más abstracciones</span></td>
+          <td style="color:var(--muted)">Núcleos de dominio compartidos</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="tip">
+      <strong>Regla práctica para proyectos nuevos</strong>
+      En etapas tempranas, priorizá <strong>CCP sobre REP</strong>: es más fácil dividir un paquete cohesivo cuando el sistema crece que reparar un sistema donde los cambios se propagan a seis lugares. Una vez que el sistema estabiliza su estructura, REP y CRP cobran más importancia.
+    </div>
+  </div>
+
+  <!-- ── TRAMPAS ── -->
+  <div class="panel" id="panel-4">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Trampas comunes</div>
+        <span class="p-tagline">Los errores que aparecen cuando el proyecto escala</span>
+        <p class="p-desc">Las violaciones de estos principios <strong>no duelen al principio</strong>. Se acumulan silenciosamente hasta que el proyecto tiene seis meses y cada cambio tarda el doble porque nadie entiende bien las dependencias.</p>
+      </div>
+      <div class="p-letter">X</div>
+    </div>
+
+    <ul class="trap-list">
+      <li>
+        <span class="trap-icon">🧺</span>
+        <div>
+          <strong>El paquete "utils" o "common" que lo tiene todo</strong>
+          Es la violación más universal. Un paquete llamado <code style="font-family:var(--mono);font-size:12px;background:var(--surface2);padding:1px 5px;border-radius:3px">utils</code> o <code style="font-family:var(--mono);font-size:12px;background:var(--surface2);padding:1px 5px;border-radius:3px">shared</code> que crece sin control viola REP (nadie lo reutiliza completo), CCP (cambia por mil razones distintas) y CRP (fuerza dependencias no relacionadas). La solución es partirlo en paquetes con nombres de dominio reales.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🔄</span>
+        <div>
+          <strong>Dependencias circulares ocultas</strong>
+          Los ciclos raramente son obvios. Aparecen con el tiempo: A importa de B, B importa de C, y C necesita algo de A "solo para un caso especial". Herramientas como <code style="font-family:var(--mono);font-size:12px;background:var(--surface2);padding:1px 5px;border-radius:3px">madge</code> (JS), <code style="font-family:var(--mono);font-size:12px;background:var(--surface2);padding:1px 5px;border-radius:3px">pydeps</code> (Python) o <code style="font-family:var(--mono);font-size:12px;background:var(--surface2);padding:1px 5px;border-radius:3px">deptrac</code> (PHP) visualizan el grafo de dependencias y detectan ciclos antes de que sean un problema.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🏔️</span>
+        <div>
+          <strong>El núcleo de dominio que depende de la infraestructura</strong>
+          Cuando el módulo de lógica de negocio importa directamente el ORM, el cliente HTTP o el logger, viola SDP: el módulo más estable y crítico del sistema depende de detalles de implementación que cambian con frecuencia. La solución es DIP a nivel de paquetes: el dominio define interfaces; la infraestructura las implementa.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">📐</span>
+        <div>
+          <strong>Organizar por capa técnica en lugar de por dominio</strong>
+          Una estructura <code style="font-family:var(--mono);font-size:12px;background:var(--surface2);padding:1px 5px;border-radius:3px">controllers / services / repositories</code> viola CCP: un cambio en la lógica de "órdenes" toca un archivo en cada una de las tres carpetas. Una estructura <code style="font-family:var(--mono);font-size:12px;background:var(--surface2);padding:1px 5px;border-radius:3px">orders / billing / users</code> —organizada por dominio— localiza los cambios.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🔍</span>
+        <div>
+          <strong>No medir la estabilidad de los paquetes</strong>
+          La estabilidad de un paquete es calculable: <em>estabilidad = dependencias salientes / (dependencias entrantes + salientes)</em>. Un paquete con muchos consumidores y pocas dependencias externas tiene estabilidad cercana a 1. Si ese paquete tiene alto acoplamiento con detalles volátiles, hay un problema de diseño que se puede detectar antes de que cause daño.
+        </div>
+      </li>
+    </ul>
+</div>
+
+	<div class="panel" id="panel-2">
+	<div class="p-header">
+      <div>
+        <div class="p-name">Principios de acoplamiento</div>
+        <span class="p-tagline" style="border-color:var(--cop-rb);background:var(--cop-r);color:var(--cop)">¿Cómo se relacionan los paquetes entre sí?</span>
+        <p class="p-desc">Una vez que definiste qué va en cada paquete, necesitás controlar <strong>cómo se conectan</strong>. Un grafo de dependencias mal diseñado es la causa principal de que los proyectos se vuelvan imposibles de modificar sin efectos en cascada.</p>
+      </div>
+      <div class="p-letter" style="color:var(--cop)">A</div>
+    </div>
+
+    <div class="group-label">
+      <span class="group-label-text" style="color:var(--cop)">Principios de acoplamiento</span>
+      <span class="group-label-line"></span>
+      <span class="group-label-count">3 principios</span>
+    </div>
+
+    <div class="principles-stack">
+
+      <div class="principle-card expanded" onclick="toggle(this)">
+        <div class="card-header">
+          <span class="card-abbr" style="background:var(--cop-r);border:1px solid var(--cop-rb);color:var(--cop)">ADP</span>
+          <div>
+            <div class="card-title">Acyclic Dependencies Principle</div>
+            <div class="card-subtitle">Sin ciclos en el grafo de dependencias</div>
+          </div>
+          <span class="card-chevron">▾</span>
+        </div>
+        <div class="card-body">
+          <div class="card-body-inner">
+            <p>El grafo de dependencias entre paquetes <strong>no debe tener ciclos</strong>. Si A depende de B, B depende de C, y C depende de A, ninguno de los tres se puede cambiar, testear o deployar de forma independiente. Son un bloque monolítico disfrazado de módulos.</p>
+            <div class="comparison">
+              <div class="code-card">
+                <div class="code-card-header"><span class="dot dot-bad"></span> Ciclo detectado</div>
+                <pre>orders → billing
+billing → users
+users → orders  <span class="cm">← ciclo 💥</span>
+
+<span class="cm">// Para testear orders
+// necesitás billing y users
+// Para testear users
+// necesitás orders. Deadlock.</span></pre>
+              </div>
+              <div class="code-card">
+                <div class="code-card-header"><span class="dot dot-good"></span> Sin ciclos</div>
+                <pre>orders → billing → users
+         ↓
+      payments
+
+<span class="cm">// Grafo acíclico dirigido (DAG)
+// Cada paquete se puede
+// testear de forma aislada ✓</span></pre>
+              </div>
+            </div>
+            <p style="margin-top:14px">Para romper un ciclo, la solución más común es extraer la dependencia circular a un tercer paquete del que ambos dependan, o introducir una interfaz que invierta la dependencia (aplicando DIP de SOLID a nivel de paquetes).</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="principle-card" onclick="toggle(this)">
+        <div class="card-header">
+          <span class="card-abbr" style="background:var(--cop-r);border:1px solid var(--cop-rb);color:var(--cop)">SDP</span>
+          <div>
+            <div class="card-title">Stable Dependencies Principle</div>
+            <div class="card-subtitle">Dependé de lo que es más estable que vos</div>
+          </div>
+          <span class="card-chevron">▾</span>
+        </div>
+        <div class="card-body">
+          <div class="card-body-inner">
+            <p>Un paquete debería depender solo de paquetes <strong>más estables que él mismo</strong>. La estabilidad se mide por cuánto cuesta cambiar un paquete: un paquete del que dependen muchos otros es difícil de cambiar —es estable. Uno del que nadie depende es fácil de cambiar —es inestable.</p>
+            <p>Si un paquete volátil (que cambia seguido) depende de un paquete estable, está bien. Si un paquete estable depende de uno volátil, cualquier cambio en el volátil fuerza cambios en cascada en todo lo que depende del estable.</p>
+            <div class="comparison">
+              <div class="code-card">
+                <div class="code-card-header"><span class="dot dot-bad"></span> Viola SDP</div>
+                <pre><span class="cm">// core-domain (estable,</span>
+<span class="cm">// 10 paquetes dependen de él)</span>
+<span class="cm">// depende de:</span>
+ui-components  <span class="cm">← cambia cada sprint</span>
+feature-flags  <span class="cm">← cambia cada semana</span>
+<span class="cm">// Un cambio en UI rompe core 💥</span></pre>
+              </div>
+              <div class="code-card">
+                <div class="code-card-header"><span class="dot dot-good"></span> Respeta SDP</div>
+                <pre><span class="cm">// core-domain (estable)</span>
+<span class="cm">// depende de:</span>
+shared-types   <span class="cm">← muy estable</span>
+base-errors    <span class="cm">← muy estable</span>
+
+<span class="cm">// ui-components (volátil)
+// depende de core-domain ✓</span></pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="principle-card" onclick="toggle(this)">
+        <div class="card-header">
+          <span class="card-abbr" style="background:var(--cop-r);border:1px solid var(--cop-rb);color:var(--cop)">SAP</span>
+          <div>
+            <div class="card-title">Stable Abstractions Principle</div>
+            <div class="card-subtitle">Los paquetes estables deben ser abstractos</div>
+          </div>
+          <span class="card-chevron">▾</span>
+        </div>
+        <div class="card-body">
+          <div class="card-body-inner">
+            <p>Un paquete <strong>estable debe ser abstracto</strong> para que su estabilidad no impida su extensión. Un paquete estable lleno de implementaciones concretas es rígido: no se puede cambiar (muchos dependen de él) y tampoco se puede extender (es concreto).</p>
+            <p>SAP combina SDP con el principio Open/Closed de SOLID a nivel de paquetes: <strong>cuanto más estable es un paquete, más abstracto debería ser</strong>. Los paquetes inestables pueden ser concretos porque es fácil cambiarlos.</p>
+            <div class="tip" style="margin-top:0">
+              <strong>La métrica de abstracción</strong>
+              Martin define la abstracción de un paquete como la proporción de interfaces y clases abstractas sobre el total de clases. Un paquete del que todos dependen debería tener una abstracción cercana a 1 (todo interfaces). Un paquete hoja (nadie depende de él) puede tener abstracción cercana a 0.
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── TENSIONES ── -->
+  <div class="panel" id="panel-3">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Tensiones entre principios</div>
+        <span class="p-tagline">Los seis principios no siempre apuntan en la misma dirección</span>
+        <p class="p-desc">Los tres principios de cohesión están <strong>en tensión permanente</strong> entre sí. No podés maximizar los tres a la vez; el diseño es una decisión sobre qué priorizar según el tipo de proyecto.</p>
+      </div>
+      <div class="p-letter">T</div>
+    </div>
+
+    <div class="analogy">
+      <span class="analogy-icon">⚖️</span>
+      <span>REP dice "agrupá lo que se reutiliza junto". CCP dice "agrupá lo que cambia junto". CRP dice "no agrupés lo que no se usa junto". <em>Un paquete perfecto según los tres principios no existe en la práctica —hay que elegir qué importa más.</em></span>
+    </div>
+
+    <table class="matrix">
+      <thead>
+        <tr>
+          <th>Principio</th>
+          <th>Prioriza</th>
+          <th>Penaliza</th>
+          <th>Mejor para</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="color:var(--coh)">REP</td>
+          <td><span class="badge-good">Reutilización</span></td>
+          <td><span class="badge-bad">Demasiados paquetes</span></td>
+          <td style="color:var(--muted)">Librerías y SDKs publicados</td>
+        </tr>
+        <tr>
+          <td style="color:var(--coh)">CCP</td>
+          <td><span class="badge-good">Mantenibilidad</span></td>
+          <td><span class="badge-bad">Menor reutilización</span></td>
+          <td style="color:var(--muted)">Aplicaciones con cambios frecuentes</td>
+        </tr>
+        <tr>
+          <td style="color:var(--coh)">CRP</td>
+          <td><span class="badge-good">Independencia</span></td>
+          <td><span class="badge-bad">Más fragmentación</span></td>
+          <td style="color:var(--muted)">Sistemas con muchos consumidores</td>
+        </tr>
+        <tr>
+          <td style="color:var(--cop)">ADP</td>
+          <td><span class="badge-good">Testeabilidad</span></td>
+          <td><span class="badge-bad">Requiere refactors</span></td>
+          <td style="color:var(--muted)">Todo sistema que crezca</td>
+        </tr>
+        <tr>
+          <td style="color:var(--cop)">SDP</td>
+          <td><span class="badge-good">Estabilidad</span></td>
+          <td><span class="badge-bad">Restricciones de diseño</span></td>
+          <td style="color:var(--muted)">Sistemas con núcleo de negocio estable</td>
+        </tr>
+        <tr>
+          <td style="color:var(--cop)">SAP</td>
+          <td><span class="badge-good">Extensibilidad</span></td>
+          <td><span class="badge-bad">Más abstracciones</span></td>
+          <td style="color:var(--muted)">Núcleos de dominio compartidos</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="tip">
+      <strong>Regla práctica para proyectos nuevos</strong>
+      En etapas tempranas, priorizá <strong>CCP sobre REP</strong>: es más fácil dividir un paquete cohesivo cuando el sistema crece que reparar un sistema donde los cambios se propagan a seis lugares. Una vez que el sistema estabiliza su estructura, REP y CRP cobran más importancia.
+    </div>
+  </div>
+
+  <!-- ── TRAMPAS ── -->
+  <div class="panel" id="panel-4">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Trampas comunes</div>
+        <span class="p-tagline">Los errores que aparecen cuando el proyecto escala</span>
+        <p class="p-desc">Las violaciones de estos principios <strong>no duelen al principio</strong>. Se acumulan silenciosamente hasta que el proyecto tiene seis meses y cada cambio tarda el doble porque nadie entiende bien las dependencias.</p>
+      </div>
+      <div class="p-letter">X</div>
+    </div>
+
+    <ul class="trap-list">
+      <li>
+        <span class="trap-icon">🧺</span>
+        <div>
+          <strong>El paquete "utils" o "common" que lo tiene todo</strong>
+          Es la violación más universal. Un paquete llamado <code style="font-family:var(--mono);font-size:12px;background:var(--surface2);padding:1px 5px;border-radius:3px">utils</code> o <code style="font-family:var(--mono);font-size:12px;background:var(--surface2);padding:1px 5px;border-radius:3px">shared</code> que crece sin control viola REP (nadie lo reutiliza completo), CCP (cambia por mil razones distintas) y CRP (fuerza dependencias no relacionadas). La solución es partirlo en paquetes con nombres de dominio reales.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🔄</span>
+        <div>
+          <strong>Dependencias circulares ocultas</strong>
+          Los ciclos raramente son obvios. Aparecen con el tiempo: A importa de B, B importa de C, y C necesita algo de A "solo para un caso especial". Herramientas como <code style="font-family:var(--mono);font-size:12px;background:var(--surface2);padding:1px 5px;border-radius:3px">madge</code> (JS), <code style="font-family:var(--mono);font-size:12px;background:var(--surface2);padding:1px 5px;border-radius:3px">pydeps</code> (Python) o <code style="font-family:var(--mono);font-size:12px;background:var(--surface2);padding:1px 5px;border-radius:3px">deptrac</code> (PHP) visualizan el grafo de dependencias y detectan ciclos antes de que sean un problema.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🏔️</span>
+        <div>
+          <strong>El núcleo de dominio que depende de la infraestructura</strong>
+          Cuando el módulo de lógica de negocio importa directamente el ORM, el cliente HTTP o el logger, viola SDP: el módulo más estable y crítico del sistema depende de detalles de implementación que cambian con frecuencia. La solución es DIP a nivel de paquetes: el dominio define interfaces; la infraestructura las implementa.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">📐</span>
+        <div>
+          <strong>Organizar por capa técnica en lugar de por dominio</strong>
+          Una estructura <code style="font-family:var(--mono);font-size:12px;background:var(--surface2);padding:1px 5px;border-radius:3px">controllers / services / repositories</code> viola CCP: un cambio en la lógica de "órdenes" toca un archivo en cada una de las tres carpetas. Una estructura <code style="font-family:var(--mono);font-size:12px;background:var(--surface2);padding:1px 5px;border-radius:3px">orders / billing / users</code> —organizada por dominio— localiza los cambios.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🔍</span>
+        <div>
+          <strong>No medir la estabilidad de los paquetes</strong>
+          La estabilidad de un paquete es calculable: <em>estabilidad = dependencias salientes / (dependencias entrantes + salientes)</em>. Un paquete con muchos consumidores y pocas dependencias externas tiene estabilidad cercana a 1. Si ese paquete tiene alto acoplamiento con detalles volátiles, hay un problema de diseño que se puede detectar antes de que cause daño.
+        </div>
+      </li>
+    </ul>
+</div>
+
+	<div class="panel" id="panel-3">
+	<div class="p-header">
+      <div>
+        <div class="p-name">Tensiones entre principios</div>
+        <span class="p-tagline">Los seis principios no siempre apuntan en la misma dirección</span>
+        <p class="p-desc">Los tres principios de cohesión están <strong>en tensión permanente</strong> entre sí. No podés maximizar los tres a la vez; el diseño es una decisión sobre qué priorizar según el tipo de proyecto.</p>
+      </div>
+      <div class="p-letter">T</div>
+    </div>
+
+    <div class="analogy">
+      <span class="analogy-icon">⚖️</span>
+      <span>REP dice "agrupá lo que se reutiliza junto". CCP dice "agrupá lo que cambia junto". CRP dice "no agrupés lo que no se usa junto". <em>Un paquete perfecto según los tres principios no existe en la práctica —hay que elegir qué importa más.</em></span>
+    </div>
+
+    <table class="matrix">
+      <thead>
+        <tr>
+          <th>Principio</th>
+          <th>Prioriza</th>
+          <th>Penaliza</th>
+          <th>Mejor para</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="color:var(--coh)">REP</td>
+          <td><span class="badge-good">Reutilización</span></td>
+          <td><span class="badge-bad">Demasiados paquetes</span></td>
+          <td style="color:var(--muted)">Librerías y SDKs publicados</td>
+        </tr>
+        <tr>
+          <td style="color:var(--coh)">CCP</td>
+          <td><span class="badge-good">Mantenibilidad</span></td>
+          <td><span class="badge-bad">Menor reutilización</span></td>
+          <td style="color:var(--muted)">Aplicaciones con cambios frecuentes</td>
+        </tr>
+        <tr>
+          <td style="color:var(--coh)">CRP</td>
+          <td><span class="badge-good">Independencia</span></td>
+          <td><span class="badge-bad">Más fragmentación</span></td>
+          <td style="color:var(--muted)">Sistemas con muchos consumidores</td>
+        </tr>
+        <tr>
+          <td style="color:var(--cop)">ADP</td>
+          <td><span class="badge-good">Testeabilidad</span></td>
+          <td><span class="badge-bad">Requiere refactors</span></td>
+          <td style="color:var(--muted)">Todo sistema que crezca</td>
+        </tr>
+        <tr>
+          <td style="color:var(--cop)">SDP</td>
+          <td><span class="badge-good">Estabilidad</span></td>
+          <td><span class="badge-bad">Restricciones de diseño</span></td>
+          <td style="color:var(--muted)">Sistemas con núcleo de negocio estable</td>
+        </tr>
+        <tr>
+          <td style="color:var(--cop)">SAP</td>
+          <td><span class="badge-good">Extensibilidad</span></td>
+          <td><span class="badge-bad">Más abstracciones</span></td>
+          <td style="color:var(--muted)">Núcleos de dominio compartidos</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="tip">
+      <strong>Regla práctica para proyectos nuevos</strong>
+      En etapas tempranas, priorizá <strong>CCP sobre REP</strong>: es más fácil dividir un paquete cohesivo cuando el sistema crece que reparar un sistema donde los cambios se propagan a seis lugares. Una vez que el sistema estabiliza su estructura, REP y CRP cobran más importancia.
+    </div>
+  </div>
+
+  <!-- ── TRAMPAS ── -->
+  <div class="panel" id="panel-4">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Trampas comunes</div>
+        <span class="p-tagline">Los errores que aparecen cuando el proyecto escala</span>
+        <p class="p-desc">Las violaciones de estos principios <strong>no duelen al principio</strong>. Se acumulan silenciosamente hasta que el proyecto tiene seis meses y cada cambio tarda el doble porque nadie entiende bien las dependencias.</p>
+      </div>
+      <div class="p-letter">X</div>
+    </div>
+
+    <ul class="trap-list">
+      <li>
+        <span class="trap-icon">🧺</span>
+        <div>
+          <strong>El paquete "utils" o "common" que lo tiene todo</strong>
+          Es la violación más universal. Un paquete llamado <code style="font-family:var(--mono);font-size:12px;background:var(--surface2);padding:1px 5px;border-radius:3px">utils</code> o <code style="font-family:var(--mono);font-size:12px;background:var(--surface2);padding:1px 5px;border-radius:3px">shared</code> que crece sin control viola REP (nadie lo reutiliza completo), CCP (cambia por mil razones distintas) y CRP (fuerza dependencias no relacionadas). La solución es partirlo en paquetes con nombres de dominio reales.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🔄</span>
+        <div>
+          <strong>Dependencias circulares ocultas</strong>
+          Los ciclos raramente son obvios. Aparecen con el tiempo: A importa de B, B importa de C, y C necesita algo de A "solo para un caso especial". Herramientas como <code style="font-family:var(--mono);font-size:12px;background:var(--surface2);padding:1px 5px;border-radius:3px">madge</code> (JS), <code style="font-family:var(--mono);font-size:12px;background:var(--surface2);padding:1px 5px;border-radius:3px">pydeps</code> (Python) o <code style="font-family:var(--mono);font-size:12px;background:var(--surface2);padding:1px 5px;border-radius:3px">deptrac</code> (PHP) visualizan el grafo de dependencias y detectan ciclos antes de que sean un problema.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🏔️</span>
+        <div>
+          <strong>El núcleo de dominio que depende de la infraestructura</strong>
+          Cuando el módulo de lógica de negocio importa directamente el ORM, el cliente HTTP o el logger, viola SDP: el módulo más estable y crítico del sistema depende de detalles de implementación que cambian con frecuencia. La solución es DIP a nivel de paquetes: el dominio define interfaces; la infraestructura las implementa.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">📐</span>
+        <div>
+          <strong>Organizar por capa técnica en lugar de por dominio</strong>
+          Una estructura <code style="font-family:var(--mono);font-size:12px;background:var(--surface2);padding:1px 5px;border-radius:3px">controllers / services / repositories</code> viola CCP: un cambio en la lógica de "órdenes" toca un archivo en cada una de las tres carpetas. Una estructura <code style="font-family:var(--mono);font-size:12px;background:var(--surface2);padding:1px 5px;border-radius:3px">orders / billing / users</code> —organizada por dominio— localiza los cambios.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🔍</span>
+        <div>
+          <strong>No medir la estabilidad de los paquetes</strong>
+          La estabilidad de un paquete es calculable: <em>estabilidad = dependencias salientes / (dependencias entrantes + salientes)</em>. Un paquete con muchos consumidores y pocas dependencias externas tiene estabilidad cercana a 1. Si ese paquete tiene alto acoplamiento con detalles volátiles, hay un problema de diseño que se puede detectar antes de que cause daño.
+        </div>
+      </li>
+    </ul>
+</div>
+
+	<div class="panel" id="panel-4">
+	<div class="p-header">
+      <div>
+        <div class="p-name">Trampas comunes</div>
+        <span class="p-tagline">Los errores que aparecen cuando el proyecto escala</span>
+        <p class="p-desc">Las violaciones de estos principios <strong>no duelen al principio</strong>. Se acumulan silenciosamente hasta que el proyecto tiene seis meses y cada cambio tarda el doble porque nadie entiende bien las dependencias.</p>
+      </div>
+      <div class="p-letter">X</div>
+    </div>
+
+    <ul class="trap-list">
+      <li>
+        <span class="trap-icon">🧺</span>
+        <div>
+          <strong>El paquete "utils" o "common" que lo tiene todo</strong>
+          Es la violación más universal. Un paquete llamado <code style="font-family:var(--mono);font-size:12px;background:var(--surface2);padding:1px 5px;border-radius:3px">utils</code> o <code style="font-family:var(--mono);font-size:12px;background:var(--surface2);padding:1px 5px;border-radius:3px">shared</code> que crece sin control viola REP (nadie lo reutiliza completo), CCP (cambia por mil razones distintas) y CRP (fuerza dependencias no relacionadas). La solución es partirlo en paquetes con nombres de dominio reales.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🔄</span>
+        <div>
+          <strong>Dependencias circulares ocultas</strong>
+          Los ciclos raramente son obvios. Aparecen con el tiempo: A importa de B, B importa de C, y C necesita algo de A "solo para un caso especial". Herramientas como <code style="font-family:var(--mono);font-size:12px;background:var(--surface2);padding:1px 5px;border-radius:3px">madge</code> (JS), <code style="font-family:var(--mono);font-size:12px;background:var(--surface2);padding:1px 5px;border-radius:3px">pydeps</code> (Python) o <code style="font-family:var(--mono);font-size:12px;background:var(--surface2);padding:1px 5px;border-radius:3px">deptrac</code> (PHP) visualizan el grafo de dependencias y detectan ciclos antes de que sean un problema.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🏔️</span>
+        <div>
+          <strong>El núcleo de dominio que depende de la infraestructura</strong>
+          Cuando el módulo de lógica de negocio importa directamente el ORM, el cliente HTTP o el logger, viola SDP: el módulo más estable y crítico del sistema depende de detalles de implementación que cambian con frecuencia. La solución es DIP a nivel de paquetes: el dominio define interfaces; la infraestructura las implementa.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">📐</span>
+        <div>
+          <strong>Organizar por capa técnica en lugar de por dominio</strong>
+          Una estructura <code style="font-family:var(--mono);font-size:12px;background:var(--surface2);padding:1px 5px;border-radius:3px">controllers / services / repositories</code> viola CCP: un cambio en la lógica de "órdenes" toca un archivo en cada una de las tres carpetas. Una estructura <code style="font-family:var(--mono);font-size:12px;background:var(--surface2);padding:1px 5px;border-radius:3px">orders / billing / users</code> —organizada por dominio— localiza los cambios.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🔍</span>
+        <div>
+          <strong>No medir la estabilidad de los paquetes</strong>
+          La estabilidad de un paquete es calculable: <em>estabilidad = dependencias salientes / (dependencias entrantes + salientes)</em>. Un paquete con muchos consumidores y pocas dependencias externas tiene estabilidad cercana a 1. Si ese paquete tiene alto acoplamiento con detalles volátiles, hay un problema de diseño que se puede detectar antes de que cause daño.
+        </div>
+      </li>
+    </ul>
+</div>
+
+	<div style="margin-top:36px;padding-top:32px;border-top:1px solid var(--border)">
+		<div class="context-inner">
+	<div>
+		<div class="context-section-label">Origen del principio</div>
+		<p class="context-text"></p>
+	</div>
+	<div class="context-divider"></div>
+	<div>
+		<div class="context-section-label">¿Solo aplica a código?</div>
+		<p class="context-text"></p>
+		<div class="scope-pills">
+			<span class="pill yes">Monolitos modulares</span>
+			<span class="pill yes">Microservicios</span>
+			<span class="pill yes">Librerías / npm / pip</span>
+			<span class="pill yes">Monorepos</span>
+			<span class="pill yes">Sistemas pequeños — opcional</span>
+		</div>
+	</div>
+</div>
+	</div>
+
+	<div class="progress" id="progress">
+		<div class="prog-dot active"></div>
+		<div class="prog-dot"></div>
+		<div class="prog-dot"></div>
+		<div class="prog-dot"></div>
+		<div class="prog-dot"></div>
+	</div>
+	<div class="nav-btns">
+		<button class="nav-btn" id="btnPrev">← Anterior</button>
+		<button class="nav-btn" id="btnNext">Siguiente →</button>
+	</div>
+</main>
+
+<footer>
+	<span>Principios de paquetes · Robert C. Martin · Agile S/W Development · 2002</span>
+	<span>Gustavo Adrián Salvini · <a href="https://github.com/guspatagonico" target="_blank">@guspatagonico</a></span>
+</footer>
+
+<nav class="snav snav-bot">
+	<a class="snav-prev" href="fail-fast.html" style="color:#f43f5e;background:rgba(244,63,94,0.12);border-color:rgba(244,63,94,0.32)"><span>←</span><span class="snav-label">Fail Fast</span></a>
+	<div class="snav-spacer"></div>
+	<div class="snav-center">
+		<a class="snav-home" href="../index.html">↑&nbsp;&nbsp;Índice</a>
+		<span class="snav-pos">09&thinsp;/&thinsp;12</span>
+	</div>
+	<div class="snav-spacer"></div>
+	<a class="snav-next" href="screaming-architecture.html" style="color:#a3e635;background:rgba(163,230,53,0.12);border-color:rgba(163,230,53,0.32)"><span class="snav-label">Screaming</span><span>→</span></a>
+</nav>
+
+<script src="../js/tabs.js"></script>
+</body>
+</html>

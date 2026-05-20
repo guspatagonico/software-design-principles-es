@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="es" data-accent="information-hiding">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Info Hiding — Principios de diseño de software</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="../css/base.css">
+<link rel="stylesheet" href="../css/layout.css">
+</head>
+<body>
+<nav class="snav snav-top">
+	<a class="snav-prev" href="soc.html" style="color:#fb923c;background:rgba(251,146,60,0.12);border-color:rgba(251,146,60,0.32)"><span>←</span><span class="snav-label">SoC</span></a>
+	<div class="snav-spacer"></div>
+	<div class="snav-center">
+		<a class="snav-home" href="../index.html">↑&nbsp;&nbsp;Índice</a>
+		<span class="snav-pos">06&thinsp;/&thinsp;12</span>
+	</div>
+	<div class="snav-spacer"></div>
+	<a class="snav-next" href="lod.html" style="color:#38bdf8;background:rgba(56,189,248,0.12);border-color:rgba(56,189,248,0.32)"><span class="snav-label">Law of Demeter</span><span>→</span></a>
+</nav>
+
+<header>
+	<div class="header-label">Principios de diseño · Referencia para devs</div>
+	<h1><em>Information</em><br>Hiding</h1>
+	<p>Lo que no es público no puede romperse desde afuera. Cada módulo debería exponer solo lo mínimo necesario y ocultar todo lo demás detrás de una interfaz estable.</p>
+</header>
+
+<div class="nav-wrap">
+	<div class="nav" id="nav">
+		<div class="nav-pill" id="navPill"></div>
+		<button class="tab-btn active" data-idx="0">
+	<span class="tab-icon">💡</span>
+	<span class="tab-word">Concepto</span>
+</button>
+		<button class="tab-btn" data-idx="1">
+	<span class="tab-icon">🔒</span>
+	<span class="tab-word">Qué ocultar</span>
+</button>
+		<button class="tab-btn" data-idx="2">
+	<span class="tab-icon">💻</span>
+	<span class="tab-word">En el código</span>
+</button>
+		<button class="tab-btn" data-idx="3">
+	<span class="tab-icon">🔬</span>
+	<span class="tab-word">Encapsulación vs IH</span>
+</button>
+		<button class="tab-btn" data-idx="4">
+	<span class="tab-icon">⚠️</span>
+	<span class="tab-word">Trampas</span>
+</button>
+	</div>
+</div>
+
+<main>
+	<div class="panel active" id="panel-0">
+	<div class="p-header">
+      <div>
+        <div class="p-name">¿Qué es Information Hiding?</div>
+        <span class="p-tagline">Lo que no ves no te puede romper</span>
+        <p class="p-desc">Information Hiding dice que cada módulo debería <strong>ocultar sus decisiones de diseño internas</strong> detrás de una interfaz estable. Los detalles de implementación —cómo almacena datos, qué algoritmo usa, qué estructura interna tiene— no deberían ser visibles para nadie más.</p>
+        <p class="p-desc" style="margin-top:10px">El principio lo formuló <strong>David Parnas en 1972</strong> como criterio para modularizar sistemas: cada módulo debería ser responsable de ocultar una <em>decisión de diseño que es probable que cambie</em>. Si algo cambia, solo ese módulo debería verse afectado.</p>
+      </div>
+      <div class="p-letter">I</div>
+    </div>
+
+    <div class="interface-diagram">
+      <div class="diag-side">
+        <div class="diag-label" style="color:var(--accent)">Módulo interno</div>
+        <div class="diag-item diag-item-pub">● getTotal()</div>
+        <div class="diag-item diag-item-pub">● save(data)</div>
+        <div class="diag-item diag-item-pub">● isValid()</div>
+        <div style="margin-top:8px;opacity:.5">
+          <div class="diag-item diag-item-priv">◌ #items[]</div>
+          <div class="diag-item diag-item-priv">◌ #calcVat()</div>
+          <div class="diag-item diag-item-priv">◌ #dbConn</div>
+          <div class="diag-item diag-item-priv">◌ #parseRow()</div>
+        </div>
+      </div>
+      <div class="diag-center">
+        <div class="diag-wall-label">interfaz</div>
+        <div class="diag-wall"></div>
+        <div style="font-size:11px;font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:6px">pública</div>
+      </div>
+      <div class="diag-side">
+        <div class="diag-label" style="color:var(--pub)">Lo que el mundo ve</div>
+        <div class="diag-client-item">✓ getTotal()</div>
+        <div class="diag-client-item">✓ save(data)</div>
+        <div class="diag-client-item">✓ isValid()</div>
+        <div style="margin-top:12px;font-size:13px;color:var(--muted);line-height:1.65">El resto no existe para el cliente. Cambiar la implementación interna no le afecta.</div>
+      </div>
+    </div>
+
+    <div class="analogy">
+      <span class="analogy-icon">☕</span>
+      <span>Cuando usás un café de cápsula no sabés qué temperatura exacta calienta el agua, qué presión de extracción usa ni qué materiales tienen los conductos internos. Usás la interfaz —botón, taza, cápsula— y el resto está oculto. <em>Si el fabricante cambia el sistema de calentamiento en la próxima versión, vos seguís usando el mismo botón.</em></span>
+    </div>
+
+    <div class="analogy">
+      <span class="analogy-icon">🔑</span>
+      <span>Information Hiding no es solo sobre <code style="font-family:var(--mono);font-size:12px;background:var(--surface2);padding:1px 5px;border-radius:3px">private</code> y <code style="font-family:var(--mono);font-size:12px;background:var(--surface2);padding:1px 5px;border-radius:3px">public</code>. Es una <em>decisión de diseño</em>: qué aspectos del módulo son su contrato estable con el mundo, y cuáles son detalles que pueden cambiar libremente sin romper a nadie.</span>
+    </div>
+
+    <div class="tip">
+      <strong>La pregunta de Parnas</strong>
+      Al diseñar un módulo, preguntate: <em>"¿Qué decisiones de diseño podrían cambiar en el futuro?"</em> Esas son exactamente las cosas que deberías ocultar. Lo que exponés es tu contrato: debería ser estable. Lo que ocultás son tus detalles de implementación: pueden cambiar libremente.
+    </div>
+  </div>
+
+  <!-- ── QUÉ OCULTAR ── -->
+  <div class="panel" id="panel-1">
+    <div class="p-header">
+      <div>
+        <div class="p-name">¿Qué se oculta?</div>
+        <span class="p-tagline">Las decisiones que probablemente van a cambiar</span>
+        <p class="p-desc">Parnas fue muy específico: lo que hay que ocultar son las <strong>decisiones de diseño que son propensas a cambiar</strong>. No todo lo interno merece ocultarse por el principio en sí —se oculta lo que, si estuviera expuesto, crearía acoplamiento que hace costosos los cambios futuros.</p>
+      </div>
+      <div class="p-letter">H</div>
+    </div>
+
+    <div class="hide-grid">
+      <div class="hide-card">
+        <div class="hide-header">
+          <span class="hide-icon">🗄️</span>
+          <span class="hide-title">Mecanismo de almacenamiento</span>
+        </div>
+        <div class="hide-desc">Si el código externo conoce que usás PostgreSQL, una migración a MongoDB rompe todo lo que depende de ese detalle. <em>Exponé operaciones de dominio, no consultas SQL.</em></div>
+        <div class="hide-examples">
+          <div class="hide-ex"><span class="no">✗ exponer</span> db.query('SELECT * FROM orders WHERE...')</div>
+          <div class="hide-ex"><span class="yes">✓ ocultar</span> orderRepo.findByStatus('pending')</div>
+        </div>
+      </div>
+      <div class="hide-card">
+        <div class="hide-header">
+          <span class="hide-icon">⚙️</span>
+          <span class="hide-title">Algoritmos y estructuras internas</span>
+        </div>
+        <div class="hide-desc">El algoritmo de ordenamiento, la estructura de datos elegida, la fórmula de cálculo. Si cambiás de bubble sort a quicksort, nadie debería saberlo. <em>Exponé el resultado, no el proceso.</em></div>
+        <div class="hide-examples">
+          <div class="hide-ex"><span class="no">✗ exponer</span> this.#items (el array interno)</div>
+          <div class="hide-ex"><span class="yes">✓ ocultar</span> getItems() retorna copia inmutable</div>
+        </div>
+      </div>
+      <div class="hide-card">
+        <div class="hide-header">
+          <span class="hide-icon">🔌</span>
+          <span class="hide-title">Dependencias externas concretas</span>
+        </div>
+        <div class="hide-desc">La librería de email, el SDK del proveedor de pagos, el cliente de caché. Si cambiás de SendGrid a SES, solo debería cambiar el adaptador. <em>Nadie más debería enterarse.</em></div>
+        <div class="hide-examples">
+          <div class="hide-ex"><span class="no">✗ exponer</span> sendgrid.send({ to, subject, html })</div>
+          <div class="hide-ex"><span class="yes">✓ ocultar</span> mailer.sendWelcome(user)</div>
+        </div>
+      </div>
+      <div class="hide-card">
+        <div class="hide-header">
+          <span class="hide-icon">📐</span>
+          <span class="hide-title">Formato y representación de datos</span>
+        </div>
+        <div class="hide-desc">Cómo se serializa internamente un objeto, en qué unidades se almacenan los valores, qué formato tienen los IDs. <em>El contrato externo puede ser estable aunque el formato interno cambie.</em></div>
+        <div class="hide-examples">
+          <div class="hide-ex"><span class="no">✗ exponer</span> { price_cents: 4999 }</div>
+          <div class="hide-ex"><span class="yes">✓ ocultar</span> product.getPrice() → { amount, currency }</div>
+        </div>
+      </div>
+      <div class="hide-card">
+        <div class="hide-header">
+          <span class="hide-icon">🔒</span>
+          <span class="hide-title">Estado de implementación mutable</span>
+        </div>
+        <div class="hide-desc">Los campos internos de un objeto que forman su estado. Exponerlos directamente permite que código externo manipule el estado sin pasar por las reglas del objeto. <em>El estado se modifica a través de comportamiento, no de asignación directa.</em></div>
+        <div class="hide-examples">
+          <div class="hide-ex"><span class="no">✗ exponer</span> order.status = 'cancelled'</div>
+          <div class="hide-ex"><span class="yes">✓ ocultar</span> order.cancel() — valida y cambia</div>
+        </div>
+      </div>
+      <div class="hide-card">
+        <div class="hide-header">
+          <span class="hide-icon">🔧</span>
+          <span class="hide-title">Configuración y parámetros técnicos</span>
+        </div>
+        <div class="hide-desc">Timeouts, tamaños de pool, reintentos, thresholds. Son detalles operacionales que no deberían ser parte del contrato público del módulo. <em>El cliente pide comportamiento, no configura infraestructura.</em></div>
+        <div class="hide-examples">
+          <div class="hide-ex"><span class="no">✗ exponer</span> new HttpClient(timeout=5000, retries=3)</div>
+          <div class="hide-ex"><span class="yes">✓ ocultar</span> apiClient.fetchUser(id)</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>El criterio de Parnas</strong>
+      No se oculta todo lo que es "privado" mecánicamente. Se oculta lo que es una <em>decisión de diseño probable de cambiar</em>. Si un detalle es estable y exponerlo simplifica el uso del módulo, puede estar justificado. El criterio no es "¿es interno?" sino "¿qué pasa si esto cambia?"
+    </div>
+  </div>
+
+  <!-- ── EN EL CÓDIGO ── -->
+  <div class="panel" id="panel-2">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Information Hiding en el código</div>
+        <span class="p-tagline">Diseñar interfaces, no implementaciones</span>
+        <p class="p-desc">Information Hiding se aplica en cada capa: en el modificador de acceso de un campo, en el diseño de una API, en la estructura de un módulo. La pregunta siempre es la misma: <strong>¿quién necesita saber esto y por qué?</strong></p>
+      </div>
+      <div class="p-letter">i</div>
+    </div>
+
+    <div class="comparison">
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-bad"></span> Viola IH — estado expuesto</div>
+        <pre><span class="kw">class</span> <span class="cl">ShoppingCart</span> {
+  <span class="pub">items</span> = []       <span class="cm">// público 😬</span>
+  <span class="pub">total</span> = <span class="num">0</span>       <span class="cm">// público 😬</span>
+  <span class="pub">discount</span> = <span class="num">0</span>    <span class="cm">// público 😬</span>
+}
+
+<span class="cm">// El cliente puede hacer:</span>
+cart.items.<span class="fn">push</span>({ price: -<span class="num">999</span> })
+cart.total = <span class="num">0</span>  <span class="cm">// bypass gratis</span></pre>
+      </div>
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-good"></span> Respeta IH — estado encapsulado</div>
+        <pre><span class="kw">class</span> <span class="cl">ShoppingCart</span> {
+  <span class="priv">#items</span> = []     <span class="cm">// privado ✓</span>
+  <span class="priv">#discount</span> = <span class="num">0</span>   <span class="cm">// privado ✓</span>
+
+  <span class="fn">addItem</span>(item) {
+    <span class="kw">this</span>.<span class="priv">#items</span>.<span class="fn">push</span>(item)
+  }
+  <span class="fn">getTotal</span>() {
+    <span class="kw">return</span> <span class="kw">this</span>.<span class="priv">#items</span>
+      .<span class="fn">reduce</span>((s,i)=>s+i.price,<span class="num">0</span>)
+      * (<span class="num">1</span> - <span class="kw">this</span>.<span class="priv">#discount</span>)
+  }
+}</pre>
+      </div>
+    </div>
+
+    <div class="comparison">
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-bad"></span> Viola IH — implementación filtrada</div>
+        <pre><span class="cm">// El módulo expone</span>
+<span class="cm">// detalles de SQL</span>
+<span class="kw">async function</span> <span class="fn">getOrders</span>(filters) {
+  <span class="kw">return</span> db.<span class="fn">query</span>(`
+    SELECT o.*, c.name, c.email
+    FROM orders o
+    JOIN customers c ON c.id = o.cid
+    WHERE o.status = $<span class="num">1</span>
+  `, [filters.status])
+}
+<span class="cm">// el llamador recibe filas crudas</span>
+<span class="cm">// y sabe del esquema de BD 😬</span></pre>
+      </div>
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-good"></span> Respeta IH — interfaz de dominio</div>
+        <pre><span class="cm">// El módulo retorna objetos</span>
+<span class="cm">// de dominio, no filas SQL</span>
+<span class="kw">async function</span> <span class="fn">getOrders</span>(filters) {
+  <span class="kw">const</span> rows = <span class="kw">await</span> db.<span class="fn">query</span>(...)
+  <span class="kw">return</span> rows.<span class="fn">map</span>(<span class="fn">toOrder</span>)
+}
+
+<span class="cm">// toOrder() es privado al módulo
+// El esquema SQL no se filtra ✓</span></pre>
+      </div>
+    </div>
+
+    <div style="margin: 28px 0 12px;font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Modificadores de visibilidad — cuándo usar cada uno</div>
+    <table class="vis-table">
+      <thead>
+        <tr>
+          <th>Visibilidad</th>
+          <th>Quién accede</th>
+          <th>Cuándo usarla</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="badge badge-priv">private</span></td>
+          <td style="color:var(--muted)">Solo la propia clase</td>
+          <td style="color:var(--muted)">Estado interno, algoritmos, implementación. Es el default que debería usarse salvo razón explícita para ser más permisivo.</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-prot">protected</span></td>
+          <td style="color:var(--muted)">La clase y sus subclases</td>
+          <td style="color:var(--muted)">Comportamiento que las subclases necesitan extender pero que no es parte del contrato público. Usarlo con criterio —es una forma de acoplamiento con la jerarquía.</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-mod">internal / package</span></td>
+          <td style="color:var(--muted)">El mismo módulo o paquete</td>
+          <td style="color:var(--muted)">Colaboración entre clases del mismo módulo que no debería cruzar fronteras de paquete. Muy útil para Information Hiding a nivel de módulo.</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-pub">public</span></td>
+          <td style="color:var(--muted)">Cualquier código</td>
+          <td style="color:var(--muted)">El contrato estable del módulo. Solo lo que el cliente <em>necesita</em> para usar el módulo. Cuanto menos, mejor.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="tip">
+      <strong>La regla de la visibilidad mínima</strong>
+      Empezá siempre con <code>private</code>. Hacé algo más visible solo cuando tenés una razón concreta para hacerlo. Es mucho más fácil hacer algo público después que volverlo privado una vez que hay código que depende de él.
+    </div>
+  </div>
+
+  <!-- ── ENCAPSULACIÓN VS IH ── -->
+  <div class="panel" id="panel-3">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Encapsulación vs Information Hiding</div>
+        <span class="p-tagline">No son lo mismo — aunque van siempre juntos</span>
+        <p class="p-desc">Son conceptos distintos que se confunden habitualmente. <strong>Encapsulación</strong> es el mecanismo del lenguaje para agrupar datos y comportamiento. <strong>Information Hiding</strong> es el principio de diseño que decide qué ocultar y por qué. La encapsulación es la herramienta; IH es la intención.</p>
+      </div>
+      <div class="p-letter">n</div>
+    </div>
+
+    <div class="versus-grid">
+      <div class="versus-card enc-card">
+        <div class="versus-label" style="color:var(--pub)">Encapsulación</div>
+        <div class="versus-name" style="color:var(--pub)">El mecanismo</div>
+        <div class="versus-desc">
+          Agrupar datos y las operaciones que los manejan en una misma unidad —la clase. Es una <strong>característica del lenguaje</strong>: clases, objetos, métodos, campos.
+          <br><br>
+          La encapsulación te <em>da la capacidad</em> de ocultar cosas. No te dice qué ocultar ni por qué. Podés tener encapsulación perfecta (todo en clases) y violar completamente Information Hiding (todo público).
+        </div>
+        <div class="versus-footer">Lenguaje → Clases, objetos, modificadores de acceso</div>
+      </div>
+      <div class="versus-card ih-card">
+        <div class="versus-label" style="color:var(--accent)">Information Hiding</div>
+        <div class="versus-name" style="color:var(--accent)">El principio</div>
+        <div class="versus-desc">
+          Decidir conscientemente qué aspectos del módulo son públicos y cuáles son detalles de implementación que deben estar ocultos. Es una <strong>decisión de diseño</strong>.
+          <br><br>
+          IH te dice <em>qué</em> ocultar y <em>por qué</em>: las decisiones que pueden cambiar. Puede aplicarse incluso sin POO —en módulos, en APIs, en interfaces de microservicios.
+        </div>
+        <div class="versus-footer">Diseño → Contratos estables, detalles variables ocultos</div>
+      </div>
+    </div>
+
+    <div class="leaky-grid">
+      <div class="leaky-card" style="border-color:rgba(248,113,113,.2)">
+        <div class="leaky-label" style="color:#f87171">Encapsulación sin IH</div>
+        <div class="leaky-title">Todo en una clase, todo público</div>
+        <div class="leaky-desc">Los datos están agrupados en una clase pero todos los campos son públicos. <em>La herramienta existe, el principio no se aplicó.</em></div>
+      </div>
+      <div class="leaky-card" style="border-color:rgba(251,146,60,.2)">
+        <div class="leaky-label" style="color:#fb923c">IH sin encapsulación</div>
+        <div class="leaky-title">Módulos con interfaz bien definida</div>
+        <div class="leaky-desc">Un módulo de Go o de C con funciones exportadas e internas. <em>El principio aplica aunque no haya clases ni POO.</em></div>
+      </div>
+      <div class="leaky-card" style="border-color:rgba(74,222,128,.2)">
+        <div class="leaky-label" style="color:var(--accent)">Encapsulación + IH</div>
+        <div class="leaky-title">El objetivo real</div>
+        <div class="leaky-desc">Clase bien diseñada: los campos son privados, la interfaz pública es mínima y estable. <em>El mecanismo sirve al principio.</em></div>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>La distinción en una sola oración</strong>
+      Encapsulación te permite poner un candado en la puerta. Information Hiding te dice qué poner detrás de ese candado —y más importante: <em>por qué</em>.
+    </div>
+  </div>
+
+  <!-- ── TRAMPAS ── -->
+  <div class="panel" id="panel-4">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Trampas comunes</div>
+        <span class="p-tagline">Cuando la interfaz pública filtra más de lo que debería</span>
+        <p class="p-desc">Las violaciones de Information Hiding se llaman <strong>"leaky abstractions"</strong> —abstracciones que filtran detalles de implementación hacia afuera. El código que depende de esos detalles se rompe cuando la implementación cambia.</p>
+      </div>
+      <div class="p-letter">!</div>
+    </div>
+
+    <ul class="trap-list">
+      <li>
+        <span class="trap-icon">🔓</span>
+        <div>
+          <strong>Getters y setters para todos los campos</strong>
+          Agregar automáticamente <code>getX()</code> y <code>setX()</code> para cada campo de la clase no es Information Hiding —es exponer todos los campos con nombres más largos. Un setter que solo asigna un valor hace que el campo sea efectivamente público. Los métodos deberían exponer <em>comportamiento</em>, no acceso al estado interno.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">💉</span>
+        <div>
+          <strong>Tipos de implementación en la interfaz pública</strong>
+          Cuando el método público retorna un <code>ArrayList</code> en lugar de una <code>List</code>, o un <code>HashMap</code> en lugar de un <code>Map</code>, el llamador empieza a depender de que sea específicamente esa implementación. Cuando cambiás a <code>LinkedList</code> o a <code>TreeMap</code>, el código del llamador puede romperse aunque el comportamiento sea equivalente.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">📡</span>
+        <div>
+          <strong>Exponer excepciones de implementación</strong>
+          Si tu módulo de dominio lanza <code>SQLException</code> o <code>RedisException</code>, el llamador ahora sabe qué tecnología de persistencia usás. Cuando cambiás de base de datos, tenés que cambiar también el manejo de errores en todos los clientes. Las excepciones que cruzan fronteras de módulo deberían ser excepciones de dominio, no de infraestructura.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🗂️</span>
+        <div>
+          <strong>Estructura del módulo expuesta en los imports</strong>
+          Si los clientes hacen <code>import { calcVat } from './order/internal/tax/vatCalculator'</code>, conocen la estructura interna del módulo. Si reorganizás la carpeta <code>internal/</code>, rompés a todos. Los módulos deberían tener un punto de entrada único que reexporte lo que es público, ocultando la estructura interna.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🌊</span>
+        <div>
+          <strong>Retornar referencias mutables a estado interno</strong>
+          Retornar el array interno directamente permite que el llamador lo modifique sin pasar por los métodos del objeto. <code>getItems()</code> que devuelve <code>this.#items</code> rompe el encapsulamiento aunque <code>#items</code> sea privado. La solución es retornar una copia inmutable o una vista de solo lectura.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🏷️</span>
+        <div>
+          <strong>Nombres que filtran la implementación</strong>
+          Métodos como <code>saveToPostgres()</code>, <code>fetchFromRedis()</code> o <code>serializeToJSON()</code> en la interfaz pública revelan detalles de implementación en el nombre. Si cambiás de Postgres a MongoDB, el nombre del método queda mentiroso. Los contratos públicos deberían hablar el lenguaje del dominio: <code>persist()</code>, <code>getFromCache()</code>, <code>serialize()</code>.
+        </div>
+      </li>
+    </ul>
+
+    <div class="tip">
+      <strong>El test del reemplazo libre</strong>
+      Si podés cambiar la implementación interna de un módulo —el algoritmo, la base de datos, la librería, la estructura de datos— sin que ningún código externo note la diferencia ni necesite modificarse, Information Hiding está bien aplicado. Si algún cliente se rompe por un cambio puramente interno, hay una abstracción con pérdidas.
+    </div>
+</div>
+
+	<div class="panel" id="panel-1">
+	<div class="p-header">
+      <div>
+        <div class="p-name">¿Qué se oculta?</div>
+        <span class="p-tagline">Las decisiones que probablemente van a cambiar</span>
+        <p class="p-desc">Parnas fue muy específico: lo que hay que ocultar son las <strong>decisiones de diseño que son propensas a cambiar</strong>. No todo lo interno merece ocultarse por el principio en sí —se oculta lo que, si estuviera expuesto, crearía acoplamiento que hace costosos los cambios futuros.</p>
+      </div>
+      <div class="p-letter">H</div>
+    </div>
+
+    <div class="hide-grid">
+      <div class="hide-card">
+        <div class="hide-header">
+          <span class="hide-icon">🗄️</span>
+          <span class="hide-title">Mecanismo de almacenamiento</span>
+        </div>
+        <div class="hide-desc">Si el código externo conoce que usás PostgreSQL, una migración a MongoDB rompe todo lo que depende de ese detalle. <em>Exponé operaciones de dominio, no consultas SQL.</em></div>
+        <div class="hide-examples">
+          <div class="hide-ex"><span class="no">✗ exponer</span> db.query('SELECT * FROM orders WHERE...')</div>
+          <div class="hide-ex"><span class="yes">✓ ocultar</span> orderRepo.findByStatus('pending')</div>
+        </div>
+      </div>
+      <div class="hide-card">
+        <div class="hide-header">
+          <span class="hide-icon">⚙️</span>
+          <span class="hide-title">Algoritmos y estructuras internas</span>
+        </div>
+        <div class="hide-desc">El algoritmo de ordenamiento, la estructura de datos elegida, la fórmula de cálculo. Si cambiás de bubble sort a quicksort, nadie debería saberlo. <em>Exponé el resultado, no el proceso.</em></div>
+        <div class="hide-examples">
+          <div class="hide-ex"><span class="no">✗ exponer</span> this.#items (el array interno)</div>
+          <div class="hide-ex"><span class="yes">✓ ocultar</span> getItems() retorna copia inmutable</div>
+        </div>
+      </div>
+      <div class="hide-card">
+        <div class="hide-header">
+          <span class="hide-icon">🔌</span>
+          <span class="hide-title">Dependencias externas concretas</span>
+        </div>
+        <div class="hide-desc">La librería de email, el SDK del proveedor de pagos, el cliente de caché. Si cambiás de SendGrid a SES, solo debería cambiar el adaptador. <em>Nadie más debería enterarse.</em></div>
+        <div class="hide-examples">
+          <div class="hide-ex"><span class="no">✗ exponer</span> sendgrid.send({ to, subject, html })</div>
+          <div class="hide-ex"><span class="yes">✓ ocultar</span> mailer.sendWelcome(user)</div>
+        </div>
+      </div>
+      <div class="hide-card">
+        <div class="hide-header">
+          <span class="hide-icon">📐</span>
+          <span class="hide-title">Formato y representación de datos</span>
+        </div>
+        <div class="hide-desc">Cómo se serializa internamente un objeto, en qué unidades se almacenan los valores, qué formato tienen los IDs. <em>El contrato externo puede ser estable aunque el formato interno cambie.</em></div>
+        <div class="hide-examples">
+          <div class="hide-ex"><span class="no">✗ exponer</span> { price_cents: 4999 }</div>
+          <div class="hide-ex"><span class="yes">✓ ocultar</span> product.getPrice() → { amount, currency }</div>
+        </div>
+      </div>
+      <div class="hide-card">
+        <div class="hide-header">
+          <span class="hide-icon">🔒</span>
+          <span class="hide-title">Estado de implementación mutable</span>
+        </div>
+        <div class="hide-desc">Los campos internos de un objeto que forman su estado. Exponerlos directamente permite que código externo manipule el estado sin pasar por las reglas del objeto. <em>El estado se modifica a través de comportamiento, no de asignación directa.</em></div>
+        <div class="hide-examples">
+          <div class="hide-ex"><span class="no">✗ exponer</span> order.status = 'cancelled'</div>
+          <div class="hide-ex"><span class="yes">✓ ocultar</span> order.cancel() — valida y cambia</div>
+        </div>
+      </div>
+      <div class="hide-card">
+        <div class="hide-header">
+          <span class="hide-icon">🔧</span>
+          <span class="hide-title">Configuración y parámetros técnicos</span>
+        </div>
+        <div class="hide-desc">Timeouts, tamaños de pool, reintentos, thresholds. Son detalles operacionales que no deberían ser parte del contrato público del módulo. <em>El cliente pide comportamiento, no configura infraestructura.</em></div>
+        <div class="hide-examples">
+          <div class="hide-ex"><span class="no">✗ exponer</span> new HttpClient(timeout=5000, retries=3)</div>
+          <div class="hide-ex"><span class="yes">✓ ocultar</span> apiClient.fetchUser(id)</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>El criterio de Parnas</strong>
+      No se oculta todo lo que es "privado" mecánicamente. Se oculta lo que es una <em>decisión de diseño probable de cambiar</em>. Si un detalle es estable y exponerlo simplifica el uso del módulo, puede estar justificado. El criterio no es "¿es interno?" sino "¿qué pasa si esto cambia?"
+    </div>
+  </div>
+
+  <!-- ── EN EL CÓDIGO ── -->
+  <div class="panel" id="panel-2">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Information Hiding en el código</div>
+        <span class="p-tagline">Diseñar interfaces, no implementaciones</span>
+        <p class="p-desc">Information Hiding se aplica en cada capa: en el modificador de acceso de un campo, en el diseño de una API, en la estructura de un módulo. La pregunta siempre es la misma: <strong>¿quién necesita saber esto y por qué?</strong></p>
+      </div>
+      <div class="p-letter">i</div>
+    </div>
+
+    <div class="comparison">
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-bad"></span> Viola IH — estado expuesto</div>
+        <pre><span class="kw">class</span> <span class="cl">ShoppingCart</span> {
+  <span class="pub">items</span> = []       <span class="cm">// público 😬</span>
+  <span class="pub">total</span> = <span class="num">0</span>       <span class="cm">// público 😬</span>
+  <span class="pub">discount</span> = <span class="num">0</span>    <span class="cm">// público 😬</span>
+}
+
+<span class="cm">// El cliente puede hacer:</span>
+cart.items.<span class="fn">push</span>({ price: -<span class="num">999</span> })
+cart.total = <span class="num">0</span>  <span class="cm">// bypass gratis</span></pre>
+      </div>
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-good"></span> Respeta IH — estado encapsulado</div>
+        <pre><span class="kw">class</span> <span class="cl">ShoppingCart</span> {
+  <span class="priv">#items</span> = []     <span class="cm">// privado ✓</span>
+  <span class="priv">#discount</span> = <span class="num">0</span>   <span class="cm">// privado ✓</span>
+
+  <span class="fn">addItem</span>(item) {
+    <span class="kw">this</span>.<span class="priv">#items</span>.<span class="fn">push</span>(item)
+  }
+  <span class="fn">getTotal</span>() {
+    <span class="kw">return</span> <span class="kw">this</span>.<span class="priv">#items</span>
+      .<span class="fn">reduce</span>((s,i)=>s+i.price,<span class="num">0</span>)
+      * (<span class="num">1</span> - <span class="kw">this</span>.<span class="priv">#discount</span>)
+  }
+}</pre>
+      </div>
+    </div>
+
+    <div class="comparison">
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-bad"></span> Viola IH — implementación filtrada</div>
+        <pre><span class="cm">// El módulo expone</span>
+<span class="cm">// detalles de SQL</span>
+<span class="kw">async function</span> <span class="fn">getOrders</span>(filters) {
+  <span class="kw">return</span> db.<span class="fn">query</span>(`
+    SELECT o.*, c.name, c.email
+    FROM orders o
+    JOIN customers c ON c.id = o.cid
+    WHERE o.status = $<span class="num">1</span>
+  `, [filters.status])
+}
+<span class="cm">// el llamador recibe filas crudas</span>
+<span class="cm">// y sabe del esquema de BD 😬</span></pre>
+      </div>
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-good"></span> Respeta IH — interfaz de dominio</div>
+        <pre><span class="cm">// El módulo retorna objetos</span>
+<span class="cm">// de dominio, no filas SQL</span>
+<span class="kw">async function</span> <span class="fn">getOrders</span>(filters) {
+  <span class="kw">const</span> rows = <span class="kw">await</span> db.<span class="fn">query</span>(...)
+  <span class="kw">return</span> rows.<span class="fn">map</span>(<span class="fn">toOrder</span>)
+}
+
+<span class="cm">// toOrder() es privado al módulo
+// El esquema SQL no se filtra ✓</span></pre>
+      </div>
+    </div>
+
+    <div style="margin: 28px 0 12px;font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Modificadores de visibilidad — cuándo usar cada uno</div>
+    <table class="vis-table">
+      <thead>
+        <tr>
+          <th>Visibilidad</th>
+          <th>Quién accede</th>
+          <th>Cuándo usarla</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="badge badge-priv">private</span></td>
+          <td style="color:var(--muted)">Solo la propia clase</td>
+          <td style="color:var(--muted)">Estado interno, algoritmos, implementación. Es el default que debería usarse salvo razón explícita para ser más permisivo.</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-prot">protected</span></td>
+          <td style="color:var(--muted)">La clase y sus subclases</td>
+          <td style="color:var(--muted)">Comportamiento que las subclases necesitan extender pero que no es parte del contrato público. Usarlo con criterio —es una forma de acoplamiento con la jerarquía.</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-mod">internal / package</span></td>
+          <td style="color:var(--muted)">El mismo módulo o paquete</td>
+          <td style="color:var(--muted)">Colaboración entre clases del mismo módulo que no debería cruzar fronteras de paquete. Muy útil para Information Hiding a nivel de módulo.</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-pub">public</span></td>
+          <td style="color:var(--muted)">Cualquier código</td>
+          <td style="color:var(--muted)">El contrato estable del módulo. Solo lo que el cliente <em>necesita</em> para usar el módulo. Cuanto menos, mejor.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="tip">
+      <strong>La regla de la visibilidad mínima</strong>
+      Empezá siempre con <code>private</code>. Hacé algo más visible solo cuando tenés una razón concreta para hacerlo. Es mucho más fácil hacer algo público después que volverlo privado una vez que hay código que depende de él.
+    </div>
+  </div>
+
+  <!-- ── ENCAPSULACIÓN VS IH ── -->
+  <div class="panel" id="panel-3">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Encapsulación vs Information Hiding</div>
+        <span class="p-tagline">No son lo mismo — aunque van siempre juntos</span>
+        <p class="p-desc">Son conceptos distintos que se confunden habitualmente. <strong>Encapsulación</strong> es el mecanismo del lenguaje para agrupar datos y comportamiento. <strong>Information Hiding</strong> es el principio de diseño que decide qué ocultar y por qué. La encapsulación es la herramienta; IH es la intención.</p>
+      </div>
+      <div class="p-letter">n</div>
+    </div>
+
+    <div class="versus-grid">
+      <div class="versus-card enc-card">
+        <div class="versus-label" style="color:var(--pub)">Encapsulación</div>
+        <div class="versus-name" style="color:var(--pub)">El mecanismo</div>
+        <div class="versus-desc">
+          Agrupar datos y las operaciones que los manejan en una misma unidad —la clase. Es una <strong>característica del lenguaje</strong>: clases, objetos, métodos, campos.
+          <br><br>
+          La encapsulación te <em>da la capacidad</em> de ocultar cosas. No te dice qué ocultar ni por qué. Podés tener encapsulación perfecta (todo en clases) y violar completamente Information Hiding (todo público).
+        </div>
+        <div class="versus-footer">Lenguaje → Clases, objetos, modificadores de acceso</div>
+      </div>
+      <div class="versus-card ih-card">
+        <div class="versus-label" style="color:var(--accent)">Information Hiding</div>
+        <div class="versus-name" style="color:var(--accent)">El principio</div>
+        <div class="versus-desc">
+          Decidir conscientemente qué aspectos del módulo son públicos y cuáles son detalles de implementación que deben estar ocultos. Es una <strong>decisión de diseño</strong>.
+          <br><br>
+          IH te dice <em>qué</em> ocultar y <em>por qué</em>: las decisiones que pueden cambiar. Puede aplicarse incluso sin POO —en módulos, en APIs, en interfaces de microservicios.
+        </div>
+        <div class="versus-footer">Diseño → Contratos estables, detalles variables ocultos</div>
+      </div>
+    </div>
+
+    <div class="leaky-grid">
+      <div class="leaky-card" style="border-color:rgba(248,113,113,.2)">
+        <div class="leaky-label" style="color:#f87171">Encapsulación sin IH</div>
+        <div class="leaky-title">Todo en una clase, todo público</div>
+        <div class="leaky-desc">Los datos están agrupados en una clase pero todos los campos son públicos. <em>La herramienta existe, el principio no se aplicó.</em></div>
+      </div>
+      <div class="leaky-card" style="border-color:rgba(251,146,60,.2)">
+        <div class="leaky-label" style="color:#fb923c">IH sin encapsulación</div>
+        <div class="leaky-title">Módulos con interfaz bien definida</div>
+        <div class="leaky-desc">Un módulo de Go o de C con funciones exportadas e internas. <em>El principio aplica aunque no haya clases ni POO.</em></div>
+      </div>
+      <div class="leaky-card" style="border-color:rgba(74,222,128,.2)">
+        <div class="leaky-label" style="color:var(--accent)">Encapsulación + IH</div>
+        <div class="leaky-title">El objetivo real</div>
+        <div class="leaky-desc">Clase bien diseñada: los campos son privados, la interfaz pública es mínima y estable. <em>El mecanismo sirve al principio.</em></div>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>La distinción en una sola oración</strong>
+      Encapsulación te permite poner un candado en la puerta. Information Hiding te dice qué poner detrás de ese candado —y más importante: <em>por qué</em>.
+    </div>
+  </div>
+
+  <!-- ── TRAMPAS ── -->
+  <div class="panel" id="panel-4">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Trampas comunes</div>
+        <span class="p-tagline">Cuando la interfaz pública filtra más de lo que debería</span>
+        <p class="p-desc">Las violaciones de Information Hiding se llaman <strong>"leaky abstractions"</strong> —abstracciones que filtran detalles de implementación hacia afuera. El código que depende de esos detalles se rompe cuando la implementación cambia.</p>
+      </div>
+      <div class="p-letter">!</div>
+    </div>
+
+    <ul class="trap-list">
+      <li>
+        <span class="trap-icon">🔓</span>
+        <div>
+          <strong>Getters y setters para todos los campos</strong>
+          Agregar automáticamente <code>getX()</code> y <code>setX()</code> para cada campo de la clase no es Information Hiding —es exponer todos los campos con nombres más largos. Un setter que solo asigna un valor hace que el campo sea efectivamente público. Los métodos deberían exponer <em>comportamiento</em>, no acceso al estado interno.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">💉</span>
+        <div>
+          <strong>Tipos de implementación en la interfaz pública</strong>
+          Cuando el método público retorna un <code>ArrayList</code> en lugar de una <code>List</code>, o un <code>HashMap</code> en lugar de un <code>Map</code>, el llamador empieza a depender de que sea específicamente esa implementación. Cuando cambiás a <code>LinkedList</code> o a <code>TreeMap</code>, el código del llamador puede romperse aunque el comportamiento sea equivalente.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">📡</span>
+        <div>
+          <strong>Exponer excepciones de implementación</strong>
+          Si tu módulo de dominio lanza <code>SQLException</code> o <code>RedisException</code>, el llamador ahora sabe qué tecnología de persistencia usás. Cuando cambiás de base de datos, tenés que cambiar también el manejo de errores en todos los clientes. Las excepciones que cruzan fronteras de módulo deberían ser excepciones de dominio, no de infraestructura.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🗂️</span>
+        <div>
+          <strong>Estructura del módulo expuesta en los imports</strong>
+          Si los clientes hacen <code>import { calcVat } from './order/internal/tax/vatCalculator'</code>, conocen la estructura interna del módulo. Si reorganizás la carpeta <code>internal/</code>, rompés a todos. Los módulos deberían tener un punto de entrada único que reexporte lo que es público, ocultando la estructura interna.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🌊</span>
+        <div>
+          <strong>Retornar referencias mutables a estado interno</strong>
+          Retornar el array interno directamente permite que el llamador lo modifique sin pasar por los métodos del objeto. <code>getItems()</code> que devuelve <code>this.#items</code> rompe el encapsulamiento aunque <code>#items</code> sea privado. La solución es retornar una copia inmutable o una vista de solo lectura.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🏷️</span>
+        <div>
+          <strong>Nombres que filtran la implementación</strong>
+          Métodos como <code>saveToPostgres()</code>, <code>fetchFromRedis()</code> o <code>serializeToJSON()</code> en la interfaz pública revelan detalles de implementación en el nombre. Si cambiás de Postgres a MongoDB, el nombre del método queda mentiroso. Los contratos públicos deberían hablar el lenguaje del dominio: <code>persist()</code>, <code>getFromCache()</code>, <code>serialize()</code>.
+        </div>
+      </li>
+    </ul>
+
+    <div class="tip">
+      <strong>El test del reemplazo libre</strong>
+      Si podés cambiar la implementación interna de un módulo —el algoritmo, la base de datos, la librería, la estructura de datos— sin que ningún código externo note la diferencia ni necesite modificarse, Information Hiding está bien aplicado. Si algún cliente se rompe por un cambio puramente interno, hay una abstracción con pérdidas.
+    </div>
+</div>
+
+	<div class="panel" id="panel-2">
+	<div class="p-header">
+      <div>
+        <div class="p-name">Information Hiding en el código</div>
+        <span class="p-tagline">Diseñar interfaces, no implementaciones</span>
+        <p class="p-desc">Information Hiding se aplica en cada capa: en el modificador de acceso de un campo, en el diseño de una API, en la estructura de un módulo. La pregunta siempre es la misma: <strong>¿quién necesita saber esto y por qué?</strong></p>
+      </div>
+      <div class="p-letter">i</div>
+    </div>
+
+    <div class="comparison">
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-bad"></span> Viola IH — estado expuesto</div>
+        <pre><span class="kw">class</span> <span class="cl">ShoppingCart</span> {
+  <span class="pub">items</span> = []       <span class="cm">// público 😬</span>
+  <span class="pub">total</span> = <span class="num">0</span>       <span class="cm">// público 😬</span>
+  <span class="pub">discount</span> = <span class="num">0</span>    <span class="cm">// público 😬</span>
+}
+
+<span class="cm">// El cliente puede hacer:</span>
+cart.items.<span class="fn">push</span>({ price: -<span class="num">999</span> })
+cart.total = <span class="num">0</span>  <span class="cm">// bypass gratis</span></pre>
+      </div>
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-good"></span> Respeta IH — estado encapsulado</div>
+        <pre><span class="kw">class</span> <span class="cl">ShoppingCart</span> {
+  <span class="priv">#items</span> = []     <span class="cm">// privado ✓</span>
+  <span class="priv">#discount</span> = <span class="num">0</span>   <span class="cm">// privado ✓</span>
+
+  <span class="fn">addItem</span>(item) {
+    <span class="kw">this</span>.<span class="priv">#items</span>.<span class="fn">push</span>(item)
+  }
+  <span class="fn">getTotal</span>() {
+    <span class="kw">return</span> <span class="kw">this</span>.<span class="priv">#items</span>
+      .<span class="fn">reduce</span>((s,i)=>s+i.price,<span class="num">0</span>)
+      * (<span class="num">1</span> - <span class="kw">this</span>.<span class="priv">#discount</span>)
+  }
+}</pre>
+      </div>
+    </div>
+
+    <div class="comparison">
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-bad"></span> Viola IH — implementación filtrada</div>
+        <pre><span class="cm">// El módulo expone</span>
+<span class="cm">// detalles de SQL</span>
+<span class="kw">async function</span> <span class="fn">getOrders</span>(filters) {
+  <span class="kw">return</span> db.<span class="fn">query</span>(`
+    SELECT o.*, c.name, c.email
+    FROM orders o
+    JOIN customers c ON c.id = o.cid
+    WHERE o.status = $<span class="num">1</span>
+  `, [filters.status])
+}
+<span class="cm">// el llamador recibe filas crudas</span>
+<span class="cm">// y sabe del esquema de BD 😬</span></pre>
+      </div>
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-good"></span> Respeta IH — interfaz de dominio</div>
+        <pre><span class="cm">// El módulo retorna objetos</span>
+<span class="cm">// de dominio, no filas SQL</span>
+<span class="kw">async function</span> <span class="fn">getOrders</span>(filters) {
+  <span class="kw">const</span> rows = <span class="kw">await</span> db.<span class="fn">query</span>(...)
+  <span class="kw">return</span> rows.<span class="fn">map</span>(<span class="fn">toOrder</span>)
+}
+
+<span class="cm">// toOrder() es privado al módulo
+// El esquema SQL no se filtra ✓</span></pre>
+      </div>
+    </div>
+
+    <div style="margin: 28px 0 12px;font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)">Modificadores de visibilidad — cuándo usar cada uno</div>
+    <table class="vis-table">
+      <thead>
+        <tr>
+          <th>Visibilidad</th>
+          <th>Quién accede</th>
+          <th>Cuándo usarla</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="badge badge-priv">private</span></td>
+          <td style="color:var(--muted)">Solo la propia clase</td>
+          <td style="color:var(--muted)">Estado interno, algoritmos, implementación. Es el default que debería usarse salvo razón explícita para ser más permisivo.</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-prot">protected</span></td>
+          <td style="color:var(--muted)">La clase y sus subclases</td>
+          <td style="color:var(--muted)">Comportamiento que las subclases necesitan extender pero que no es parte del contrato público. Usarlo con criterio —es una forma de acoplamiento con la jerarquía.</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-mod">internal / package</span></td>
+          <td style="color:var(--muted)">El mismo módulo o paquete</td>
+          <td style="color:var(--muted)">Colaboración entre clases del mismo módulo que no debería cruzar fronteras de paquete. Muy útil para Information Hiding a nivel de módulo.</td>
+        </tr>
+        <tr>
+          <td><span class="badge badge-pub">public</span></td>
+          <td style="color:var(--muted)">Cualquier código</td>
+          <td style="color:var(--muted)">El contrato estable del módulo. Solo lo que el cliente <em>necesita</em> para usar el módulo. Cuanto menos, mejor.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="tip">
+      <strong>La regla de la visibilidad mínima</strong>
+      Empezá siempre con <code>private</code>. Hacé algo más visible solo cuando tenés una razón concreta para hacerlo. Es mucho más fácil hacer algo público después que volverlo privado una vez que hay código que depende de él.
+    </div>
+  </div>
+
+  <!-- ── ENCAPSULACIÓN VS IH ── -->
+  <div class="panel" id="panel-3">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Encapsulación vs Information Hiding</div>
+        <span class="p-tagline">No son lo mismo — aunque van siempre juntos</span>
+        <p class="p-desc">Son conceptos distintos que se confunden habitualmente. <strong>Encapsulación</strong> es el mecanismo del lenguaje para agrupar datos y comportamiento. <strong>Information Hiding</strong> es el principio de diseño que decide qué ocultar y por qué. La encapsulación es la herramienta; IH es la intención.</p>
+      </div>
+      <div class="p-letter">n</div>
+    </div>
+
+    <div class="versus-grid">
+      <div class="versus-card enc-card">
+        <div class="versus-label" style="color:var(--pub)">Encapsulación</div>
+        <div class="versus-name" style="color:var(--pub)">El mecanismo</div>
+        <div class="versus-desc">
+          Agrupar datos y las operaciones que los manejan en una misma unidad —la clase. Es una <strong>característica del lenguaje</strong>: clases, objetos, métodos, campos.
+          <br><br>
+          La encapsulación te <em>da la capacidad</em> de ocultar cosas. No te dice qué ocultar ni por qué. Podés tener encapsulación perfecta (todo en clases) y violar completamente Information Hiding (todo público).
+        </div>
+        <div class="versus-footer">Lenguaje → Clases, objetos, modificadores de acceso</div>
+      </div>
+      <div class="versus-card ih-card">
+        <div class="versus-label" style="color:var(--accent)">Information Hiding</div>
+        <div class="versus-name" style="color:var(--accent)">El principio</div>
+        <div class="versus-desc">
+          Decidir conscientemente qué aspectos del módulo son públicos y cuáles son detalles de implementación que deben estar ocultos. Es una <strong>decisión de diseño</strong>.
+          <br><br>
+          IH te dice <em>qué</em> ocultar y <em>por qué</em>: las decisiones que pueden cambiar. Puede aplicarse incluso sin POO —en módulos, en APIs, en interfaces de microservicios.
+        </div>
+        <div class="versus-footer">Diseño → Contratos estables, detalles variables ocultos</div>
+      </div>
+    </div>
+
+    <div class="leaky-grid">
+      <div class="leaky-card" style="border-color:rgba(248,113,113,.2)">
+        <div class="leaky-label" style="color:#f87171">Encapsulación sin IH</div>
+        <div class="leaky-title">Todo en una clase, todo público</div>
+        <div class="leaky-desc">Los datos están agrupados en una clase pero todos los campos son públicos. <em>La herramienta existe, el principio no se aplicó.</em></div>
+      </div>
+      <div class="leaky-card" style="border-color:rgba(251,146,60,.2)">
+        <div class="leaky-label" style="color:#fb923c">IH sin encapsulación</div>
+        <div class="leaky-title">Módulos con interfaz bien definida</div>
+        <div class="leaky-desc">Un módulo de Go o de C con funciones exportadas e internas. <em>El principio aplica aunque no haya clases ni POO.</em></div>
+      </div>
+      <div class="leaky-card" style="border-color:rgba(74,222,128,.2)">
+        <div class="leaky-label" style="color:var(--accent)">Encapsulación + IH</div>
+        <div class="leaky-title">El objetivo real</div>
+        <div class="leaky-desc">Clase bien diseñada: los campos son privados, la interfaz pública es mínima y estable. <em>El mecanismo sirve al principio.</em></div>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>La distinción en una sola oración</strong>
+      Encapsulación te permite poner un candado en la puerta. Information Hiding te dice qué poner detrás de ese candado —y más importante: <em>por qué</em>.
+    </div>
+  </div>
+
+  <!-- ── TRAMPAS ── -->
+  <div class="panel" id="panel-4">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Trampas comunes</div>
+        <span class="p-tagline">Cuando la interfaz pública filtra más de lo que debería</span>
+        <p class="p-desc">Las violaciones de Information Hiding se llaman <strong>"leaky abstractions"</strong> —abstracciones que filtran detalles de implementación hacia afuera. El código que depende de esos detalles se rompe cuando la implementación cambia.</p>
+      </div>
+      <div class="p-letter">!</div>
+    </div>
+
+    <ul class="trap-list">
+      <li>
+        <span class="trap-icon">🔓</span>
+        <div>
+          <strong>Getters y setters para todos los campos</strong>
+          Agregar automáticamente <code>getX()</code> y <code>setX()</code> para cada campo de la clase no es Information Hiding —es exponer todos los campos con nombres más largos. Un setter que solo asigna un valor hace que el campo sea efectivamente público. Los métodos deberían exponer <em>comportamiento</em>, no acceso al estado interno.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">💉</span>
+        <div>
+          <strong>Tipos de implementación en la interfaz pública</strong>
+          Cuando el método público retorna un <code>ArrayList</code> en lugar de una <code>List</code>, o un <code>HashMap</code> en lugar de un <code>Map</code>, el llamador empieza a depender de que sea específicamente esa implementación. Cuando cambiás a <code>LinkedList</code> o a <code>TreeMap</code>, el código del llamador puede romperse aunque el comportamiento sea equivalente.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">📡</span>
+        <div>
+          <strong>Exponer excepciones de implementación</strong>
+          Si tu módulo de dominio lanza <code>SQLException</code> o <code>RedisException</code>, el llamador ahora sabe qué tecnología de persistencia usás. Cuando cambiás de base de datos, tenés que cambiar también el manejo de errores en todos los clientes. Las excepciones que cruzan fronteras de módulo deberían ser excepciones de dominio, no de infraestructura.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🗂️</span>
+        <div>
+          <strong>Estructura del módulo expuesta en los imports</strong>
+          Si los clientes hacen <code>import { calcVat } from './order/internal/tax/vatCalculator'</code>, conocen la estructura interna del módulo. Si reorganizás la carpeta <code>internal/</code>, rompés a todos. Los módulos deberían tener un punto de entrada único que reexporte lo que es público, ocultando la estructura interna.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🌊</span>
+        <div>
+          <strong>Retornar referencias mutables a estado interno</strong>
+          Retornar el array interno directamente permite que el llamador lo modifique sin pasar por los métodos del objeto. <code>getItems()</code> que devuelve <code>this.#items</code> rompe el encapsulamiento aunque <code>#items</code> sea privado. La solución es retornar una copia inmutable o una vista de solo lectura.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🏷️</span>
+        <div>
+          <strong>Nombres que filtran la implementación</strong>
+          Métodos como <code>saveToPostgres()</code>, <code>fetchFromRedis()</code> o <code>serializeToJSON()</code> en la interfaz pública revelan detalles de implementación en el nombre. Si cambiás de Postgres a MongoDB, el nombre del método queda mentiroso. Los contratos públicos deberían hablar el lenguaje del dominio: <code>persist()</code>, <code>getFromCache()</code>, <code>serialize()</code>.
+        </div>
+      </li>
+    </ul>
+
+    <div class="tip">
+      <strong>El test del reemplazo libre</strong>
+      Si podés cambiar la implementación interna de un módulo —el algoritmo, la base de datos, la librería, la estructura de datos— sin que ningún código externo note la diferencia ni necesite modificarse, Information Hiding está bien aplicado. Si algún cliente se rompe por un cambio puramente interno, hay una abstracción con pérdidas.
+    </div>
+</div>
+
+	<div class="panel" id="panel-3">
+	<div class="p-header">
+      <div>
+        <div class="p-name">Encapsulación vs Information Hiding</div>
+        <span class="p-tagline">No son lo mismo — aunque van siempre juntos</span>
+        <p class="p-desc">Son conceptos distintos que se confunden habitualmente. <strong>Encapsulación</strong> es el mecanismo del lenguaje para agrupar datos y comportamiento. <strong>Information Hiding</strong> es el principio de diseño que decide qué ocultar y por qué. La encapsulación es la herramienta; IH es la intención.</p>
+      </div>
+      <div class="p-letter">n</div>
+    </div>
+
+    <div class="versus-grid">
+      <div class="versus-card enc-card">
+        <div class="versus-label" style="color:var(--pub)">Encapsulación</div>
+        <div class="versus-name" style="color:var(--pub)">El mecanismo</div>
+        <div class="versus-desc">
+          Agrupar datos y las operaciones que los manejan en una misma unidad —la clase. Es una <strong>característica del lenguaje</strong>: clases, objetos, métodos, campos.
+          <br><br>
+          La encapsulación te <em>da la capacidad</em> de ocultar cosas. No te dice qué ocultar ni por qué. Podés tener encapsulación perfecta (todo en clases) y violar completamente Information Hiding (todo público).
+        </div>
+        <div class="versus-footer">Lenguaje → Clases, objetos, modificadores de acceso</div>
+      </div>
+      <div class="versus-card ih-card">
+        <div class="versus-label" style="color:var(--accent)">Information Hiding</div>
+        <div class="versus-name" style="color:var(--accent)">El principio</div>
+        <div class="versus-desc">
+          Decidir conscientemente qué aspectos del módulo son públicos y cuáles son detalles de implementación que deben estar ocultos. Es una <strong>decisión de diseño</strong>.
+          <br><br>
+          IH te dice <em>qué</em> ocultar y <em>por qué</em>: las decisiones que pueden cambiar. Puede aplicarse incluso sin POO —en módulos, en APIs, en interfaces de microservicios.
+        </div>
+        <div class="versus-footer">Diseño → Contratos estables, detalles variables ocultos</div>
+      </div>
+    </div>
+
+    <div class="leaky-grid">
+      <div class="leaky-card" style="border-color:rgba(248,113,113,.2)">
+        <div class="leaky-label" style="color:#f87171">Encapsulación sin IH</div>
+        <div class="leaky-title">Todo en una clase, todo público</div>
+        <div class="leaky-desc">Los datos están agrupados en una clase pero todos los campos son públicos. <em>La herramienta existe, el principio no se aplicó.</em></div>
+      </div>
+      <div class="leaky-card" style="border-color:rgba(251,146,60,.2)">
+        <div class="leaky-label" style="color:#fb923c">IH sin encapsulación</div>
+        <div class="leaky-title">Módulos con interfaz bien definida</div>
+        <div class="leaky-desc">Un módulo de Go o de C con funciones exportadas e internas. <em>El principio aplica aunque no haya clases ni POO.</em></div>
+      </div>
+      <div class="leaky-card" style="border-color:rgba(74,222,128,.2)">
+        <div class="leaky-label" style="color:var(--accent)">Encapsulación + IH</div>
+        <div class="leaky-title">El objetivo real</div>
+        <div class="leaky-desc">Clase bien diseñada: los campos son privados, la interfaz pública es mínima y estable. <em>El mecanismo sirve al principio.</em></div>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>La distinción en una sola oración</strong>
+      Encapsulación te permite poner un candado en la puerta. Information Hiding te dice qué poner detrás de ese candado —y más importante: <em>por qué</em>.
+    </div>
+  </div>
+
+  <!-- ── TRAMPAS ── -->
+  <div class="panel" id="panel-4">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Trampas comunes</div>
+        <span class="p-tagline">Cuando la interfaz pública filtra más de lo que debería</span>
+        <p class="p-desc">Las violaciones de Information Hiding se llaman <strong>"leaky abstractions"</strong> —abstracciones que filtran detalles de implementación hacia afuera. El código que depende de esos detalles se rompe cuando la implementación cambia.</p>
+      </div>
+      <div class="p-letter">!</div>
+    </div>
+
+    <ul class="trap-list">
+      <li>
+        <span class="trap-icon">🔓</span>
+        <div>
+          <strong>Getters y setters para todos los campos</strong>
+          Agregar automáticamente <code>getX()</code> y <code>setX()</code> para cada campo de la clase no es Information Hiding —es exponer todos los campos con nombres más largos. Un setter que solo asigna un valor hace que el campo sea efectivamente público. Los métodos deberían exponer <em>comportamiento</em>, no acceso al estado interno.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">💉</span>
+        <div>
+          <strong>Tipos de implementación en la interfaz pública</strong>
+          Cuando el método público retorna un <code>ArrayList</code> en lugar de una <code>List</code>, o un <code>HashMap</code> en lugar de un <code>Map</code>, el llamador empieza a depender de que sea específicamente esa implementación. Cuando cambiás a <code>LinkedList</code> o a <code>TreeMap</code>, el código del llamador puede romperse aunque el comportamiento sea equivalente.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">📡</span>
+        <div>
+          <strong>Exponer excepciones de implementación</strong>
+          Si tu módulo de dominio lanza <code>SQLException</code> o <code>RedisException</code>, el llamador ahora sabe qué tecnología de persistencia usás. Cuando cambiás de base de datos, tenés que cambiar también el manejo de errores en todos los clientes. Las excepciones que cruzan fronteras de módulo deberían ser excepciones de dominio, no de infraestructura.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🗂️</span>
+        <div>
+          <strong>Estructura del módulo expuesta en los imports</strong>
+          Si los clientes hacen <code>import { calcVat } from './order/internal/tax/vatCalculator'</code>, conocen la estructura interna del módulo. Si reorganizás la carpeta <code>internal/</code>, rompés a todos. Los módulos deberían tener un punto de entrada único que reexporte lo que es público, ocultando la estructura interna.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🌊</span>
+        <div>
+          <strong>Retornar referencias mutables a estado interno</strong>
+          Retornar el array interno directamente permite que el llamador lo modifique sin pasar por los métodos del objeto. <code>getItems()</code> que devuelve <code>this.#items</code> rompe el encapsulamiento aunque <code>#items</code> sea privado. La solución es retornar una copia inmutable o una vista de solo lectura.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🏷️</span>
+        <div>
+          <strong>Nombres que filtran la implementación</strong>
+          Métodos como <code>saveToPostgres()</code>, <code>fetchFromRedis()</code> o <code>serializeToJSON()</code> en la interfaz pública revelan detalles de implementación en el nombre. Si cambiás de Postgres a MongoDB, el nombre del método queda mentiroso. Los contratos públicos deberían hablar el lenguaje del dominio: <code>persist()</code>, <code>getFromCache()</code>, <code>serialize()</code>.
+        </div>
+      </li>
+    </ul>
+
+    <div class="tip">
+      <strong>El test del reemplazo libre</strong>
+      Si podés cambiar la implementación interna de un módulo —el algoritmo, la base de datos, la librería, la estructura de datos— sin que ningún código externo note la diferencia ni necesite modificarse, Information Hiding está bien aplicado. Si algún cliente se rompe por un cambio puramente interno, hay una abstracción con pérdidas.
+    </div>
+</div>
+
+	<div class="panel" id="panel-4">
+	<div class="p-header">
+      <div>
+        <div class="p-name">Trampas comunes</div>
+        <span class="p-tagline">Cuando la interfaz pública filtra más de lo que debería</span>
+        <p class="p-desc">Las violaciones de Information Hiding se llaman <strong>"leaky abstractions"</strong> —abstracciones que filtran detalles de implementación hacia afuera. El código que depende de esos detalles se rompe cuando la implementación cambia.</p>
+      </div>
+      <div class="p-letter">!</div>
+    </div>
+
+    <ul class="trap-list">
+      <li>
+        <span class="trap-icon">🔓</span>
+        <div>
+          <strong>Getters y setters para todos los campos</strong>
+          Agregar automáticamente <code>getX()</code> y <code>setX()</code> para cada campo de la clase no es Information Hiding —es exponer todos los campos con nombres más largos. Un setter que solo asigna un valor hace que el campo sea efectivamente público. Los métodos deberían exponer <em>comportamiento</em>, no acceso al estado interno.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">💉</span>
+        <div>
+          <strong>Tipos de implementación en la interfaz pública</strong>
+          Cuando el método público retorna un <code>ArrayList</code> en lugar de una <code>List</code>, o un <code>HashMap</code> en lugar de un <code>Map</code>, el llamador empieza a depender de que sea específicamente esa implementación. Cuando cambiás a <code>LinkedList</code> o a <code>TreeMap</code>, el código del llamador puede romperse aunque el comportamiento sea equivalente.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">📡</span>
+        <div>
+          <strong>Exponer excepciones de implementación</strong>
+          Si tu módulo de dominio lanza <code>SQLException</code> o <code>RedisException</code>, el llamador ahora sabe qué tecnología de persistencia usás. Cuando cambiás de base de datos, tenés que cambiar también el manejo de errores en todos los clientes. Las excepciones que cruzan fronteras de módulo deberían ser excepciones de dominio, no de infraestructura.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🗂️</span>
+        <div>
+          <strong>Estructura del módulo expuesta en los imports</strong>
+          Si los clientes hacen <code>import { calcVat } from './order/internal/tax/vatCalculator'</code>, conocen la estructura interna del módulo. Si reorganizás la carpeta <code>internal/</code>, rompés a todos. Los módulos deberían tener un punto de entrada único que reexporte lo que es público, ocultando la estructura interna.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🌊</span>
+        <div>
+          <strong>Retornar referencias mutables a estado interno</strong>
+          Retornar el array interno directamente permite que el llamador lo modifique sin pasar por los métodos del objeto. <code>getItems()</code> que devuelve <code>this.#items</code> rompe el encapsulamiento aunque <code>#items</code> sea privado. La solución es retornar una copia inmutable o una vista de solo lectura.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🏷️</span>
+        <div>
+          <strong>Nombres que filtran la implementación</strong>
+          Métodos como <code>saveToPostgres()</code>, <code>fetchFromRedis()</code> o <code>serializeToJSON()</code> en la interfaz pública revelan detalles de implementación en el nombre. Si cambiás de Postgres a MongoDB, el nombre del método queda mentiroso. Los contratos públicos deberían hablar el lenguaje del dominio: <code>persist()</code>, <code>getFromCache()</code>, <code>serialize()</code>.
+        </div>
+      </li>
+    </ul>
+
+    <div class="tip">
+      <strong>El test del reemplazo libre</strong>
+      Si podés cambiar la implementación interna de un módulo —el algoritmo, la base de datos, la librería, la estructura de datos— sin que ningún código externo note la diferencia ni necesite modificarse, Information Hiding está bien aplicado. Si algún cliente se rompe por un cambio puramente interno, hay una abstracción con pérdidas.
+    </div>
+</div>
+
+	<div style="margin-top:36px;padding-top:32px;border-top:1px solid var(--border)">
+		<div class="context-inner">
+	<div>
+		<div class="context-section-label">Origen del principio</div>
+		<p class="context-text"></p>
+	</div>
+	<div class="context-divider"></div>
+	<div>
+		<div class="context-section-label">¿Solo aplica a código?</div>
+		<p class="context-text"></p>
+		<div class="scope-pills">
+			<span class="pill yes">POO</span>
+			<span class="pill yes">Módulos funcionales</span>
+			<span class="pill yes">APIs REST / GraphQL</span>
+			<span class="pill yes">Microservicios</span>
+			<span class="pill yes">SDKs y librerías</span>
+			<span class="pill yes">Bases de datos — vistas/procs</span>
+		</div>
+	</div>
+</div>
+	</div>
+
+	<div class="progress" id="progress">
+		<div class="prog-dot active"></div>
+		<div class="prog-dot"></div>
+		<div class="prog-dot"></div>
+		<div class="prog-dot"></div>
+		<div class="prog-dot"></div>
+	</div>
+	<div class="nav-btns">
+		<button class="nav-btn" id="btnPrev">← Anterior</button>
+		<button class="nav-btn" id="btnNext">Siguiente →</button>
+	</div>
+</main>
+
+<footer>
+	<span>Information Hiding · David L. Parnas · 1972 · principio de diseño de software</span>
+	<span>Gustavo Adrián Salvini · <a href="https://github.com/guspatagonico" target="_blank">@guspatagonico</a></span>
+</footer>
+
+<nav class="snav snav-bot">
+	<a class="snav-prev" href="soc.html" style="color:#fb923c;background:rgba(251,146,60,0.12);border-color:rgba(251,146,60,0.32)"><span>←</span><span class="snav-label">SoC</span></a>
+	<div class="snav-spacer"></div>
+	<div class="snav-center">
+		<a class="snav-home" href="../index.html">↑&nbsp;&nbsp;Índice</a>
+		<span class="snav-pos">06&thinsp;/&thinsp;12</span>
+	</div>
+	<div class="snav-spacer"></div>
+	<a class="snav-next" href="lod.html" style="color:#38bdf8;background:rgba(56,189,248,0.12);border-color:rgba(56,189,248,0.32)"><span class="snav-label">Law of Demeter</span><span>→</span></a>
+</nav>
+
+<script src="../js/tabs.js"></script>
+</body>
+</html>

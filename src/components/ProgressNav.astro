@@ -1,0 +1,13 @@
+---
+const { tabCount } = Astro.props;
+---
+
+<div class="progress" id="progress">
+	{Array.from({ length: tabCount }, (_, i) => (
+		<div class={`prog-dot${i === 0 ? ' active' : ''}`}></div>
+	))}
+</div>
+<div class="nav-btns">
+	<button class="nav-btn" id="btnPrev">← Anterior</button>
+	<button class="nav-btn" id="btnNext">Siguiente →</button>
+</div>

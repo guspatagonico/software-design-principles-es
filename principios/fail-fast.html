@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="es" data-accent="fail-fast">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fail Fast — Principios de diseño de software</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="../css/base.css">
+<link rel="stylesheet" href="../css/layout.css">
+</head>
+<body>
+<nav class="snav snav-top">
+	<a class="snav-prev" href="lod.html" style="color:#38bdf8;background:rgba(56,189,248,0.12);border-color:rgba(56,189,248,0.32)"><span>←</span><span class="snav-label">Law of Demeter</span></a>
+	<div class="snav-spacer"></div>
+	<div class="snav-center">
+		<a class="snav-home" href="../index.html">↑&nbsp;&nbsp;Índice</a>
+		<span class="snav-pos">08&thinsp;/&thinsp;12</span>
+	</div>
+	<div class="snav-spacer"></div>
+	<a class="snav-next" href="pkg.html" style="color:#e879f9;background:rgba(232,121,249,0.12);border-color:rgba(232,121,249,0.32)"><span class="snav-label">Paquetes</span><span>→</span></a>
+</nav>
+
+<header>
+	<div class="header-label">Principios de diseño · Referencia para devs</div>
+	<h1><em>Fail</em><br>Fast</h1>
+	<p>Cuando algo está mal, el sistema debería decirlo de inmediato y de forma ruidosa. Un bug que explota en el momento exacto en que ocurre es exponencialmente más barato que uno que se descubre tres pasos después.</p>
+</header>
+
+<div class="nav-wrap">
+	<div class="nav" id="nav">
+		<div class="nav-pill" id="navPill"></div>
+		<button class="tab-btn active" data-idx="0">
+	<span class="tab-icon">💡</span>
+	<span class="tab-word">Concepto</span>
+</button>
+		<button class="tab-btn" data-idx="1">
+	<span class="tab-icon">🚨</span>
+	<span class="tab-word">Cuándo aplicar</span>
+</button>
+		<button class="tab-btn" data-idx="2">
+	<span class="tab-icon">💻</span>
+	<span class="tab-word">En el código</span>
+</button>
+		<button class="tab-btn" data-idx="3">
+	<span class="tab-icon">⚖️</span>
+	<span class="tab-word">Fail Fast vs Fail Safe</span>
+</button>
+		<button class="tab-btn" data-idx="4">
+	<span class="tab-icon">⚠️</span>
+	<span class="tab-word">Trampas</span>
+</button>
+	</div>
+</div>
+
+<main>
+	<div class="panel active" id="panel-0">
+	<div class="p-header">
+      <div>
+        <div class="p-name">¿Qué es Fail Fast?</div>
+        <span class="p-tagline">Fallá pronto · Fallá fuerte · Fallá claro</span>
+        <p class="p-desc">Fail Fast dice que cuando el sistema detecta una condición inválida, debería <strong>fallar de inmediato y de manera visible</strong>, en lugar de continuar con un estado potencialmente corrupto que va a causar errores mucho más difíciles de diagnosticar más adelante.</p>
+        <p class="p-desc" style="margin-top:10px">El principio fue articulado por <strong>Jim Shore en 2004</strong> en IEEE Software. La idea central: <strong>el costo de un fallo crece exponencialmente con la distancia entre dónde ocurre el problema y dónde se detecta</strong>. Detectar temprano es barato. Detectar tarde es catastrófico.</p>
+      </div>
+      <div class="p-letter">F</div>
+    </div>
+
+    <div class="timeline">
+      <div class="timeline-label">Costo del fallo según cuándo se detecta</div>
+      <div class="timeline-row">
+        <div class="tl-name" style="color:var(--fast)">Fail Fast</div>
+        <div class="tl-track">
+          <div class="tl-seg-fail-only" style="width:12%;padding:0 8px;font-size:10px">falla</div>
+          <div style="flex:1;padding-left:10px;font-size:12px;color:var(--muted)">→ stack trace exacto, estado conocido, fácil de reproducir</div>
+        </div>
+        <div class="tl-cost" style="color:var(--fast)">costo bajo</div>
+      </div>
+      <div class="timeline-row">
+        <div class="tl-name" style="color:var(--warn)">Fallo tardío</div>
+        <div class="tl-track">
+          <div class="tl-seg-ok"   style="width:30%;padding:0 6px;font-size:10px">ejecuta...</div>
+          <div class="tl-seg-warn" style="width:30%;padding:0 6px;font-size:10px">corrompe...</div>
+          <div class="tl-seg-fail" style="width:40%;padding:0 6px;font-size:10px">falla lejos</div>
+        </div>
+        <div class="tl-cost" style="color:var(--warn)">costo alto</div>
+      </div>
+      <div class="timeline-row">
+        <div class="tl-name" style="color:#f87171">Fallo silencioso</div>
+        <div class="tl-track">
+          <div class="tl-seg-ok"   style="width:25%;padding:0 6px;font-size:10px">ejecuta...</div>
+          <div class="tl-seg-warn" style="width:35%;padding:0 6px;font-size:10px">datos malos...</div>
+          <div class="tl-seg-warn" style="width:40%;padding:0 6px;font-size:10px;border-radius:0 5px 5px 0">se propagan...</div>
+        </div>
+        <div class="tl-cost" style="color:#f87171">costo enorme</div>
+      </div>
+    </div>
+
+    <div class="analogy">
+      <span class="analogy-icon">🏗️</span>
+      <span>En construcción, cuando un ladrillo está mal colocado, mejor descubrirlo ahora que cuando el edificio tiene diez pisos arriba. El costo de reparar la cimentación crece con cada capa que se agrega encima. <em>El mismo principio aplica a los bugs: cuanto más tarde se detectan, más código construiste encima del error.</em></span>
+    </div>
+
+    <div class="analogy">
+      <span class="analogy-icon">🩺</span>
+      <span>Un sistema que no falla ruidosamente cuando tiene un problema es como un paciente que no siente dolor cuando debería. El dolor es una señal de alarma del cuerpo —molesta, pero es mucho mejor que no sentirlo y que la enfermedad progrese sin síntomas. <em>Las excepciones son el dolor del software.</em></span>
+    </div>
+
+    <div class="tip">
+      <strong>La regla de Jim Shore</strong>
+      "Comprobá frecuentemente, fallá ruidosamente, no continúes con estado inválido." Un sistema que detecta un problema y sigue ejecutando como si no hubiera pasado nada es mucho más peligroso que uno que se detiene inmediatamente. El primero corrompe datos; el segundo solo interrumpe.
+    </div>
+  </div>
+
+  <!-- ── CUÁNDO APLICAR ── -->
+  <div class="panel" id="panel-1">
+    <div class="p-header">
+      <div>
+        <div class="p-name">¿Cuándo aplicar Fail Fast?</div>
+        <span class="p-tagline">Las cuatro señales de alarma que deben fallar pronto</span>
+        <p class="p-desc">Fail Fast no significa lanzar excepciones por todo. Significa identificar los <strong>puntos críticos donde un estado inválido no debería propagarse</strong> y cortarlo ahí. Hay cuatro categorías principales donde siempre aplica.</p>
+      </div>
+      <div class="p-letter">F</div>
+    </div>
+
+    <div class="signals-grid">
+      <div class="signal-card">
+        <div class="signal-num">01 — Precondiciones</div>
+        <div class="signal-title">Validar entradas al inicio de cada función</div>
+        <div class="signal-desc">Antes de ejecutar cualquier lógica, verificar que los argumentos son válidos. Si no lo son, <em>fallar de inmediato</em> con un mensaje claro que diga exactamente qué está mal y dónde.</div>
+        <div class="signal-code">
+          <span class="sc-ok">✓</span> <span style="color:#c084fc">if</span> (!userId) <span style="color:#c084fc">throw</span> <span style="color:#f43f5e">new</span> Error(<span style="color:#fb923c">'userId requerido'</span>)<br>
+          <span class="sc-ok">✓</span> <span style="color:#c084fc">if</span> (amount &lt;= 0) <span style="color:#c084fc">throw</span> <span style="color:#f43f5e">new</span> Error(<span style="color:#fb923c">'amount > 0'</span>)
+        </div>
+      </div>
+      <div class="signal-card">
+        <div class="signal-num">02 — Bordes del sistema</div>
+        <div class="signal-title">Validar todo lo que entra desde afuera</div>
+        <div class="signal-desc">HTTP requests, archivos, mensajes de queues, respuestas de APIs externas. Todo lo que viene de afuera del sistema es no confiable. <em>Validar en el borde, antes de que los datos lleguen al dominio.</em></div>
+        <div class="signal-code">
+          <span class="sc-bad">✗</span> aceptar JSON sin parsear ni validar schema<br>
+          <span class="sc-ok">✓</span> validar con Zod/Joi/Pydantic en el controller
+        </div>
+      </div>
+      <div class="signal-card">
+        <div class="signal-num">03 — Invariantes de dominio</div>
+        <div class="signal-title">Reglas que nunca deben violarse</div>
+        <div class="signal-desc">Las condiciones que el sistema asume que siempre son verdaderas. Si se violan, hay un bug —no una condición de negocio. <em>Usar assertions para detectarlos en el momento exacto en que ocurren.</em></div>
+        <div class="signal-code">
+          <span class="sc-ok">✓</span> assert(items.length > 0, <span style="color:#fb923c">'order sin items'</span>)<br>
+          <span class="sc-ok">✓</span> assert(total >= 0, <span style="color:#fb923c">'total negativo'</span>)
+        </div>
+      </div>
+      <div class="signal-card">
+        <div class="signal-num">04 — Errores de configuración</div>
+        <div class="signal-title">Fallar al inicio, no en runtime</div>
+        <div class="signal-desc">Si falta una variable de entorno, una clave de API o una conexión a base de datos, <em>fallar inmediatamente al arrancar</em>, no cuando el primer usuario intenta hacer algo y recibe un error críptico.</div>
+        <div class="signal-code">
+          <span class="sc-bad">✗</span> leer process.env.API_KEY cuando se usa<br>
+          <span class="sc-ok">✓</span> verificar todas las vars al inicio del proceso
+        </div>
+      </div>
+    </div>
+
+    <div class="analogy">
+      <span class="analogy-icon">🛫</span>
+      <span>Un avión no despega con un motor defectuoso esperando que "quizás no sea tan grave". La verificación pre-vuelo es un Fail Fast sistemático. <em>Es preferible cancelar el vuelo en tierra que descubrir el problema a 10.000 metros de altura.</em></span>
+    </div>
+
+    <div class="tip">
+      <strong>El punto de validación correcto</strong>
+      Fail Fast no significa validar en todos los niveles del sistema. Significa validar <em>en el punto más cercano a la fuente del dato</em>. Los datos externos se validan en el borde. Las precondiciones de una función se validan al entrar. Los invariantes se verifican donde se modifica el estado. No repitas la validación en cada capa —eso viola DRY.
+    </div>
+  </div>
+
+  <!-- ── EN EL CÓDIGO ── -->
+  <div class="panel" id="panel-2">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Fail Fast en el código</div>
+        <span class="p-tagline">Guard clauses, assertions y validación en el borde</span>
+        <p class="p-desc">Fail Fast se implementa con tres herramientas principales: <strong>guard clauses</strong> que cortan el flujo temprano, <strong>assertions</strong> que verifican invariantes en desarrollo, y <strong>validación de schema</strong> en las fronteras del sistema.</p>
+      </div>
+      <div class="p-letter">a</div>
+    </div>
+
+    <div class="comparison">
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-bad"></span> Fallo tardío y silencioso</div>
+        <pre><span class="kw">function</span> <span class="fn">processOrder</span>(order) {
+  <span class="cm">// no validamos nada</span>
+  <span class="kw">const</span> total = order.items
+    .<span class="fn">reduce</span>((s, i) => s + i.price, <span class="num">0</span>)
+
+  <span class="cm">// si order.customer es null:</span>
+  <span class="cm">// falla acá con un error</span>
+  <span class="cm">// que no dice nada útil 💥</span>
+  <span class="fn">sendEmail</span>(order.customer.email)
+
+  <span class="fn">saveToDb</span>(total, order.customer.id)
+}</pre>
+      </div>
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-good"></span> Fail Fast — guard clauses</div>
+        <pre><span class="kw">function</span> <span class="fn">processOrder</span>(order) {
+  <span class="cm">// validamos antes de empezar</span>
+  <span class="kw">if</span> (!order)
+    <span class="kw">throw</span> <span class="kw">new</span> <span class="cl">Error</span>(<span class="str">'order requerida'</span>)
+  <span class="kw">if</span> (!order.customer?.email)
+    <span class="kw">throw</span> <span class="kw">new</span> <span class="cl">Error</span>(<span class="str">'email de cliente falta'</span>)
+  <span class="kw">if</span> (!order.items?.length)
+    <span class="kw">throw</span> <span class="kw">new</span> <span class="cl">Error</span>(<span class="str">'orden sin items'</span>)
+
+  <span class="cm">// ahora el flujo principal</span>
+  <span class="cm">// trabaja con datos válidos ✓</span>
+}</pre>
+      </div>
+    </div>
+
+    <div class="comparison">
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-bad"></span> Config que falla tarde</div>
+        <pre><span class="kw">async function</span> <span class="fn">sendEmail</span>(to, body) {
+  <span class="cm">// se lee cuando se usa</span>
+  <span class="kw">const</span> key = process.env.SENDGRID_KEY
+
+  <span class="cm">// si KEY no existe, falla acá</span>
+  <span class="cm">// cuando el primer email se envía</span>
+  <span class="cm">// quizás horas después del deploy 💥</span>
+  <span class="kw">await</span> sendgrid.<span class="fn">send</span>({ to, body, key })
+}</pre>
+      </div>
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-good"></span> Config que falla al arrancar</div>
+        <pre><span class="cm">// al inicio del proceso</span>
+<span class="kw">const</span> REQUIRED_VARS = [
+  <span class="str">'SENDGRID_KEY'</span>, <span class="str">'DATABASE_URL'</span>,
+  <span class="str">'JWT_SECRET'</span>, <span class="str">'APP_PORT'</span>
+]
+
+<span class="kw">for</span> (<span class="kw">const</span> v <span class="kw">of</span> REQUIRED_VARS) {
+  <span class="kw">if</span> (!process.env[v])
+    <span class="kw">throw</span> <span class="kw">new</span> <span class="cl">Error</span>(<span class="str">`Falta: ${v}`</span>)
+}
+<span class="cm">// si llegamos acá, todo OK ✓</span></pre>
+      </div>
+    </div>
+
+    <div class="comparison">
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-bad"></span> Retornar null — fallo diferido</div>
+        <pre><span class="kw">function</span> <span class="fn">findUser</span>(id) {
+  <span class="kw">const</span> user = db.<span class="fn">query</span>(id)
+  <span class="kw">if</span> (!user) <span class="kw">return</span> <span class="ok">null</span> <span class="cm">// 😬</span>
+  <span class="kw">return</span> user
+}
+
+<span class="cm">// Quien llama recibe null y</span>
+<span class="cm">// si no lo chequea, el</span>
+<span class="cm">// NullPointerException aparece</span>
+<span class="cm">// tres llamadas después 💥</span></pre>
+      </div>
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-good"></span> Lanzar excepción — fallo inmediato</div>
+        <pre><span class="kw">function</span> <span class="fn">findUser</span>(id) {
+  <span class="kw">const</span> user = db.<span class="fn">query</span>(id)
+  <span class="kw">if</span> (!user)
+    <span class="kw">throw</span> <span class="kw">new</span> <span class="cl">UserNotFoundError</span>(id)
+  <span class="kw">return</span> user <span class="cm">// siempre válido ✓</span>
+}
+
+<span class="cm">// El error ocurre exactamente</span>
+<span class="cm">// donde está el problema</span>
+<span class="cm">// con un mensaje descriptivo ✓</span></pre>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>Excepciones descriptivas, no genéricas</strong>
+      <code>throw new Error('error')</code> viola el espíritu de Fail Fast aunque técnicamente falle pronto. El mensaje debe decir <em>qué</em> salió mal, <em>dónde</em> y con <em>qué valor</em>. <code>throw new Error(`userId inválido: esperado string, recibido ${typeof userId}`)</code> es un fallo rápido útil. El error genérico es solo un fallo rápido ruidoso.
+    </div>
+  </div>
+
+  <!-- ── FAIL FAST VS FAIL SAFE ── -->
+  <div class="panel" id="panel-3">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Fail Fast vs Fail Safe</div>
+        <span class="p-tagline">No son opuestos — son herramientas para contextos distintos</span>
+        <p class="p-desc">Fail Safe es el otro extremo: diseñar el sistema para que, cuando algo falla, <strong>degrade de forma controlada</strong> en lugar de detenerse completamente. No son contradictorios —son complementarios y se aplican en capas distintas del sistema.</p>
+      </div>
+      <div class="p-letter">s</div>
+    </div>
+
+    <div class="versus-grid">
+      <div class="versus-card vfast">
+        <div class="versus-label" style="color:var(--fast)">Fail Fast</div>
+        <div class="versus-name" style="color:var(--fast)">Fallar inmediato y visible</div>
+        <div class="versus-desc">
+          Detectar el problema <strong>en el momento en que ocurre</strong> y reportarlo ruidosamente. El objetivo es que los errores sean obvios y fáciles de diagnosticar, especialmente en desarrollo.
+          <br><br>
+          Prioriza la <em>integridad del sistema</em> sobre la disponibilidad. Preferible que el sistema se detenga antes de continuar con datos corruptos.
+        </div>
+        <div class="versus-examples">
+          <div class="versus-ex">→ Validación de precondiciones</div>
+          <div class="versus-ex">→ Assertions de invariantes</div>
+          <div class="versus-ex">→ Verificación de configuración al inicio</div>
+          <div class="versus-ex">→ Lanzar excepción en lugar de retornar null</div>
+        </div>
+      </div>
+      <div class="versus-card vsafe">
+        <div class="versus-label" style="color:var(--safe)">Fail Safe</div>
+        <div class="versus-name" style="color:var(--safe)">Degradar de forma controlada</div>
+        <div class="versus-desc">
+          Diseñar para que cuando un componente falle, el sistema completo <strong>siga funcionando de forma degradada</strong> en lugar de colapsar. El objetivo es la resiliencia del sistema ante fallos inevitables.
+          <br><br>
+          Prioriza la <em>disponibilidad</em>. Acceptable que algunas features fallen si el sistema sigue parcialmente operativo.
+        </div>
+        <div class="versus-examples">
+          <div class="versus-ex">→ Circuit breakers en servicios externos</div>
+          <div class="versus-ex">→ Fallback a caché si la BD no responde</div>
+          <div class="versus-ex">→ Retry con backoff exponencial</div>
+          <div class="versus-ex">→ Valores por defecto cuando un servicio falla</div>
+        </div>
+      </div>
+    </div>
+
+    <table class="ctx-matrix">
+      <thead>
+        <tr>
+          <th>Contexto</th>
+          <th>Estrategia</th>
+          <th>Razonamiento</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Bug de programación (null inesperado, tipo incorrecto)</td>
+          <td><span class="badge-fast">Fail Fast</span></td>
+          <td style="color:var(--muted)">Es un bug —necesita ser detectado y corregido, no ignorado</td>
+        </tr>
+        <tr>
+          <td>Configuración inválida al arrancar</td>
+          <td><span class="badge-fast">Fail Fast</span></td>
+          <td style="color:var(--muted)">El sistema no puede funcionar correctamente sin config válida</td>
+        </tr>
+        <tr>
+          <td>Servicio externo temporalmente caído</td>
+          <td><span class="badge-safe">Fail Safe</span></td>
+          <td style="color:var(--muted)">Es una condición de red, no un bug. El sistema debería degradar</td>
+        </tr>
+        <tr>
+          <td>Feature no crítica con error</td>
+          <td><span class="badge-safe">Fail Safe</span></td>
+          <td style="color:var(--muted)">No tiene sentido bajar todo el sistema por una feature secundaria</td>
+        </tr>
+        <tr>
+          <td>Input inválido de usuario</td>
+          <td><span class="badge-both">Ambos</span></td>
+          <td style="color:var(--muted)">Fail Fast para detectar el error, Fail Safe para mostrar un mensaje amigable</td>
+        </tr>
+        <tr>
+          <td>Datos corruptos en base de datos</td>
+          <td><span class="badge-fast">Fail Fast</span></td>
+          <td style="color:var(--muted)">Datos inválidos no deben propagarse —mejor detener y alertar</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="tip">
+      <strong>La regla de las capas</strong>
+      Fail Fast aplica en el <em>interior</em> del sistema: en las funciones, los servicios, el dominio. Fail Safe aplica en las <em>fronteras externas</em>: la comunicación con servicios de terceros, los recursos de red, las integraciones. El núcleo falla fuerte para que los bugs sean obvios; el borde falla con gracia para que los problemas externos no colapsen todo.
+    </div>
+  </div>
+
+  <!-- ── TRAMPAS ── -->
+  <div class="panel" id="panel-4">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Trampas comunes</div>
+        <span class="p-tagline">Las formas en que los bugs se vuelven invisibles</span>
+        <p class="p-desc">Violar Fail Fast casi siempre parece <strong>la opción más segura</strong> en el momento. Retornar null en lugar de lanzar, capturar la excepción para que "no moleste", devolver un valor por defecto "razonable". Estas decisiones vuelven los bugs invisibles hasta que el daño ya está hecho.</p>
+      </div>
+      <div class="p-letter">t</div>
+    </div>
+
+    <ul class="trap-list">
+      <li>
+        <span class="trap-icon">🔇</span>
+        <div>
+          <strong>Swallowing exceptions — tragar el error</strong>
+          El antipatrón más dañino. Un bloque <code>try/catch</code> que captura la excepción y no hace nada con ella —o solo loguea "algo salió mal"— convierte un fallo ruidoso en uno silencioso. El sistema continúa en un estado inválido y el bug aparece mucho después, irreconocible.
+          <div style="margin-top:8px;background:var(--surface2);border-radius:6px;padding:10px 12px;font-family:var(--mono);font-size:12px;color:var(--muted)">
+            <span style="color:#f87171">✗</span> try { ... } catch (e) { console.log('error') }<br>
+            <span style="color:#4ade80">✓</span> try { ... } catch (e) { throw new AppError('contexto', e) }
+          </div>
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">👻</span>
+        <div>
+          <strong>Retornar null, -1 o "" como señal de error</strong>
+          Retornar <code>null</code> cuando no se encuentra algo, <code>-1</code> cuando falla un índice, o <code>""</code> cuando falta un valor transfiere la responsabilidad de detectar el error al llamador —que quizás no lo chequea. La excepción falla en el origen; el <code>null</code> falla tres llamadas después con un NullPointerException sin contexto.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🧢</span>
+        <div>
+          <strong>Valores por defecto que ocultan errores de configuración</strong>
+          <code>const timeout = process.env.TIMEOUT ?? 5000</code> parece prudente. Pero si <code>TIMEOUT</code> debería estar configurado y no lo está, el valor por defecto enmascara una mala configuración. El sistema funciona con un timeout incorrecto sin que nadie se entere. La alternativa es fallar al inicio si la variable es obligatoria.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🌊</span>
+        <div>
+          <strong>Continuar después de detectar un estado inválido</strong>
+          Verificar que algo está mal y seguir de todas formas: <code>if (!user) { log('user not found'); return user; }</code> —el log dice que el usuario no existe, pero se retorna <code>undefined</code> de todos modos. El código que llama recibe <code>undefined</code> y falla más tarde. Si el estado es inválido, <em>no continúes</em>.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🔄</span>
+        <div>
+          <strong>Validar solo en desarrollo, no en producción</strong>
+          Deshabilitar assertions o validaciones en producción "por performance" es una forma de Fail Slow selectivo. Los bugs que solo se manifiestan en producción —con datos reales, bajo carga real— son los más difíciles de diagnosticar. Las assertions tienen un costo mínimo y salvan horas de debugging.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">📨</span>
+        <div>
+          <strong>Mensajes de error sin contexto</strong>
+          <code>throw new Error('invalid input')</code> es Fail Fast en forma pero no en espíritu. Un error útil dice: qué valor recibió, qué esperaba, en qué función, con qué parámetros. <code>throw new Error(`amount debe ser positivo, recibido: ${amount} en processPayment(orderId=${orderId})`)</code> lleva al bug en segundos.
+        </div>
+      </li>
+    </ul>
+</div>
+
+	<div class="panel" id="panel-1">
+	<div class="p-header">
+      <div>
+        <div class="p-name">¿Cuándo aplicar Fail Fast?</div>
+        <span class="p-tagline">Las cuatro señales de alarma que deben fallar pronto</span>
+        <p class="p-desc">Fail Fast no significa lanzar excepciones por todo. Significa identificar los <strong>puntos críticos donde un estado inválido no debería propagarse</strong> y cortarlo ahí. Hay cuatro categorías principales donde siempre aplica.</p>
+      </div>
+      <div class="p-letter">F</div>
+    </div>
+
+    <div class="signals-grid">
+      <div class="signal-card">
+        <div class="signal-num">01 — Precondiciones</div>
+        <div class="signal-title">Validar entradas al inicio de cada función</div>
+        <div class="signal-desc">Antes de ejecutar cualquier lógica, verificar que los argumentos son válidos. Si no lo son, <em>fallar de inmediato</em> con un mensaje claro que diga exactamente qué está mal y dónde.</div>
+        <div class="signal-code">
+          <span class="sc-ok">✓</span> <span style="color:#c084fc">if</span> (!userId) <span style="color:#c084fc">throw</span> <span style="color:#f43f5e">new</span> Error(<span style="color:#fb923c">'userId requerido'</span>)<br>
+          <span class="sc-ok">✓</span> <span style="color:#c084fc">if</span> (amount &lt;= 0) <span style="color:#c084fc">throw</span> <span style="color:#f43f5e">new</span> Error(<span style="color:#fb923c">'amount > 0'</span>)
+        </div>
+      </div>
+      <div class="signal-card">
+        <div class="signal-num">02 — Bordes del sistema</div>
+        <div class="signal-title">Validar todo lo que entra desde afuera</div>
+        <div class="signal-desc">HTTP requests, archivos, mensajes de queues, respuestas de APIs externas. Todo lo que viene de afuera del sistema es no confiable. <em>Validar en el borde, antes de que los datos lleguen al dominio.</em></div>
+        <div class="signal-code">
+          <span class="sc-bad">✗</span> aceptar JSON sin parsear ni validar schema<br>
+          <span class="sc-ok">✓</span> validar con Zod/Joi/Pydantic en el controller
+        </div>
+      </div>
+      <div class="signal-card">
+        <div class="signal-num">03 — Invariantes de dominio</div>
+        <div class="signal-title">Reglas que nunca deben violarse</div>
+        <div class="signal-desc">Las condiciones que el sistema asume que siempre son verdaderas. Si se violan, hay un bug —no una condición de negocio. <em>Usar assertions para detectarlos en el momento exacto en que ocurren.</em></div>
+        <div class="signal-code">
+          <span class="sc-ok">✓</span> assert(items.length > 0, <span style="color:#fb923c">'order sin items'</span>)<br>
+          <span class="sc-ok">✓</span> assert(total >= 0, <span style="color:#fb923c">'total negativo'</span>)
+        </div>
+      </div>
+      <div class="signal-card">
+        <div class="signal-num">04 — Errores de configuración</div>
+        <div class="signal-title">Fallar al inicio, no en runtime</div>
+        <div class="signal-desc">Si falta una variable de entorno, una clave de API o una conexión a base de datos, <em>fallar inmediatamente al arrancar</em>, no cuando el primer usuario intenta hacer algo y recibe un error críptico.</div>
+        <div class="signal-code">
+          <span class="sc-bad">✗</span> leer process.env.API_KEY cuando se usa<br>
+          <span class="sc-ok">✓</span> verificar todas las vars al inicio del proceso
+        </div>
+      </div>
+    </div>
+
+    <div class="analogy">
+      <span class="analogy-icon">🛫</span>
+      <span>Un avión no despega con un motor defectuoso esperando que "quizás no sea tan grave". La verificación pre-vuelo es un Fail Fast sistemático. <em>Es preferible cancelar el vuelo en tierra que descubrir el problema a 10.000 metros de altura.</em></span>
+    </div>
+
+    <div class="tip">
+      <strong>El punto de validación correcto</strong>
+      Fail Fast no significa validar en todos los niveles del sistema. Significa validar <em>en el punto más cercano a la fuente del dato</em>. Los datos externos se validan en el borde. Las precondiciones de una función se validan al entrar. Los invariantes se verifican donde se modifica el estado. No repitas la validación en cada capa —eso viola DRY.
+    </div>
+  </div>
+
+  <!-- ── EN EL CÓDIGO ── -->
+  <div class="panel" id="panel-2">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Fail Fast en el código</div>
+        <span class="p-tagline">Guard clauses, assertions y validación en el borde</span>
+        <p class="p-desc">Fail Fast se implementa con tres herramientas principales: <strong>guard clauses</strong> que cortan el flujo temprano, <strong>assertions</strong> que verifican invariantes en desarrollo, y <strong>validación de schema</strong> en las fronteras del sistema.</p>
+      </div>
+      <div class="p-letter">a</div>
+    </div>
+
+    <div class="comparison">
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-bad"></span> Fallo tardío y silencioso</div>
+        <pre><span class="kw">function</span> <span class="fn">processOrder</span>(order) {
+  <span class="cm">// no validamos nada</span>
+  <span class="kw">const</span> total = order.items
+    .<span class="fn">reduce</span>((s, i) => s + i.price, <span class="num">0</span>)
+
+  <span class="cm">// si order.customer es null:</span>
+  <span class="cm">// falla acá con un error</span>
+  <span class="cm">// que no dice nada útil 💥</span>
+  <span class="fn">sendEmail</span>(order.customer.email)
+
+  <span class="fn">saveToDb</span>(total, order.customer.id)
+}</pre>
+      </div>
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-good"></span> Fail Fast — guard clauses</div>
+        <pre><span class="kw">function</span> <span class="fn">processOrder</span>(order) {
+  <span class="cm">// validamos antes de empezar</span>
+  <span class="kw">if</span> (!order)
+    <span class="kw">throw</span> <span class="kw">new</span> <span class="cl">Error</span>(<span class="str">'order requerida'</span>)
+  <span class="kw">if</span> (!order.customer?.email)
+    <span class="kw">throw</span> <span class="kw">new</span> <span class="cl">Error</span>(<span class="str">'email de cliente falta'</span>)
+  <span class="kw">if</span> (!order.items?.length)
+    <span class="kw">throw</span> <span class="kw">new</span> <span class="cl">Error</span>(<span class="str">'orden sin items'</span>)
+
+  <span class="cm">// ahora el flujo principal</span>
+  <span class="cm">// trabaja con datos válidos ✓</span>
+}</pre>
+      </div>
+    </div>
+
+    <div class="comparison">
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-bad"></span> Config que falla tarde</div>
+        <pre><span class="kw">async function</span> <span class="fn">sendEmail</span>(to, body) {
+  <span class="cm">// se lee cuando se usa</span>
+  <span class="kw">const</span> key = process.env.SENDGRID_KEY
+
+  <span class="cm">// si KEY no existe, falla acá</span>
+  <span class="cm">// cuando el primer email se envía</span>
+  <span class="cm">// quizás horas después del deploy 💥</span>
+  <span class="kw">await</span> sendgrid.<span class="fn">send</span>({ to, body, key })
+}</pre>
+      </div>
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-good"></span> Config que falla al arrancar</div>
+        <pre><span class="cm">// al inicio del proceso</span>
+<span class="kw">const</span> REQUIRED_VARS = [
+  <span class="str">'SENDGRID_KEY'</span>, <span class="str">'DATABASE_URL'</span>,
+  <span class="str">'JWT_SECRET'</span>, <span class="str">'APP_PORT'</span>
+]
+
+<span class="kw">for</span> (<span class="kw">const</span> v <span class="kw">of</span> REQUIRED_VARS) {
+  <span class="kw">if</span> (!process.env[v])
+    <span class="kw">throw</span> <span class="kw">new</span> <span class="cl">Error</span>(<span class="str">`Falta: ${v}`</span>)
+}
+<span class="cm">// si llegamos acá, todo OK ✓</span></pre>
+      </div>
+    </div>
+
+    <div class="comparison">
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-bad"></span> Retornar null — fallo diferido</div>
+        <pre><span class="kw">function</span> <span class="fn">findUser</span>(id) {
+  <span class="kw">const</span> user = db.<span class="fn">query</span>(id)
+  <span class="kw">if</span> (!user) <span class="kw">return</span> <span class="ok">null</span> <span class="cm">// 😬</span>
+  <span class="kw">return</span> user
+}
+
+<span class="cm">// Quien llama recibe null y</span>
+<span class="cm">// si no lo chequea, el</span>
+<span class="cm">// NullPointerException aparece</span>
+<span class="cm">// tres llamadas después 💥</span></pre>
+      </div>
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-good"></span> Lanzar excepción — fallo inmediato</div>
+        <pre><span class="kw">function</span> <span class="fn">findUser</span>(id) {
+  <span class="kw">const</span> user = db.<span class="fn">query</span>(id)
+  <span class="kw">if</span> (!user)
+    <span class="kw">throw</span> <span class="kw">new</span> <span class="cl">UserNotFoundError</span>(id)
+  <span class="kw">return</span> user <span class="cm">// siempre válido ✓</span>
+}
+
+<span class="cm">// El error ocurre exactamente</span>
+<span class="cm">// donde está el problema</span>
+<span class="cm">// con un mensaje descriptivo ✓</span></pre>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>Excepciones descriptivas, no genéricas</strong>
+      <code>throw new Error('error')</code> viola el espíritu de Fail Fast aunque técnicamente falle pronto. El mensaje debe decir <em>qué</em> salió mal, <em>dónde</em> y con <em>qué valor</em>. <code>throw new Error(`userId inválido: esperado string, recibido ${typeof userId}`)</code> es un fallo rápido útil. El error genérico es solo un fallo rápido ruidoso.
+    </div>
+  </div>
+
+  <!-- ── FAIL FAST VS FAIL SAFE ── -->
+  <div class="panel" id="panel-3">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Fail Fast vs Fail Safe</div>
+        <span class="p-tagline">No son opuestos — son herramientas para contextos distintos</span>
+        <p class="p-desc">Fail Safe es el otro extremo: diseñar el sistema para que, cuando algo falla, <strong>degrade de forma controlada</strong> en lugar de detenerse completamente. No son contradictorios —son complementarios y se aplican en capas distintas del sistema.</p>
+      </div>
+      <div class="p-letter">s</div>
+    </div>
+
+    <div class="versus-grid">
+      <div class="versus-card vfast">
+        <div class="versus-label" style="color:var(--fast)">Fail Fast</div>
+        <div class="versus-name" style="color:var(--fast)">Fallar inmediato y visible</div>
+        <div class="versus-desc">
+          Detectar el problema <strong>en el momento en que ocurre</strong> y reportarlo ruidosamente. El objetivo es que los errores sean obvios y fáciles de diagnosticar, especialmente en desarrollo.
+          <br><br>
+          Prioriza la <em>integridad del sistema</em> sobre la disponibilidad. Preferible que el sistema se detenga antes de continuar con datos corruptos.
+        </div>
+        <div class="versus-examples">
+          <div class="versus-ex">→ Validación de precondiciones</div>
+          <div class="versus-ex">→ Assertions de invariantes</div>
+          <div class="versus-ex">→ Verificación de configuración al inicio</div>
+          <div class="versus-ex">→ Lanzar excepción en lugar de retornar null</div>
+        </div>
+      </div>
+      <div class="versus-card vsafe">
+        <div class="versus-label" style="color:var(--safe)">Fail Safe</div>
+        <div class="versus-name" style="color:var(--safe)">Degradar de forma controlada</div>
+        <div class="versus-desc">
+          Diseñar para que cuando un componente falle, el sistema completo <strong>siga funcionando de forma degradada</strong> en lugar de colapsar. El objetivo es la resiliencia del sistema ante fallos inevitables.
+          <br><br>
+          Prioriza la <em>disponibilidad</em>. Acceptable que algunas features fallen si el sistema sigue parcialmente operativo.
+        </div>
+        <div class="versus-examples">
+          <div class="versus-ex">→ Circuit breakers en servicios externos</div>
+          <div class="versus-ex">→ Fallback a caché si la BD no responde</div>
+          <div class="versus-ex">→ Retry con backoff exponencial</div>
+          <div class="versus-ex">→ Valores por defecto cuando un servicio falla</div>
+        </div>
+      </div>
+    </div>
+
+    <table class="ctx-matrix">
+      <thead>
+        <tr>
+          <th>Contexto</th>
+          <th>Estrategia</th>
+          <th>Razonamiento</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Bug de programación (null inesperado, tipo incorrecto)</td>
+          <td><span class="badge-fast">Fail Fast</span></td>
+          <td style="color:var(--muted)">Es un bug —necesita ser detectado y corregido, no ignorado</td>
+        </tr>
+        <tr>
+          <td>Configuración inválida al arrancar</td>
+          <td><span class="badge-fast">Fail Fast</span></td>
+          <td style="color:var(--muted)">El sistema no puede funcionar correctamente sin config válida</td>
+        </tr>
+        <tr>
+          <td>Servicio externo temporalmente caído</td>
+          <td><span class="badge-safe">Fail Safe</span></td>
+          <td style="color:var(--muted)">Es una condición de red, no un bug. El sistema debería degradar</td>
+        </tr>
+        <tr>
+          <td>Feature no crítica con error</td>
+          <td><span class="badge-safe">Fail Safe</span></td>
+          <td style="color:var(--muted)">No tiene sentido bajar todo el sistema por una feature secundaria</td>
+        </tr>
+        <tr>
+          <td>Input inválido de usuario</td>
+          <td><span class="badge-both">Ambos</span></td>
+          <td style="color:var(--muted)">Fail Fast para detectar el error, Fail Safe para mostrar un mensaje amigable</td>
+        </tr>
+        <tr>
+          <td>Datos corruptos en base de datos</td>
+          <td><span class="badge-fast">Fail Fast</span></td>
+          <td style="color:var(--muted)">Datos inválidos no deben propagarse —mejor detener y alertar</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="tip">
+      <strong>La regla de las capas</strong>
+      Fail Fast aplica en el <em>interior</em> del sistema: en las funciones, los servicios, el dominio. Fail Safe aplica en las <em>fronteras externas</em>: la comunicación con servicios de terceros, los recursos de red, las integraciones. El núcleo falla fuerte para que los bugs sean obvios; el borde falla con gracia para que los problemas externos no colapsen todo.
+    </div>
+  </div>
+
+  <!-- ── TRAMPAS ── -->
+  <div class="panel" id="panel-4">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Trampas comunes</div>
+        <span class="p-tagline">Las formas en que los bugs se vuelven invisibles</span>
+        <p class="p-desc">Violar Fail Fast casi siempre parece <strong>la opción más segura</strong> en el momento. Retornar null en lugar de lanzar, capturar la excepción para que "no moleste", devolver un valor por defecto "razonable". Estas decisiones vuelven los bugs invisibles hasta que el daño ya está hecho.</p>
+      </div>
+      <div class="p-letter">t</div>
+    </div>
+
+    <ul class="trap-list">
+      <li>
+        <span class="trap-icon">🔇</span>
+        <div>
+          <strong>Swallowing exceptions — tragar el error</strong>
+          El antipatrón más dañino. Un bloque <code>try/catch</code> que captura la excepción y no hace nada con ella —o solo loguea "algo salió mal"— convierte un fallo ruidoso en uno silencioso. El sistema continúa en un estado inválido y el bug aparece mucho después, irreconocible.
+          <div style="margin-top:8px;background:var(--surface2);border-radius:6px;padding:10px 12px;font-family:var(--mono);font-size:12px;color:var(--muted)">
+            <span style="color:#f87171">✗</span> try { ... } catch (e) { console.log('error') }<br>
+            <span style="color:#4ade80">✓</span> try { ... } catch (e) { throw new AppError('contexto', e) }
+          </div>
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">👻</span>
+        <div>
+          <strong>Retornar null, -1 o "" como señal de error</strong>
+          Retornar <code>null</code> cuando no se encuentra algo, <code>-1</code> cuando falla un índice, o <code>""</code> cuando falta un valor transfiere la responsabilidad de detectar el error al llamador —que quizás no lo chequea. La excepción falla en el origen; el <code>null</code> falla tres llamadas después con un NullPointerException sin contexto.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🧢</span>
+        <div>
+          <strong>Valores por defecto que ocultan errores de configuración</strong>
+          <code>const timeout = process.env.TIMEOUT ?? 5000</code> parece prudente. Pero si <code>TIMEOUT</code> debería estar configurado y no lo está, el valor por defecto enmascara una mala configuración. El sistema funciona con un timeout incorrecto sin que nadie se entere. La alternativa es fallar al inicio si la variable es obligatoria.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🌊</span>
+        <div>
+          <strong>Continuar después de detectar un estado inválido</strong>
+          Verificar que algo está mal y seguir de todas formas: <code>if (!user) { log('user not found'); return user; }</code> —el log dice que el usuario no existe, pero se retorna <code>undefined</code> de todos modos. El código que llama recibe <code>undefined</code> y falla más tarde. Si el estado es inválido, <em>no continúes</em>.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🔄</span>
+        <div>
+          <strong>Validar solo en desarrollo, no en producción</strong>
+          Deshabilitar assertions o validaciones en producción "por performance" es una forma de Fail Slow selectivo. Los bugs que solo se manifiestan en producción —con datos reales, bajo carga real— son los más difíciles de diagnosticar. Las assertions tienen un costo mínimo y salvan horas de debugging.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">📨</span>
+        <div>
+          <strong>Mensajes de error sin contexto</strong>
+          <code>throw new Error('invalid input')</code> es Fail Fast en forma pero no en espíritu. Un error útil dice: qué valor recibió, qué esperaba, en qué función, con qué parámetros. <code>throw new Error(`amount debe ser positivo, recibido: ${amount} en processPayment(orderId=${orderId})`)</code> lleva al bug en segundos.
+        </div>
+      </li>
+    </ul>
+</div>
+
+	<div class="panel" id="panel-2">
+	<div class="p-header">
+      <div>
+        <div class="p-name">Fail Fast en el código</div>
+        <span class="p-tagline">Guard clauses, assertions y validación en el borde</span>
+        <p class="p-desc">Fail Fast se implementa con tres herramientas principales: <strong>guard clauses</strong> que cortan el flujo temprano, <strong>assertions</strong> que verifican invariantes en desarrollo, y <strong>validación de schema</strong> en las fronteras del sistema.</p>
+      </div>
+      <div class="p-letter">a</div>
+    </div>
+
+    <div class="comparison">
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-bad"></span> Fallo tardío y silencioso</div>
+        <pre><span class="kw">function</span> <span class="fn">processOrder</span>(order) {
+  <span class="cm">// no validamos nada</span>
+  <span class="kw">const</span> total = order.items
+    .<span class="fn">reduce</span>((s, i) => s + i.price, <span class="num">0</span>)
+
+  <span class="cm">// si order.customer es null:</span>
+  <span class="cm">// falla acá con un error</span>
+  <span class="cm">// que no dice nada útil 💥</span>
+  <span class="fn">sendEmail</span>(order.customer.email)
+
+  <span class="fn">saveToDb</span>(total, order.customer.id)
+}</pre>
+      </div>
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-good"></span> Fail Fast — guard clauses</div>
+        <pre><span class="kw">function</span> <span class="fn">processOrder</span>(order) {
+  <span class="cm">// validamos antes de empezar</span>
+  <span class="kw">if</span> (!order)
+    <span class="kw">throw</span> <span class="kw">new</span> <span class="cl">Error</span>(<span class="str">'order requerida'</span>)
+  <span class="kw">if</span> (!order.customer?.email)
+    <span class="kw">throw</span> <span class="kw">new</span> <span class="cl">Error</span>(<span class="str">'email de cliente falta'</span>)
+  <span class="kw">if</span> (!order.items?.length)
+    <span class="kw">throw</span> <span class="kw">new</span> <span class="cl">Error</span>(<span class="str">'orden sin items'</span>)
+
+  <span class="cm">// ahora el flujo principal</span>
+  <span class="cm">// trabaja con datos válidos ✓</span>
+}</pre>
+      </div>
+    </div>
+
+    <div class="comparison">
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-bad"></span> Config que falla tarde</div>
+        <pre><span class="kw">async function</span> <span class="fn">sendEmail</span>(to, body) {
+  <span class="cm">// se lee cuando se usa</span>
+  <span class="kw">const</span> key = process.env.SENDGRID_KEY
+
+  <span class="cm">// si KEY no existe, falla acá</span>
+  <span class="cm">// cuando el primer email se envía</span>
+  <span class="cm">// quizás horas después del deploy 💥</span>
+  <span class="kw">await</span> sendgrid.<span class="fn">send</span>({ to, body, key })
+}</pre>
+      </div>
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-good"></span> Config que falla al arrancar</div>
+        <pre><span class="cm">// al inicio del proceso</span>
+<span class="kw">const</span> REQUIRED_VARS = [
+  <span class="str">'SENDGRID_KEY'</span>, <span class="str">'DATABASE_URL'</span>,
+  <span class="str">'JWT_SECRET'</span>, <span class="str">'APP_PORT'</span>
+]
+
+<span class="kw">for</span> (<span class="kw">const</span> v <span class="kw">of</span> REQUIRED_VARS) {
+  <span class="kw">if</span> (!process.env[v])
+    <span class="kw">throw</span> <span class="kw">new</span> <span class="cl">Error</span>(<span class="str">`Falta: ${v}`</span>)
+}
+<span class="cm">// si llegamos acá, todo OK ✓</span></pre>
+      </div>
+    </div>
+
+    <div class="comparison">
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-bad"></span> Retornar null — fallo diferido</div>
+        <pre><span class="kw">function</span> <span class="fn">findUser</span>(id) {
+  <span class="kw">const</span> user = db.<span class="fn">query</span>(id)
+  <span class="kw">if</span> (!user) <span class="kw">return</span> <span class="ok">null</span> <span class="cm">// 😬</span>
+  <span class="kw">return</span> user
+}
+
+<span class="cm">// Quien llama recibe null y</span>
+<span class="cm">// si no lo chequea, el</span>
+<span class="cm">// NullPointerException aparece</span>
+<span class="cm">// tres llamadas después 💥</span></pre>
+      </div>
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-good"></span> Lanzar excepción — fallo inmediato</div>
+        <pre><span class="kw">function</span> <span class="fn">findUser</span>(id) {
+  <span class="kw">const</span> user = db.<span class="fn">query</span>(id)
+  <span class="kw">if</span> (!user)
+    <span class="kw">throw</span> <span class="kw">new</span> <span class="cl">UserNotFoundError</span>(id)
+  <span class="kw">return</span> user <span class="cm">// siempre válido ✓</span>
+}
+
+<span class="cm">// El error ocurre exactamente</span>
+<span class="cm">// donde está el problema</span>
+<span class="cm">// con un mensaje descriptivo ✓</span></pre>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>Excepciones descriptivas, no genéricas</strong>
+      <code>throw new Error('error')</code> viola el espíritu de Fail Fast aunque técnicamente falle pronto. El mensaje debe decir <em>qué</em> salió mal, <em>dónde</em> y con <em>qué valor</em>. <code>throw new Error(`userId inválido: esperado string, recibido ${typeof userId}`)</code> es un fallo rápido útil. El error genérico es solo un fallo rápido ruidoso.
+    </div>
+  </div>
+
+  <!-- ── FAIL FAST VS FAIL SAFE ── -->
+  <div class="panel" id="panel-3">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Fail Fast vs Fail Safe</div>
+        <span class="p-tagline">No son opuestos — son herramientas para contextos distintos</span>
+        <p class="p-desc">Fail Safe es el otro extremo: diseñar el sistema para que, cuando algo falla, <strong>degrade de forma controlada</strong> en lugar de detenerse completamente. No son contradictorios —son complementarios y se aplican en capas distintas del sistema.</p>
+      </div>
+      <div class="p-letter">s</div>
+    </div>
+
+    <div class="versus-grid">
+      <div class="versus-card vfast">
+        <div class="versus-label" style="color:var(--fast)">Fail Fast</div>
+        <div class="versus-name" style="color:var(--fast)">Fallar inmediato y visible</div>
+        <div class="versus-desc">
+          Detectar el problema <strong>en el momento en que ocurre</strong> y reportarlo ruidosamente. El objetivo es que los errores sean obvios y fáciles de diagnosticar, especialmente en desarrollo.
+          <br><br>
+          Prioriza la <em>integridad del sistema</em> sobre la disponibilidad. Preferible que el sistema se detenga antes de continuar con datos corruptos.
+        </div>
+        <div class="versus-examples">
+          <div class="versus-ex">→ Validación de precondiciones</div>
+          <div class="versus-ex">→ Assertions de invariantes</div>
+          <div class="versus-ex">→ Verificación de configuración al inicio</div>
+          <div class="versus-ex">→ Lanzar excepción en lugar de retornar null</div>
+        </div>
+      </div>
+      <div class="versus-card vsafe">
+        <div class="versus-label" style="color:var(--safe)">Fail Safe</div>
+        <div class="versus-name" style="color:var(--safe)">Degradar de forma controlada</div>
+        <div class="versus-desc">
+          Diseñar para que cuando un componente falle, el sistema completo <strong>siga funcionando de forma degradada</strong> en lugar de colapsar. El objetivo es la resiliencia del sistema ante fallos inevitables.
+          <br><br>
+          Prioriza la <em>disponibilidad</em>. Acceptable que algunas features fallen si el sistema sigue parcialmente operativo.
+        </div>
+        <div class="versus-examples">
+          <div class="versus-ex">→ Circuit breakers en servicios externos</div>
+          <div class="versus-ex">→ Fallback a caché si la BD no responde</div>
+          <div class="versus-ex">→ Retry con backoff exponencial</div>
+          <div class="versus-ex">→ Valores por defecto cuando un servicio falla</div>
+        </div>
+      </div>
+    </div>
+
+    <table class="ctx-matrix">
+      <thead>
+        <tr>
+          <th>Contexto</th>
+          <th>Estrategia</th>
+          <th>Razonamiento</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Bug de programación (null inesperado, tipo incorrecto)</td>
+          <td><span class="badge-fast">Fail Fast</span></td>
+          <td style="color:var(--muted)">Es un bug —necesita ser detectado y corregido, no ignorado</td>
+        </tr>
+        <tr>
+          <td>Configuración inválida al arrancar</td>
+          <td><span class="badge-fast">Fail Fast</span></td>
+          <td style="color:var(--muted)">El sistema no puede funcionar correctamente sin config válida</td>
+        </tr>
+        <tr>
+          <td>Servicio externo temporalmente caído</td>
+          <td><span class="badge-safe">Fail Safe</span></td>
+          <td style="color:var(--muted)">Es una condición de red, no un bug. El sistema debería degradar</td>
+        </tr>
+        <tr>
+          <td>Feature no crítica con error</td>
+          <td><span class="badge-safe">Fail Safe</span></td>
+          <td style="color:var(--muted)">No tiene sentido bajar todo el sistema por una feature secundaria</td>
+        </tr>
+        <tr>
+          <td>Input inválido de usuario</td>
+          <td><span class="badge-both">Ambos</span></td>
+          <td style="color:var(--muted)">Fail Fast para detectar el error, Fail Safe para mostrar un mensaje amigable</td>
+        </tr>
+        <tr>
+          <td>Datos corruptos en base de datos</td>
+          <td><span class="badge-fast">Fail Fast</span></td>
+          <td style="color:var(--muted)">Datos inválidos no deben propagarse —mejor detener y alertar</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="tip">
+      <strong>La regla de las capas</strong>
+      Fail Fast aplica en el <em>interior</em> del sistema: en las funciones, los servicios, el dominio. Fail Safe aplica en las <em>fronteras externas</em>: la comunicación con servicios de terceros, los recursos de red, las integraciones. El núcleo falla fuerte para que los bugs sean obvios; el borde falla con gracia para que los problemas externos no colapsen todo.
+    </div>
+  </div>
+
+  <!-- ── TRAMPAS ── -->
+  <div class="panel" id="panel-4">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Trampas comunes</div>
+        <span class="p-tagline">Las formas en que los bugs se vuelven invisibles</span>
+        <p class="p-desc">Violar Fail Fast casi siempre parece <strong>la opción más segura</strong> en el momento. Retornar null en lugar de lanzar, capturar la excepción para que "no moleste", devolver un valor por defecto "razonable". Estas decisiones vuelven los bugs invisibles hasta que el daño ya está hecho.</p>
+      </div>
+      <div class="p-letter">t</div>
+    </div>
+
+    <ul class="trap-list">
+      <li>
+        <span class="trap-icon">🔇</span>
+        <div>
+          <strong>Swallowing exceptions — tragar el error</strong>
+          El antipatrón más dañino. Un bloque <code>try/catch</code> que captura la excepción y no hace nada con ella —o solo loguea "algo salió mal"— convierte un fallo ruidoso en uno silencioso. El sistema continúa en un estado inválido y el bug aparece mucho después, irreconocible.
+          <div style="margin-top:8px;background:var(--surface2);border-radius:6px;padding:10px 12px;font-family:var(--mono);font-size:12px;color:var(--muted)">
+            <span style="color:#f87171">✗</span> try { ... } catch (e) { console.log('error') }<br>
+            <span style="color:#4ade80">✓</span> try { ... } catch (e) { throw new AppError('contexto', e) }
+          </div>
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">👻</span>
+        <div>
+          <strong>Retornar null, -1 o "" como señal de error</strong>
+          Retornar <code>null</code> cuando no se encuentra algo, <code>-1</code> cuando falla un índice, o <code>""</code> cuando falta un valor transfiere la responsabilidad de detectar el error al llamador —que quizás no lo chequea. La excepción falla en el origen; el <code>null</code> falla tres llamadas después con un NullPointerException sin contexto.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🧢</span>
+        <div>
+          <strong>Valores por defecto que ocultan errores de configuración</strong>
+          <code>const timeout = process.env.TIMEOUT ?? 5000</code> parece prudente. Pero si <code>TIMEOUT</code> debería estar configurado y no lo está, el valor por defecto enmascara una mala configuración. El sistema funciona con un timeout incorrecto sin que nadie se entere. La alternativa es fallar al inicio si la variable es obligatoria.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🌊</span>
+        <div>
+          <strong>Continuar después de detectar un estado inválido</strong>
+          Verificar que algo está mal y seguir de todas formas: <code>if (!user) { log('user not found'); return user; }</code> —el log dice que el usuario no existe, pero se retorna <code>undefined</code> de todos modos. El código que llama recibe <code>undefined</code> y falla más tarde. Si el estado es inválido, <em>no continúes</em>.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🔄</span>
+        <div>
+          <strong>Validar solo en desarrollo, no en producción</strong>
+          Deshabilitar assertions o validaciones en producción "por performance" es una forma de Fail Slow selectivo. Los bugs que solo se manifiestan en producción —con datos reales, bajo carga real— son los más difíciles de diagnosticar. Las assertions tienen un costo mínimo y salvan horas de debugging.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">📨</span>
+        <div>
+          <strong>Mensajes de error sin contexto</strong>
+          <code>throw new Error('invalid input')</code> es Fail Fast en forma pero no en espíritu. Un error útil dice: qué valor recibió, qué esperaba, en qué función, con qué parámetros. <code>throw new Error(`amount debe ser positivo, recibido: ${amount} en processPayment(orderId=${orderId})`)</code> lleva al bug en segundos.
+        </div>
+      </li>
+    </ul>
+</div>
+
+	<div class="panel" id="panel-3">
+	<div class="p-header">
+      <div>
+        <div class="p-name">Fail Fast vs Fail Safe</div>
+        <span class="p-tagline">No son opuestos — son herramientas para contextos distintos</span>
+        <p class="p-desc">Fail Safe es el otro extremo: diseñar el sistema para que, cuando algo falla, <strong>degrade de forma controlada</strong> en lugar de detenerse completamente. No son contradictorios —son complementarios y se aplican en capas distintas del sistema.</p>
+      </div>
+      <div class="p-letter">s</div>
+    </div>
+
+    <div class="versus-grid">
+      <div class="versus-card vfast">
+        <div class="versus-label" style="color:var(--fast)">Fail Fast</div>
+        <div class="versus-name" style="color:var(--fast)">Fallar inmediato y visible</div>
+        <div class="versus-desc">
+          Detectar el problema <strong>en el momento en que ocurre</strong> y reportarlo ruidosamente. El objetivo es que los errores sean obvios y fáciles de diagnosticar, especialmente en desarrollo.
+          <br><br>
+          Prioriza la <em>integridad del sistema</em> sobre la disponibilidad. Preferible que el sistema se detenga antes de continuar con datos corruptos.
+        </div>
+        <div class="versus-examples">
+          <div class="versus-ex">→ Validación de precondiciones</div>
+          <div class="versus-ex">→ Assertions de invariantes</div>
+          <div class="versus-ex">→ Verificación de configuración al inicio</div>
+          <div class="versus-ex">→ Lanzar excepción en lugar de retornar null</div>
+        </div>
+      </div>
+      <div class="versus-card vsafe">
+        <div class="versus-label" style="color:var(--safe)">Fail Safe</div>
+        <div class="versus-name" style="color:var(--safe)">Degradar de forma controlada</div>
+        <div class="versus-desc">
+          Diseñar para que cuando un componente falle, el sistema completo <strong>siga funcionando de forma degradada</strong> en lugar de colapsar. El objetivo es la resiliencia del sistema ante fallos inevitables.
+          <br><br>
+          Prioriza la <em>disponibilidad</em>. Acceptable que algunas features fallen si el sistema sigue parcialmente operativo.
+        </div>
+        <div class="versus-examples">
+          <div class="versus-ex">→ Circuit breakers en servicios externos</div>
+          <div class="versus-ex">→ Fallback a caché si la BD no responde</div>
+          <div class="versus-ex">→ Retry con backoff exponencial</div>
+          <div class="versus-ex">→ Valores por defecto cuando un servicio falla</div>
+        </div>
+      </div>
+    </div>
+
+    <table class="ctx-matrix">
+      <thead>
+        <tr>
+          <th>Contexto</th>
+          <th>Estrategia</th>
+          <th>Razonamiento</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Bug de programación (null inesperado, tipo incorrecto)</td>
+          <td><span class="badge-fast">Fail Fast</span></td>
+          <td style="color:var(--muted)">Es un bug —necesita ser detectado y corregido, no ignorado</td>
+        </tr>
+        <tr>
+          <td>Configuración inválida al arrancar</td>
+          <td><span class="badge-fast">Fail Fast</span></td>
+          <td style="color:var(--muted)">El sistema no puede funcionar correctamente sin config válida</td>
+        </tr>
+        <tr>
+          <td>Servicio externo temporalmente caído</td>
+          <td><span class="badge-safe">Fail Safe</span></td>
+          <td style="color:var(--muted)">Es una condición de red, no un bug. El sistema debería degradar</td>
+        </tr>
+        <tr>
+          <td>Feature no crítica con error</td>
+          <td><span class="badge-safe">Fail Safe</span></td>
+          <td style="color:var(--muted)">No tiene sentido bajar todo el sistema por una feature secundaria</td>
+        </tr>
+        <tr>
+          <td>Input inválido de usuario</td>
+          <td><span class="badge-both">Ambos</span></td>
+          <td style="color:var(--muted)">Fail Fast para detectar el error, Fail Safe para mostrar un mensaje amigable</td>
+        </tr>
+        <tr>
+          <td>Datos corruptos en base de datos</td>
+          <td><span class="badge-fast">Fail Fast</span></td>
+          <td style="color:var(--muted)">Datos inválidos no deben propagarse —mejor detener y alertar</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="tip">
+      <strong>La regla de las capas</strong>
+      Fail Fast aplica en el <em>interior</em> del sistema: en las funciones, los servicios, el dominio. Fail Safe aplica en las <em>fronteras externas</em>: la comunicación con servicios de terceros, los recursos de red, las integraciones. El núcleo falla fuerte para que los bugs sean obvios; el borde falla con gracia para que los problemas externos no colapsen todo.
+    </div>
+  </div>
+
+  <!-- ── TRAMPAS ── -->
+  <div class="panel" id="panel-4">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Trampas comunes</div>
+        <span class="p-tagline">Las formas en que los bugs se vuelven invisibles</span>
+        <p class="p-desc">Violar Fail Fast casi siempre parece <strong>la opción más segura</strong> en el momento. Retornar null en lugar de lanzar, capturar la excepción para que "no moleste", devolver un valor por defecto "razonable". Estas decisiones vuelven los bugs invisibles hasta que el daño ya está hecho.</p>
+      </div>
+      <div class="p-letter">t</div>
+    </div>
+
+    <ul class="trap-list">
+      <li>
+        <span class="trap-icon">🔇</span>
+        <div>
+          <strong>Swallowing exceptions — tragar el error</strong>
+          El antipatrón más dañino. Un bloque <code>try/catch</code> que captura la excepción y no hace nada con ella —o solo loguea "algo salió mal"— convierte un fallo ruidoso en uno silencioso. El sistema continúa en un estado inválido y el bug aparece mucho después, irreconocible.
+          <div style="margin-top:8px;background:var(--surface2);border-radius:6px;padding:10px 12px;font-family:var(--mono);font-size:12px;color:var(--muted)">
+            <span style="color:#f87171">✗</span> try { ... } catch (e) { console.log('error') }<br>
+            <span style="color:#4ade80">✓</span> try { ... } catch (e) { throw new AppError('contexto', e) }
+          </div>
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">👻</span>
+        <div>
+          <strong>Retornar null, -1 o "" como señal de error</strong>
+          Retornar <code>null</code> cuando no se encuentra algo, <code>-1</code> cuando falla un índice, o <code>""</code> cuando falta un valor transfiere la responsabilidad de detectar el error al llamador —que quizás no lo chequea. La excepción falla en el origen; el <code>null</code> falla tres llamadas después con un NullPointerException sin contexto.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🧢</span>
+        <div>
+          <strong>Valores por defecto que ocultan errores de configuración</strong>
+          <code>const timeout = process.env.TIMEOUT ?? 5000</code> parece prudente. Pero si <code>TIMEOUT</code> debería estar configurado y no lo está, el valor por defecto enmascara una mala configuración. El sistema funciona con un timeout incorrecto sin que nadie se entere. La alternativa es fallar al inicio si la variable es obligatoria.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🌊</span>
+        <div>
+          <strong>Continuar después de detectar un estado inválido</strong>
+          Verificar que algo está mal y seguir de todas formas: <code>if (!user) { log('user not found'); return user; }</code> —el log dice que el usuario no existe, pero se retorna <code>undefined</code> de todos modos. El código que llama recibe <code>undefined</code> y falla más tarde. Si el estado es inválido, <em>no continúes</em>.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🔄</span>
+        <div>
+          <strong>Validar solo en desarrollo, no en producción</strong>
+          Deshabilitar assertions o validaciones en producción "por performance" es una forma de Fail Slow selectivo. Los bugs que solo se manifiestan en producción —con datos reales, bajo carga real— son los más difíciles de diagnosticar. Las assertions tienen un costo mínimo y salvan horas de debugging.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">📨</span>
+        <div>
+          <strong>Mensajes de error sin contexto</strong>
+          <code>throw new Error('invalid input')</code> es Fail Fast en forma pero no en espíritu. Un error útil dice: qué valor recibió, qué esperaba, en qué función, con qué parámetros. <code>throw new Error(`amount debe ser positivo, recibido: ${amount} en processPayment(orderId=${orderId})`)</code> lleva al bug en segundos.
+        </div>
+      </li>
+    </ul>
+</div>
+
+	<div class="panel" id="panel-4">
+	<div class="p-header">
+      <div>
+        <div class="p-name">Trampas comunes</div>
+        <span class="p-tagline">Las formas en que los bugs se vuelven invisibles</span>
+        <p class="p-desc">Violar Fail Fast casi siempre parece <strong>la opción más segura</strong> en el momento. Retornar null en lugar de lanzar, capturar la excepción para que "no moleste", devolver un valor por defecto "razonable". Estas decisiones vuelven los bugs invisibles hasta que el daño ya está hecho.</p>
+      </div>
+      <div class="p-letter">t</div>
+    </div>
+
+    <ul class="trap-list">
+      <li>
+        <span class="trap-icon">🔇</span>
+        <div>
+          <strong>Swallowing exceptions — tragar el error</strong>
+          El antipatrón más dañino. Un bloque <code>try/catch</code> que captura la excepción y no hace nada con ella —o solo loguea "algo salió mal"— convierte un fallo ruidoso en uno silencioso. El sistema continúa en un estado inválido y el bug aparece mucho después, irreconocible.
+          <div style="margin-top:8px;background:var(--surface2);border-radius:6px;padding:10px 12px;font-family:var(--mono);font-size:12px;color:var(--muted)">
+            <span style="color:#f87171">✗</span> try { ... } catch (e) { console.log('error') }<br>
+            <span style="color:#4ade80">✓</span> try { ... } catch (e) { throw new AppError('contexto', e) }
+          </div>
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">👻</span>
+        <div>
+          <strong>Retornar null, -1 o "" como señal de error</strong>
+          Retornar <code>null</code> cuando no se encuentra algo, <code>-1</code> cuando falla un índice, o <code>""</code> cuando falta un valor transfiere la responsabilidad de detectar el error al llamador —que quizás no lo chequea. La excepción falla en el origen; el <code>null</code> falla tres llamadas después con un NullPointerException sin contexto.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🧢</span>
+        <div>
+          <strong>Valores por defecto que ocultan errores de configuración</strong>
+          <code>const timeout = process.env.TIMEOUT ?? 5000</code> parece prudente. Pero si <code>TIMEOUT</code> debería estar configurado y no lo está, el valor por defecto enmascara una mala configuración. El sistema funciona con un timeout incorrecto sin que nadie se entere. La alternativa es fallar al inicio si la variable es obligatoria.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🌊</span>
+        <div>
+          <strong>Continuar después de detectar un estado inválido</strong>
+          Verificar que algo está mal y seguir de todas formas: <code>if (!user) { log('user not found'); return user; }</code> —el log dice que el usuario no existe, pero se retorna <code>undefined</code> de todos modos. El código que llama recibe <code>undefined</code> y falla más tarde. Si el estado es inválido, <em>no continúes</em>.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">🔄</span>
+        <div>
+          <strong>Validar solo en desarrollo, no en producción</strong>
+          Deshabilitar assertions o validaciones en producción "por performance" es una forma de Fail Slow selectivo. Los bugs que solo se manifiestan en producción —con datos reales, bajo carga real— son los más difíciles de diagnosticar. Las assertions tienen un costo mínimo y salvan horas de debugging.
+        </div>
+      </li>
+      <li>
+        <span class="trap-icon">📨</span>
+        <div>
+          <strong>Mensajes de error sin contexto</strong>
+          <code>throw new Error('invalid input')</code> es Fail Fast en forma pero no en espíritu. Un error útil dice: qué valor recibió, qué esperaba, en qué función, con qué parámetros. <code>throw new Error(`amount debe ser positivo, recibido: ${amount} en processPayment(orderId=${orderId})`)</code> lleva al bug en segundos.
+        </div>
+      </li>
+    </ul>
+</div>
+
+	<div style="margin-top:36px;padding-top:32px;border-top:1px solid var(--border)">
+		<div class="context-inner">
+	<div>
+		<div class="context-section-label">Origen del principio</div>
+		<p class="context-text"></p>
+	</div>
+	<div class="context-divider"></div>
+	<div>
+		<div class="context-section-label">¿Solo aplica a código?</div>
+		<p class="context-text"></p>
+		<div class="scope-pills">
+			<span class="pill yes">Código de aplicación</span>
+			<span class="pill yes">Configuración / arranque</span>
+			<span class="pill yes">Tests (assertions)</span>
+			<span class="pill yes">Pipelines de CI/CD</span>
+			<span class="pill yes">Validación de APIs</span>
+			<span class="pill yes">Sistemas distribuidos — balancear con Fail Safe</span>
+		</div>
+	</div>
+</div>
+	</div>
+
+	<div class="progress" id="progress">
+		<div class="prog-dot active"></div>
+		<div class="prog-dot"></div>
+		<div class="prog-dot"></div>
+		<div class="prog-dot"></div>
+		<div class="prog-dot"></div>
+	</div>
+	<div class="nav-btns">
+		<button class="nav-btn" id="btnPrev">← Anterior</button>
+		<button class="nav-btn" id="btnNext">Siguiente →</button>
+	</div>
+</main>
+
+<footer>
+	<span>Fail Fast · Jim Shore · IEEE Software · 2004</span>
+	<span>Gustavo Adrián Salvini · <a href="https://github.com/guspatagonico" target="_blank">@guspatagonico</a></span>
+</footer>
+
+<nav class="snav snav-bot">
+	<a class="snav-prev" href="lod.html" style="color:#38bdf8;background:rgba(56,189,248,0.12);border-color:rgba(56,189,248,0.32)"><span>←</span><span class="snav-label">Law of Demeter</span></a>
+	<div class="snav-spacer"></div>
+	<div class="snav-center">
+		<a class="snav-home" href="../index.html">↑&nbsp;&nbsp;Índice</a>
+		<span class="snav-pos">08&thinsp;/&thinsp;12</span>
+	</div>
+	<div class="snav-spacer"></div>
+	<a class="snav-next" href="pkg.html" style="color:#e879f9;background:rgba(232,121,249,0.12);border-color:rgba(232,121,249,0.32)"><span class="snav-label">Paquetes</span><span>→</span></a>
+</nav>
+
+<script src="../js/tabs.js"></script>
+</body>
+</html>

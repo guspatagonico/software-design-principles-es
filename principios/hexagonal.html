@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="es" data-accent="hexagonal" class="layout-wide">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hexagonal — Principios de diseño de software</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="../css/base.css">
+<link rel="stylesheet" href="../css/layout.css">
+</head>
+<body>
+<nav class="snav snav-top">
+	<a class="snav-prev" href="clean-architecture.html" style="color:#a855f7;background:rgba(168,85,247,0.12);border-color:rgba(168,85,247,0.32)"><span>←</span><span class="snav-label">Clean Arch</span></a>
+	<div class="snav-spacer"></div>
+	<div class="snav-center">
+		<a class="snav-home" href="../index.html">↑&nbsp;&nbsp;Índice</a>
+		<span class="snav-pos">12&thinsp;/&thinsp;12</span>
+	</div>
+	<div class="snav-spacer"></div>
+	<div class="snav-ghost"></div>
+</nav>
+
+<header>
+	<div class="header-label">Principios de diseño · Referencia para devs</div>
+	<h1><em>Ports &amp; Adapters</em><br>Hexagonal Architecture</h1>
+	<p>El dominio vive en el centro. Define puertos —interfaces— que describen lo que necesita. El mundo exterior conecta a través de adaptadores que implementan esos puertos. El dominio no sabe nada de afuera.</p>
+</header>
+
+<div class="nav-wrap">
+	<div class="nav" id="nav">
+		<div class="nav-pill" id="navPill"></div>
+		<button class="tab-btn active" data-idx="0">
+	<span class="tab-icon">💡</span>
+	<span class="tab-word">Concepto</span>
+</button>
+		<button class="tab-btn" data-idx="1">
+	<span class="tab-icon">🔌</span>
+	<span class="tab-word">Los puertos</span>
+</button>
+		<button class="tab-btn" data-idx="2">
+	<span class="tab-icon">🔧</span>
+	<span class="tab-word">Los adaptadores</span>
+</button>
+		<button class="tab-btn" data-idx="3">
+	<span class="tab-icon">💻</span>
+	<span class="tab-word">En el código</span>
+</button>
+		<button class="tab-btn" data-idx="4">
+	<span class="tab-icon">⚠️</span>
+	<span class="tab-word">Trampas</span>
+</button>
+	</div>
+</div>
+
+<main>
+	<div class="panel active" id="panel-0">
+	<div class="p-header">
+      <div>
+        <div class="p-name">¿Qué es la arquitectura hexagonal?</div>
+        <span class="p-tagline">El dominio en el centro · El mundo afuera</span>
+        <p class="p-desc">Alistair Cockburn la formuló en 2005. La idea central: la aplicación debería ser igualmente usable por <strong>cualquier medio externo</strong> —HTTP, CLI, tests, eventos— y debería poder funcionar en <strong>aislamiento completo</strong> de bases de datos, servicios externos y frameworks. Todo eso se logra con puertos y adaptadores.</p>
+      </div>
+      <div class="p-letter">H</div>
+    </div>
+
+    <div class="hex-diagram-wrap">
+      <!--
+        Hexagon geometry: flat left/right sides (edges at x=335 and x=525)
+        Center (430,185), r=110.  Vertices at 30°,90°,150°,210°,270°,330°:
+          Top-right (525,130) · Top (430,75) · Top-left (335,130)
+          Bot-left  (335,240) · Bot (430,295) · Bot-right (525,240)
+        Left flat edge:  x=335, y=130→240  (span 110 px)
+        Right flat edge: x=525, y=130→240  (span 110 px)
+        4 equidistant port-points per edge at y = 152, 174, 196, 218
+      -->
+      <svg viewBox="0 0 860 360" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <!-- Driving: arrowhead points INTO hexagon (tip at hex edge) -->
+          <marker id="m-drv" markerWidth="7" markerHeight="6"
+                  refX="6.5" refY="3" orient="auto">
+            <path d="M0,0 L7,3 L0,6 Z" fill="#f472b6"/>
+          </marker>
+          <!-- Driven: arrowhead points OUT toward adapter (tip at box) -->
+          <marker id="m-drn" markerWidth="7" markerHeight="6"
+                  refX="6.5" refY="3" orient="auto">
+            <path d="M0,0 L7,3 L0,6 Z" fill="#a78bfa"/>
+          </marker>
+        </defs>
+
+        <!-- ══ SECTION LABELS ══ -->
+        <text x="112" y="22" text-anchor="middle"
+              font-family="'DM Mono',monospace" font-size="9"
+              letter-spacing="2" fill="#f472b6" opacity=".65">DRIVING  →</text>
+        <text x="748" y="22" text-anchor="middle"
+              font-family="'DM Mono',monospace" font-size="9"
+              letter-spacing="2" fill="#a78bfa" opacity=".65">←  DRIVEN</text>
+
+        <!-- ══ HEXAGON (flat left/right sides) ══ -->
+        <polygon points="525,130 430,75 335,130 335,240 430,295 525,240"
+                 fill="rgba(34,211,238,.07)"
+                 stroke="rgba(34,211,238,.38)" stroke-width="1.5"/>
+
+        <!-- Highlight the two flat port-edges -->
+        <line x1="335" y1="130" x2="335" y2="240"
+              stroke="#f472b6" stroke-width="2" opacity=".35"/>
+        <line x1="525" y1="130" x2="525" y2="240"
+              stroke="#a78bfa" stroke-width="2" opacity=".35"/>
+
+        <!-- PORT dots on left edge  (y = 152, 174, 196, 218) -->
+        <circle cx="335" cy="152" r="4.5" fill="#f472b6" opacity=".75"/>
+        <circle cx="335" cy="174" r="4.5" fill="#f472b6" opacity=".75"/>
+        <circle cx="335" cy="196" r="4.5" fill="#f472b6" opacity=".75"/>
+        <circle cx="335" cy="218" r="4.5" fill="#f472b6" opacity=".75"/>
+
+        <!-- PORT dots on right edge -->
+        <circle cx="525" cy="152" r="4.5" fill="#a78bfa" opacity=".75"/>
+        <circle cx="525" cy="174" r="4.5" fill="#a78bfa" opacity=".75"/>
+        <circle cx="525" cy="196" r="4.5" fill="#a78bfa" opacity=".75"/>
+        <circle cx="525" cy="218" r="4.5" fill="#a78bfa" opacity=".75"/>
+
+        <!-- Domain labels -->
+        <text x="430" y="172" text-anchor="middle"
+              font-family="'Fraunces',serif" font-size="22"
+              font-weight="300" fill="#22d3ee">Dominio</text>
+        <text x="430" y="194" text-anchor="middle"
+              font-family="'DM Mono',monospace" font-size="8.5"
+              letter-spacing="1.4" fill="#48688a">ENTIDADES · CASOS DE USO</text>
+        <text x="430" y="210" text-anchor="middle"
+              font-family="'DM Mono',monospace" font-size="8.5"
+              letter-spacing="1.4" fill="#48688a">PUERTOS (INTERFACES)</text>
+
+        <!-- ══ DRIVING ADAPTERS (left) ══
+             Boxes: x=20–205, height=36, gap=16
+             Centers y: 107, 159, 211, 263
+             Lines from (205,cy) → (335, port_y)           -->
+
+        <!-- HTTP Controller → port y=152 -->
+        <line x1="205" y1="107" x2="333" y2="152"
+              stroke="#f472b6" stroke-width="1.2"
+              stroke-dasharray="5,3.5" opacity=".55"
+              marker-end="url(#m-drv)"/>
+        <rect x="20" y="89" width="185" height="36" rx="7"
+              fill="rgba(244,114,182,.08)" stroke="rgba(244,114,182,.3)" stroke-width="1"/>
+        <circle cx="40" cy="107" r="4" fill="#f472b6"/>
+        <text x="52" y="111" font-family="'DM Mono',monospace"
+              font-size="11" fill="#f472b6">HTTP Controller</text>
+
+        <!-- CLI Command → port y=174 -->
+        <line x1="205" y1="159" x2="333" y2="174"
+              stroke="#f472b6" stroke-width="1.2"
+              stroke-dasharray="5,3.5" opacity=".55"
+              marker-end="url(#m-drv)"/>
+        <rect x="20" y="141" width="185" height="36" rx="7"
+              fill="rgba(244,114,182,.08)" stroke="rgba(244,114,182,.3)" stroke-width="1"/>
+        <circle cx="40" cy="159" r="4" fill="#f472b6"/>
+        <text x="52" y="163" font-family="'DM Mono',monospace"
+              font-size="11" fill="#f472b6">CLI Command</text>
+
+        <!-- Test Suite → port y=196 -->
+        <line x1="205" y1="211" x2="333" y2="196"
+              stroke="#f472b6" stroke-width="1.2"
+              stroke-dasharray="5,3.5" opacity=".55"
+              marker-end="url(#m-drv)"/>
+        <rect x="20" y="193" width="185" height="36" rx="7"
+              fill="rgba(244,114,182,.08)" stroke="rgba(244,114,182,.3)" stroke-width="1"/>
+        <circle cx="40" cy="211" r="4" fill="#f472b6"/>
+        <text x="52" y="215" font-family="'DM Mono',monospace"
+              font-size="11" fill="#f472b6">Test Suite</text>
+
+        <!-- Message Consumer → port y=218 -->
+        <line x1="205" y1="263" x2="333" y2="218"
+              stroke="#f472b6" stroke-width="1.2"
+              stroke-dasharray="5,3.5" opacity=".55"
+              marker-end="url(#m-drv)"/>
+        <rect x="20" y="245" width="185" height="36" rx="7"
+              fill="rgba(244,114,182,.08)" stroke="rgba(244,114,182,.3)" stroke-width="1"/>
+        <circle cx="40" cy="263" r="4" fill="#f472b6"/>
+        <text x="52" y="267" font-family="'DM Mono',monospace"
+              font-size="11" fill="#f472b6">Message Consumer</text>
+
+        <!-- ══ DRIVEN ADAPTERS (right) ══
+             Boxes: x=655–840, height=36, gap=16
+             Centers y: 107, 159, 211, 263
+             Lines from (527,port_y) → (655,cy)            -->
+
+        <!-- port y=152 → PostgreSQL -->
+        <line x1="527" y1="152" x2="653" y2="107"
+              stroke="#a78bfa" stroke-width="1.2"
+              stroke-dasharray="5,3.5" opacity=".55"
+              marker-end="url(#m-drn)"/>
+        <rect x="655" y="89" width="185" height="36" rx="7"
+              fill="rgba(167,139,250,.08)" stroke="rgba(167,139,250,.3)" stroke-width="1"/>
+        <circle cx="822" cy="107" r="4" fill="#a78bfa"/>
+        <text x="667" y="111" font-family="'DM Mono',monospace"
+              font-size="11" fill="#a78bfa">PostgreSQL Repo</text>
+
+        <!-- port y=174 → SendGrid -->
+        <line x1="527" y1="174" x2="653" y2="159"
+              stroke="#a78bfa" stroke-width="1.2"
+              stroke-dasharray="5,3.5" opacity=".55"
+              marker-end="url(#m-drn)"/>
+        <rect x="655" y="141" width="185" height="36" rx="7"
+              fill="rgba(167,139,250,.08)" stroke="rgba(167,139,250,.3)" stroke-width="1"/>
+        <circle cx="822" cy="159" r="4" fill="#a78bfa"/>
+        <text x="667" y="163" font-family="'DM Mono',monospace"
+              font-size="11" fill="#a78bfa">SendGrid Mailer</text>
+
+        <!-- port y=196 → Redis -->
+        <line x1="527" y1="196" x2="653" y2="211"
+              stroke="#a78bfa" stroke-width="1.2"
+              stroke-dasharray="5,3.5" opacity=".55"
+              marker-end="url(#m-drn)"/>
+        <rect x="655" y="193" width="185" height="36" rx="7"
+              fill="rgba(167,139,250,.08)" stroke="rgba(167,139,250,.3)" stroke-width="1"/>
+        <circle cx="822" cy="211" r="4" fill="#a78bfa"/>
+        <text x="667" y="215" font-family="'DM Mono',monospace"
+              font-size="11" fill="#a78bfa">Redis Cache</text>
+
+        <!-- port y=218 → Stripe -->
+        <line x1="527" y1="218" x2="653" y2="263"
+              stroke="#a78bfa" stroke-width="1.2"
+              stroke-dasharray="5,3.5" opacity=".55"
+              marker-end="url(#m-drn)"/>
+        <rect x="655" y="245" width="185" height="36" rx="7"
+              fill="rgba(167,139,250,.08)" stroke="rgba(167,139,250,.3)" stroke-width="1"/>
+        <circle cx="822" cy="263" r="4" fill="#a78bfa"/>
+        <text x="667" y="267" font-family="'DM Mono',monospace"
+              font-size="11" fill="#a78bfa">Stripe Payment</text>
+
+        <!-- ══ LEGEND ══ -->
+        <g transform="translate(270,326)" font-family="'DM Mono',monospace" font-size="10">
+          <circle cx="6" cy="5" r="4" fill="#f472b6" opacity=".8"/>
+          <text x="16" y="9" fill="#f472b6" opacity=".8">Driving — conduce el dominio desde afuera</text>
+          <circle cx="6" cy="22" r="4" fill="#a78bfa" opacity=".8"/>
+          <text x="16" y="26" fill="#a78bfa" opacity=".8">Driven — el dominio los conduce hacia afuera</text>
+        </g>
+      </svg>
+    </div>
+
+    <div class="analogy">
+      <span class="analogy-icon">🔌</span>
+      <span>El tomacorriente de tu casa no sabe qué enchufás en él —un teléfono, una lámpara o un cargador de laptop. Define un contrato (forma, voltaje) y cualquier dispositivo que lo cumpla funciona. <em>El dominio define los puertos; los adaptadores son los enchufes que conectan el mundo exterior.</em></span>
+    </div>
+
+    <div class="tip">
+      <strong>El nombre "hexagonal" es arbitrario</strong>
+      Cockburn eligió el hexágono como forma porque tiene suficientes lados para dibujar varios puertos. No hay nada mágico en el número seis. Por eso el nombre más descriptivo es <strong>Ports and Adapters</strong> —es lo que realmente importa en el patrón.
+    </div>
+  </div>
+
+  <!-- LOS PUERTOS -->
+  <div class="panel" id="panel-1">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Los puertos</div>
+        <span class="p-tagline">Las interfaces que el dominio define para comunicarse con el exterior</span>
+        <p class="p-desc">Un <strong>puerto</strong> es simplemente una interfaz —un contrato— definida por el dominio. Describe lo que el dominio necesita o lo que el dominio ofrece, sin saber nada sobre quién lo implementa. Hay dos tipos con roles completamente distintos.</p>
+      </div>
+      <div class="p-letter">P</div>
+    </div>
+
+    <div class="ports-grid">
+      <div class="port-card pc-driving">
+        <div class="port-label" style="color:var(--driving)">Driving ports · Puertos primarios</div>
+        <div class="port-name" style="color:var(--driving)">Entradas al dominio</div>
+        <div class="port-desc">Definen <strong>cómo se puede usar el dominio</strong> desde afuera. Son las operaciones que el dominio expone: sus casos de uso. El mundo exterior <em>conduce</em> la aplicación a través de estos puertos.</div>
+        <div class="port-examples">
+          <div class="port-ex" style="color:var(--driving)">ICreateOrderPort → createOrder(data)</div>
+          <div class="port-ex" style="color:var(--driving)">IGetOrderPort → getOrderById(id)</div>
+          <div class="port-ex" style="color:var(--driving)">IProcessPaymentPort → processPayment(order)</div>
+        </div>
+      </div>
+      <div class="port-card pc-driven">
+        <div class="port-label" style="color:var(--driven)">Driven ports · Puertos secundarios</div>
+        <div class="port-name" style="color:var(--driven)">Lo que el dominio necesita</div>
+        <div class="port-desc">Definen <strong>qué necesita el dominio del exterior</strong> para funcionar. El dominio <em>conduce</em> a los servicios externos a través de estos puertos. Los define el dominio; los implementa la infraestructura.</div>
+        <div class="port-examples">
+          <div class="port-ex" style="color:var(--driven)">IOrderRepository → save, findById</div>
+          <div class="port-ex" style="color:var(--driven)">IMailer → sendConfirmation(order)</div>
+          <div class="port-ex" style="color:var(--driven)">IPaymentGateway → charge(amount, card)</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="analogy">
+      <span class="analogy-icon">🎭</span>
+      <span>Los puertos <em>driving</em> son como el escenario de un teatro: definen qué actuaciones son posibles. Los puertos <em>driven</em> son como la tramoya: el escenario no sabe si hay humanos moviendo los telones o un sistema automático —solo sabe que cuando los pide, aparecen.</span>
+    </div>
+
+    <div class="tip">
+      <strong>¿Dónde viven los puertos?</strong>
+      Los puertos —ambos tipos— viven <em>dentro del dominio</em>. Son interfaces definidas por el dominio para sus propias necesidades. Los adaptadores viven afuera e implementan esas interfaces. Esto garantiza que la dependencia siempre apunta hacia adentro: la infraestructura depende del dominio, nunca al revés.
+    </div>
+  </div>
+
+  <!-- LOS ADAPTADORES -->
+  <div class="panel" id="panel-2">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Los adaptadores</div>
+        <span class="p-tagline">Los traductores entre el dominio y el mundo exterior</span>
+        <p class="p-desc">Un <strong>adaptador</strong> es la implementación concreta de un puerto. Traduce entre el lenguaje del dominio y el lenguaje de la tecnología específica que conecta. Es intercambiable: podés reemplazar un adaptador por otro sin tocar el dominio.</p>
+      </div>
+      <div class="p-letter">A</div>
+    </div>
+
+    <div style="font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--driving);margin-bottom:12px">Adaptadores driving — conectan el exterior con el dominio</div>
+    <div class="adapters-grid">
+      <div class="adapter-card">
+        <span class="adapter-tag at-driving">HTTP Controller</span>
+        <div class="adapter-title">REST / GraphQL Controller</div>
+        <div class="adapter-desc">Recibe el request HTTP, extrae los datos, los convierte al formato que el puerto driving espera, llama al caso de uso y convierte la respuesta a HTTP. <em>No tiene lógica de negocio.</em></div>
+      </div>
+      <div class="adapter-card">
+        <span class="adapter-tag at-driving">CLI Adapter</span>
+        <div class="adapter-title">Command Line Interface</div>
+        <div class="adapter-desc">El mismo dominio puede usarse desde la línea de comandos. El adaptador CLI parsea los argumentos y llama al mismo puerto driving. <em>El dominio no cambia.</em></div>
+      </div>
+      <div class="adapter-card">
+        <span class="adapter-tag at-driving">Test Adapter</span>
+        <div class="adapter-title">Tests de aceptación</div>
+        <div class="adapter-desc">Los tests son adaptadores driving. Llaman directamente al puerto driving del dominio, sin levantar servidor HTTP. <em>Tests rápidos, sin infraestructura.</em></div>
+      </div>
+      <div class="adapter-card">
+        <span class="adapter-tag at-driving">Message Consumer</span>
+        <div class="adapter-title">Event / Queue Consumer</div>
+        <div class="adapter-desc">Un mensaje de Kafka o SQS dispara un caso de uso. El adaptador deserializa el mensaje y llama al puerto driving. <em>El dominio no sabe que hay una queue.</em></div>
+      </div>
+    </div>
+
+    <div style="font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--driven);margin:24px 0 12px">Adaptadores driven — conectan el dominio con servicios externos</div>
+    <div class="adapters-grid">
+      <div class="adapter-card">
+        <span class="adapter-tag at-driven">PostgreSQL Adapter</span>
+        <div class="adapter-title">Repository implementation</div>
+        <div class="adapter-desc">Implementa <code style="font-family:var(--mono);font-size:11px;background:var(--surface2);padding:1px 4px;border-radius:3px">IOrderRepository</code> usando SQL. Si cambiamos a MongoDB, escribimos <code style="font-family:var(--mono);font-size:11px;background:var(--surface2);padding:1px 4px;border-radius:3px">MongoOrderRepository</code>. <em>El dominio no cambia.</em></div>
+      </div>
+      <div class="adapter-card">
+        <span class="adapter-tag at-driven">SendGrid Adapter</span>
+        <div class="adapter-title">Mailer implementation</div>
+        <div class="adapter-desc">Implementa <code style="font-family:var(--mono);font-size:11px;background:var(--surface2);padding:1px 4px;border-radius:3px">IMailer</code> usando la API de SendGrid. Reemplazable por SES o cualquier otro proveedor sin tocar el dominio.</div>
+      </div>
+      <div class="adapter-card">
+        <span class="adapter-tag at-driven">In-Memory Adapter</span>
+        <div class="adapter-title">Fake para tests</div>
+        <div class="adapter-desc">Implementa los puertos driven con almacenamiento en memoria. Permite testear el dominio completo <em>sin base de datos ni servicios externos.</em> Tests instantáneos.</div>
+      </div>
+      <div class="adapter-card">
+        <span class="adapter-tag at-driven">Stripe Adapter</span>
+        <div class="adapter-title">Payment gateway</div>
+        <div class="adapter-desc">Implementa <code style="font-family:var(--mono);font-size:11px;background:var(--surface2);padding:1px 4px;border-radius:3px">IPaymentGateway</code> con Stripe. En tests se usa un <em>FakePaymentGateway</em> que aprueba o rechaza según el monto.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EN EL CÓDIGO -->
+  <div class="panel" id="panel-3">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Ports &amp; Adapters en el código</div>
+        <span class="p-tagline">Del puerto a la implementación concreta</span>
+        <p class="p-desc">La implementación sigue siempre el mismo patrón: el <strong>dominio define la interfaz</strong>, la <strong>infraestructura la implementa</strong>, y la <strong>composición</strong> los conecta. El dominio nunca importa nada de la capa de adaptadores.</p>
+      </div>
+      <div class="p-letter">d</div>
+    </div>
+
+    <div class="comparison">
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-domain"></span> Puerto driven (dentro del dominio)</div>
+        <pre><span class="cm">// src/orders/ports/IOrderRepository.ts</span>
+<span class="cm">// Vive en el dominio. No importa nada.</span>
+
+<span class="kw">interface</span> <span class="cl">IOrderRepository</span> {
+  <span class="fn">save</span>(order: <span class="cl">Order</span>): <span class="cl">Promise</span>&lt;<span class="kw">void</span>&gt;
+  <span class="fn">findById</span>(id: <span class="kw">string</span>): <span class="cl">Promise</span>&lt;<span class="cl">Order</span> | <span class="kw">null</span>&gt;
+  <span class="fn">listByStatus</span>(s: <span class="kw">string</span>): <span class="cl">Promise</span>&lt;<span class="cl">Order</span>[]&gt;
+}
+
+<span class="kw">interface</span> <span class="cl">IMailer</span> {
+  <span class="fn">sendConfirmation</span>(order: <span class="cl">Order</span>): <span class="cl">Promise</span>&lt;<span class="kw">void</span>&gt;
+}</pre>
+      </div>
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-domain"></span> Caso de uso (usa los puertos)</div>
+        <pre><span class="cm">// src/orders/CreateOrderUseCase.ts</span>
+
+<span class="kw">class</span> <span class="cl">CreateOrderUseCase</span> {
+  <span class="fn">constructor</span>(
+    <span class="kw">private</span> repo:   <span class="cl">IOrderRepository</span>,
+    <span class="kw">private</span> mailer: <span class="cl">IMailer</span>
+  ) {}
+
+  <span class="kw">async</span> <span class="fn">execute</span>(data: <span class="cl">CreateOrderDTO</span>) {
+    <span class="kw">const</span> order = <span class="cl">Order</span>.<span class="fn">create</span>(data)
+    <span class="kw">await</span> <span class="kw">this</span>.repo.<span class="fn">save</span>(order)
+    <span class="kw">await</span> <span class="kw">this</span>.mailer.<span class="fn">sendConfirmation</span>(order)
+    <span class="kw">return</span> order
+  }
+}</pre>
+      </div>
+    </div>
+
+    <div class="comparison">
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-driven"></span> Adaptador driven (implementa el puerto)</div>
+        <pre><span class="cm">// src/infra/db/PostgresOrderRepository.ts</span>
+<span class="kw">import</span> { db } <span class="kw">from</span> <span class="str">'./connection'</span>
+
+<span class="kw">class</span> <span class="cl">PostgresOrderRepository</span>
+  <span class="kw">implements</span> <span class="cl">IOrderRepository</span> {
+
+  <span class="kw">async</span> <span class="fn">save</span>(order: <span class="cl">Order</span>) {
+    <span class="kw">await</span> db.<span class="fn">query</span>(
+      <span class="str">`INSERT INTO orders ...`</span>,
+      [order.id, order.total]
+    )
+  }
+  <span class="cm">// ... findById, listByStatus</span>
+}</pre>
+      </div>
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-driving"></span> Composición (conecta todo)</div>
+        <pre><span class="cm">// src/infra/composition-root.ts</span>
+<span class="cm">// El único lugar donde se conocen</span>
+<span class="cm">// las implementaciones concretas</span>
+
+<span class="kw">const</span> repo   = <span class="kw">new</span> <span class="cl">PostgresOrderRepository</span>()
+<span class="kw">const</span> mailer = <span class="kw">new</span> <span class="cl">SendGridMailer</span>()
+<span class="kw">const</span> useCase = <span class="kw">new</span> <span class="cl">CreateOrderUseCase</span>(
+  repo, mailer
+)
+
+<span class="cm">// En tests:</span>
+<span class="kw">const</span> useCase = <span class="kw">new</span> <span class="cl">CreateOrderUseCase</span>(
+  <span class="kw">new</span> <span class="cl">InMemoryOrderRepo</span>(),
+  <span class="kw">new</span> <span class="cl">FakeMailer</span>()
+)</pre>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>El beneficio más concreto: tests sin infraestructura</strong>
+      Porque el caso de uso solo conoce interfaces, podés crear implementaciones en memoria para los tests. El suite completo de tests del dominio corre en milisegundos, sin levantar base de datos, sin llamadas de red, sin configuración de entorno. Y si el dominio pasa los tests, la lógica de negocio es correcta independientemente de qué adaptadores uses en producción.
+    </div>
+  </div>
+
+  <!-- TRAMPAS -->
+  <div class="panel" id="panel-4">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Trampas comunes</div>
+        <span class="p-tagline">Cuando los puertos se convierten en tuberías vacías</span>
+        <p class="p-desc">Hexagonal Architecture puede aplicarse mecánicamente sin captar el espíritu. El resultado es una arquitectura que tiene la forma correcta pero no los beneficios —capas adicionales sin valor real.</p>
+      </div>
+      <div class="p-letter">!</div>
+    </div>
+    <ul class="trap-list">
+      <li><span class="trap-icon">🪞</span><div><strong>Puertos que son mirrors exactos de la infraestructura</strong>Si <code>IOrderRepository</code> tiene métodos como <code>executeQuery(sql, params)</code> o <code>findByRawFilter(mongoFilter)</code>, el puerto está filtrando la tecnología hacia adentro. El dominio ahora conoce SQL o MongoDB indirectamente. Los puertos deben hablar el lenguaje del dominio: <code>findPendingOrders()</code>, no <code>findWhere({status:'pending'})</code>.</div></li>
+      <li><span class="trap-icon">📋</span><div><strong>Un puerto por cada método de infraestructura</strong>Crear una interfaz de un solo método para cada operación (<code>ISaveOrder</code>, <code>IFindOrder</code>, <code>IDeleteOrder</code>) es sobre-fragmentar. Un puerto representa una <em>capacidad</em> del dominio, no una operación atómica. <code>IOrderRepository</code> agrupa todas las operaciones de persistencia de órdenes.</div></li>
+      <li><span class="trap-icon">🔄</span><div><strong>Lógica de negocio en los adaptadores driving</strong>El controller HTTP debería ser un adaptador delgado: recibe input, llama al caso de uso, devuelve output. Cuando empieza a tener lógica condicional de negocio, esa lógica no puede testearse sin levantar el servidor HTTP y los beneficios de la arquitectura se pierden.</div></li>
+      <li><span class="trap-icon">💾</span><div><strong>Adaptadores driven que transforman la forma del dominio</strong>Si el repositorio de PostgreSQL retorna filas SQL y quien consume decide cómo mapearlas a entidades, el mapping está en el lugar equivocado. El adaptador driven es responsable de convertir los datos del storage al formato de la entidad de dominio —y de volver a convertir al guardar.</div></li>
+      <li><span class="trap-icon">🏗️</span><div><strong>Aplicarla donde es overhead puro</strong>Hexagonal Architecture agrega complejidad real: más archivos, más interfaces, más indirección. Para scripts, herramientas internas simples o prototipos, el overhead no se justifica. El patrón brilla cuando el dominio es complejo, las integraciones son múltiples o el sistema necesita testearse en aislamiento.</div></li>
+    </ul>
+  </div>
+
+  <div style="margin-top:36px;padding-top:32px;border-top:1px solid var(--border)">
+    <div class="context-inner">
+      <div>
+        <div class="context-section-label">Origen</div>
+        <p class="context-text"><strong>Alistair Cockburn</strong> formuló Ports and Adapters en 2005 como respuesta a la dificultad de testear aplicaciones con dependencias directas a bases de datos y servicios externos. La motivó la pregunta: <em>"¿Cómo puedo testear mi aplicación sin la base de datos?"</em>. La respuesta fue definir interfaces que el dominio controla y que la infraestructura implementa.</p>
+      </div>
+      <div class="context-divider"></div>
+      <div>
+        <div class="context-section-label">Relación con otros patrones</div>
+        <p class="context-text">Hexagonal es la base práctica de Clean Architecture y comparte el mismo principio fundamental.</p>
+        <div class="scope-pills">
+          <span class="pill yes">Implementa DIP de SOLID</span>
+          <span class="pill yes">Precede Clean Architecture</span>
+          <span class="pill yes">Compatible con DDD</span>
+          <span class="pill partial">Overhead en sistemas simples</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="progress" id="progress">
+    <div class="prog-dot active" onclick="show(0)"></div>
+    <div class="prog-dot" onclick="show(1)"></div>
+    <div class="prog-dot" onclick="show(2)"></div>
+    <div class="prog-dot" onclick="show(3)"></div>
+    <div class="prog-dot" onclick="show(4)"></div>
+  </div>
+  <div class="nav-btns">
+    <button class="nav-btn" id="btnPrev" onclick="navigate(-1)">← Anterior</button>
+    <button class="nav-btn" id="btnNext" onclick="navigate(1)">Siguiente →</button>
+</div>
+
+	<div class="panel" id="panel-1">
+	<div class="p-header">
+      <div>
+        <div class="p-name">Los puertos</div>
+        <span class="p-tagline">Las interfaces que el dominio define para comunicarse con el exterior</span>
+        <p class="p-desc">Un <strong>puerto</strong> es simplemente una interfaz —un contrato— definida por el dominio. Describe lo que el dominio necesita o lo que el dominio ofrece, sin saber nada sobre quién lo implementa. Hay dos tipos con roles completamente distintos.</p>
+      </div>
+      <div class="p-letter">P</div>
+    </div>
+
+    <div class="ports-grid">
+      <div class="port-card pc-driving">
+        <div class="port-label" style="color:var(--driving)">Driving ports · Puertos primarios</div>
+        <div class="port-name" style="color:var(--driving)">Entradas al dominio</div>
+        <div class="port-desc">Definen <strong>cómo se puede usar el dominio</strong> desde afuera. Son las operaciones que el dominio expone: sus casos de uso. El mundo exterior <em>conduce</em> la aplicación a través de estos puertos.</div>
+        <div class="port-examples">
+          <div class="port-ex" style="color:var(--driving)">ICreateOrderPort → createOrder(data)</div>
+          <div class="port-ex" style="color:var(--driving)">IGetOrderPort → getOrderById(id)</div>
+          <div class="port-ex" style="color:var(--driving)">IProcessPaymentPort → processPayment(order)</div>
+        </div>
+      </div>
+      <div class="port-card pc-driven">
+        <div class="port-label" style="color:var(--driven)">Driven ports · Puertos secundarios</div>
+        <div class="port-name" style="color:var(--driven)">Lo que el dominio necesita</div>
+        <div class="port-desc">Definen <strong>qué necesita el dominio del exterior</strong> para funcionar. El dominio <em>conduce</em> a los servicios externos a través de estos puertos. Los define el dominio; los implementa la infraestructura.</div>
+        <div class="port-examples">
+          <div class="port-ex" style="color:var(--driven)">IOrderRepository → save, findById</div>
+          <div class="port-ex" style="color:var(--driven)">IMailer → sendConfirmation(order)</div>
+          <div class="port-ex" style="color:var(--driven)">IPaymentGateway → charge(amount, card)</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="analogy">
+      <span class="analogy-icon">🎭</span>
+      <span>Los puertos <em>driving</em> son como el escenario de un teatro: definen qué actuaciones son posibles. Los puertos <em>driven</em> son como la tramoya: el escenario no sabe si hay humanos moviendo los telones o un sistema automático —solo sabe que cuando los pide, aparecen.</span>
+    </div>
+
+    <div class="tip">
+      <strong>¿Dónde viven los puertos?</strong>
+      Los puertos —ambos tipos— viven <em>dentro del dominio</em>. Son interfaces definidas por el dominio para sus propias necesidades. Los adaptadores viven afuera e implementan esas interfaces. Esto garantiza que la dependencia siempre apunta hacia adentro: la infraestructura depende del dominio, nunca al revés.
+    </div>
+  </div>
+
+  <!-- LOS ADAPTADORES -->
+  <div class="panel" id="panel-2">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Los adaptadores</div>
+        <span class="p-tagline">Los traductores entre el dominio y el mundo exterior</span>
+        <p class="p-desc">Un <strong>adaptador</strong> es la implementación concreta de un puerto. Traduce entre el lenguaje del dominio y el lenguaje de la tecnología específica que conecta. Es intercambiable: podés reemplazar un adaptador por otro sin tocar el dominio.</p>
+      </div>
+      <div class="p-letter">A</div>
+    </div>
+
+    <div style="font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--driving);margin-bottom:12px">Adaptadores driving — conectan el exterior con el dominio</div>
+    <div class="adapters-grid">
+      <div class="adapter-card">
+        <span class="adapter-tag at-driving">HTTP Controller</span>
+        <div class="adapter-title">REST / GraphQL Controller</div>
+        <div class="adapter-desc">Recibe el request HTTP, extrae los datos, los convierte al formato que el puerto driving espera, llama al caso de uso y convierte la respuesta a HTTP. <em>No tiene lógica de negocio.</em></div>
+      </div>
+      <div class="adapter-card">
+        <span class="adapter-tag at-driving">CLI Adapter</span>
+        <div class="adapter-title">Command Line Interface</div>
+        <div class="adapter-desc">El mismo dominio puede usarse desde la línea de comandos. El adaptador CLI parsea los argumentos y llama al mismo puerto driving. <em>El dominio no cambia.</em></div>
+      </div>
+      <div class="adapter-card">
+        <span class="adapter-tag at-driving">Test Adapter</span>
+        <div class="adapter-title">Tests de aceptación</div>
+        <div class="adapter-desc">Los tests son adaptadores driving. Llaman directamente al puerto driving del dominio, sin levantar servidor HTTP. <em>Tests rápidos, sin infraestructura.</em></div>
+      </div>
+      <div class="adapter-card">
+        <span class="adapter-tag at-driving">Message Consumer</span>
+        <div class="adapter-title">Event / Queue Consumer</div>
+        <div class="adapter-desc">Un mensaje de Kafka o SQS dispara un caso de uso. El adaptador deserializa el mensaje y llama al puerto driving. <em>El dominio no sabe que hay una queue.</em></div>
+      </div>
+    </div>
+
+    <div style="font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--driven);margin:24px 0 12px">Adaptadores driven — conectan el dominio con servicios externos</div>
+    <div class="adapters-grid">
+      <div class="adapter-card">
+        <span class="adapter-tag at-driven">PostgreSQL Adapter</span>
+        <div class="adapter-title">Repository implementation</div>
+        <div class="adapter-desc">Implementa <code style="font-family:var(--mono);font-size:11px;background:var(--surface2);padding:1px 4px;border-radius:3px">IOrderRepository</code> usando SQL. Si cambiamos a MongoDB, escribimos <code style="font-family:var(--mono);font-size:11px;background:var(--surface2);padding:1px 4px;border-radius:3px">MongoOrderRepository</code>. <em>El dominio no cambia.</em></div>
+      </div>
+      <div class="adapter-card">
+        <span class="adapter-tag at-driven">SendGrid Adapter</span>
+        <div class="adapter-title">Mailer implementation</div>
+        <div class="adapter-desc">Implementa <code style="font-family:var(--mono);font-size:11px;background:var(--surface2);padding:1px 4px;border-radius:3px">IMailer</code> usando la API de SendGrid. Reemplazable por SES o cualquier otro proveedor sin tocar el dominio.</div>
+      </div>
+      <div class="adapter-card">
+        <span class="adapter-tag at-driven">In-Memory Adapter</span>
+        <div class="adapter-title">Fake para tests</div>
+        <div class="adapter-desc">Implementa los puertos driven con almacenamiento en memoria. Permite testear el dominio completo <em>sin base de datos ni servicios externos.</em> Tests instantáneos.</div>
+      </div>
+      <div class="adapter-card">
+        <span class="adapter-tag at-driven">Stripe Adapter</span>
+        <div class="adapter-title">Payment gateway</div>
+        <div class="adapter-desc">Implementa <code style="font-family:var(--mono);font-size:11px;background:var(--surface2);padding:1px 4px;border-radius:3px">IPaymentGateway</code> con Stripe. En tests se usa un <em>FakePaymentGateway</em> que aprueba o rechaza según el monto.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EN EL CÓDIGO -->
+  <div class="panel" id="panel-3">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Ports &amp; Adapters en el código</div>
+        <span class="p-tagline">Del puerto a la implementación concreta</span>
+        <p class="p-desc">La implementación sigue siempre el mismo patrón: el <strong>dominio define la interfaz</strong>, la <strong>infraestructura la implementa</strong>, y la <strong>composición</strong> los conecta. El dominio nunca importa nada de la capa de adaptadores.</p>
+      </div>
+      <div class="p-letter">d</div>
+    </div>
+
+    <div class="comparison">
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-domain"></span> Puerto driven (dentro del dominio)</div>
+        <pre><span class="cm">// src/orders/ports/IOrderRepository.ts</span>
+<span class="cm">// Vive en el dominio. No importa nada.</span>
+
+<span class="kw">interface</span> <span class="cl">IOrderRepository</span> {
+  <span class="fn">save</span>(order: <span class="cl">Order</span>): <span class="cl">Promise</span>&lt;<span class="kw">void</span>&gt;
+  <span class="fn">findById</span>(id: <span class="kw">string</span>): <span class="cl">Promise</span>&lt;<span class="cl">Order</span> | <span class="kw">null</span>&gt;
+  <span class="fn">listByStatus</span>(s: <span class="kw">string</span>): <span class="cl">Promise</span>&lt;<span class="cl">Order</span>[]&gt;
+}
+
+<span class="kw">interface</span> <span class="cl">IMailer</span> {
+  <span class="fn">sendConfirmation</span>(order: <span class="cl">Order</span>): <span class="cl">Promise</span>&lt;<span class="kw">void</span>&gt;
+}</pre>
+      </div>
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-domain"></span> Caso de uso (usa los puertos)</div>
+        <pre><span class="cm">// src/orders/CreateOrderUseCase.ts</span>
+
+<span class="kw">class</span> <span class="cl">CreateOrderUseCase</span> {
+  <span class="fn">constructor</span>(
+    <span class="kw">private</span> repo:   <span class="cl">IOrderRepository</span>,
+    <span class="kw">private</span> mailer: <span class="cl">IMailer</span>
+  ) {}
+
+  <span class="kw">async</span> <span class="fn">execute</span>(data: <span class="cl">CreateOrderDTO</span>) {
+    <span class="kw">const</span> order = <span class="cl">Order</span>.<span class="fn">create</span>(data)
+    <span class="kw">await</span> <span class="kw">this</span>.repo.<span class="fn">save</span>(order)
+    <span class="kw">await</span> <span class="kw">this</span>.mailer.<span class="fn">sendConfirmation</span>(order)
+    <span class="kw">return</span> order
+  }
+}</pre>
+      </div>
+    </div>
+
+    <div class="comparison">
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-driven"></span> Adaptador driven (implementa el puerto)</div>
+        <pre><span class="cm">// src/infra/db/PostgresOrderRepository.ts</span>
+<span class="kw">import</span> { db } <span class="kw">from</span> <span class="str">'./connection'</span>
+
+<span class="kw">class</span> <span class="cl">PostgresOrderRepository</span>
+  <span class="kw">implements</span> <span class="cl">IOrderRepository</span> {
+
+  <span class="kw">async</span> <span class="fn">save</span>(order: <span class="cl">Order</span>) {
+    <span class="kw">await</span> db.<span class="fn">query</span>(
+      <span class="str">`INSERT INTO orders ...`</span>,
+      [order.id, order.total]
+    )
+  }
+  <span class="cm">// ... findById, listByStatus</span>
+}</pre>
+      </div>
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-driving"></span> Composición (conecta todo)</div>
+        <pre><span class="cm">// src/infra/composition-root.ts</span>
+<span class="cm">// El único lugar donde se conocen</span>
+<span class="cm">// las implementaciones concretas</span>
+
+<span class="kw">const</span> repo   = <span class="kw">new</span> <span class="cl">PostgresOrderRepository</span>()
+<span class="kw">const</span> mailer = <span class="kw">new</span> <span class="cl">SendGridMailer</span>()
+<span class="kw">const</span> useCase = <span class="kw">new</span> <span class="cl">CreateOrderUseCase</span>(
+  repo, mailer
+)
+
+<span class="cm">// En tests:</span>
+<span class="kw">const</span> useCase = <span class="kw">new</span> <span class="cl">CreateOrderUseCase</span>(
+  <span class="kw">new</span> <span class="cl">InMemoryOrderRepo</span>(),
+  <span class="kw">new</span> <span class="cl">FakeMailer</span>()
+)</pre>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>El beneficio más concreto: tests sin infraestructura</strong>
+      Porque el caso de uso solo conoce interfaces, podés crear implementaciones en memoria para los tests. El suite completo de tests del dominio corre en milisegundos, sin levantar base de datos, sin llamadas de red, sin configuración de entorno. Y si el dominio pasa los tests, la lógica de negocio es correcta independientemente de qué adaptadores uses en producción.
+    </div>
+  </div>
+
+  <!-- TRAMPAS -->
+  <div class="panel" id="panel-4">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Trampas comunes</div>
+        <span class="p-tagline">Cuando los puertos se convierten en tuberías vacías</span>
+        <p class="p-desc">Hexagonal Architecture puede aplicarse mecánicamente sin captar el espíritu. El resultado es una arquitectura que tiene la forma correcta pero no los beneficios —capas adicionales sin valor real.</p>
+      </div>
+      <div class="p-letter">!</div>
+    </div>
+    <ul class="trap-list">
+      <li><span class="trap-icon">🪞</span><div><strong>Puertos que son mirrors exactos de la infraestructura</strong>Si <code>IOrderRepository</code> tiene métodos como <code>executeQuery(sql, params)</code> o <code>findByRawFilter(mongoFilter)</code>, el puerto está filtrando la tecnología hacia adentro. El dominio ahora conoce SQL o MongoDB indirectamente. Los puertos deben hablar el lenguaje del dominio: <code>findPendingOrders()</code>, no <code>findWhere({status:'pending'})</code>.</div></li>
+      <li><span class="trap-icon">📋</span><div><strong>Un puerto por cada método de infraestructura</strong>Crear una interfaz de un solo método para cada operación (<code>ISaveOrder</code>, <code>IFindOrder</code>, <code>IDeleteOrder</code>) es sobre-fragmentar. Un puerto representa una <em>capacidad</em> del dominio, no una operación atómica. <code>IOrderRepository</code> agrupa todas las operaciones de persistencia de órdenes.</div></li>
+      <li><span class="trap-icon">🔄</span><div><strong>Lógica de negocio en los adaptadores driving</strong>El controller HTTP debería ser un adaptador delgado: recibe input, llama al caso de uso, devuelve output. Cuando empieza a tener lógica condicional de negocio, esa lógica no puede testearse sin levantar el servidor HTTP y los beneficios de la arquitectura se pierden.</div></li>
+      <li><span class="trap-icon">💾</span><div><strong>Adaptadores driven que transforman la forma del dominio</strong>Si el repositorio de PostgreSQL retorna filas SQL y quien consume decide cómo mapearlas a entidades, el mapping está en el lugar equivocado. El adaptador driven es responsable de convertir los datos del storage al formato de la entidad de dominio —y de volver a convertir al guardar.</div></li>
+      <li><span class="trap-icon">🏗️</span><div><strong>Aplicarla donde es overhead puro</strong>Hexagonal Architecture agrega complejidad real: más archivos, más interfaces, más indirección. Para scripts, herramientas internas simples o prototipos, el overhead no se justifica. El patrón brilla cuando el dominio es complejo, las integraciones son múltiples o el sistema necesita testearse en aislamiento.</div></li>
+    </ul>
+  </div>
+
+  <div style="margin-top:36px;padding-top:32px;border-top:1px solid var(--border)">
+    <div class="context-inner">
+      <div>
+        <div class="context-section-label">Origen</div>
+        <p class="context-text"><strong>Alistair Cockburn</strong> formuló Ports and Adapters en 2005 como respuesta a la dificultad de testear aplicaciones con dependencias directas a bases de datos y servicios externos. La motivó la pregunta: <em>"¿Cómo puedo testear mi aplicación sin la base de datos?"</em>. La respuesta fue definir interfaces que el dominio controla y que la infraestructura implementa.</p>
+      </div>
+      <div class="context-divider"></div>
+      <div>
+        <div class="context-section-label">Relación con otros patrones</div>
+        <p class="context-text">Hexagonal es la base práctica de Clean Architecture y comparte el mismo principio fundamental.</p>
+        <div class="scope-pills">
+          <span class="pill yes">Implementa DIP de SOLID</span>
+          <span class="pill yes">Precede Clean Architecture</span>
+          <span class="pill yes">Compatible con DDD</span>
+          <span class="pill partial">Overhead en sistemas simples</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="progress" id="progress">
+    <div class="prog-dot active" onclick="show(0)"></div>
+    <div class="prog-dot" onclick="show(1)"></div>
+    <div class="prog-dot" onclick="show(2)"></div>
+    <div class="prog-dot" onclick="show(3)"></div>
+    <div class="prog-dot" onclick="show(4)"></div>
+  </div>
+  <div class="nav-btns">
+    <button class="nav-btn" id="btnPrev" onclick="navigate(-1)">← Anterior</button>
+    <button class="nav-btn" id="btnNext" onclick="navigate(1)">Siguiente →</button>
+</div>
+
+	<div class="panel" id="panel-2">
+	<div class="p-header">
+      <div>
+        <div class="p-name">Los adaptadores</div>
+        <span class="p-tagline">Los traductores entre el dominio y el mundo exterior</span>
+        <p class="p-desc">Un <strong>adaptador</strong> es la implementación concreta de un puerto. Traduce entre el lenguaje del dominio y el lenguaje de la tecnología específica que conecta. Es intercambiable: podés reemplazar un adaptador por otro sin tocar el dominio.</p>
+      </div>
+      <div class="p-letter">A</div>
+    </div>
+
+    <div style="font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--driving);margin-bottom:12px">Adaptadores driving — conectan el exterior con el dominio</div>
+    <div class="adapters-grid">
+      <div class="adapter-card">
+        <span class="adapter-tag at-driving">HTTP Controller</span>
+        <div class="adapter-title">REST / GraphQL Controller</div>
+        <div class="adapter-desc">Recibe el request HTTP, extrae los datos, los convierte al formato que el puerto driving espera, llama al caso de uso y convierte la respuesta a HTTP. <em>No tiene lógica de negocio.</em></div>
+      </div>
+      <div class="adapter-card">
+        <span class="adapter-tag at-driving">CLI Adapter</span>
+        <div class="adapter-title">Command Line Interface</div>
+        <div class="adapter-desc">El mismo dominio puede usarse desde la línea de comandos. El adaptador CLI parsea los argumentos y llama al mismo puerto driving. <em>El dominio no cambia.</em></div>
+      </div>
+      <div class="adapter-card">
+        <span class="adapter-tag at-driving">Test Adapter</span>
+        <div class="adapter-title">Tests de aceptación</div>
+        <div class="adapter-desc">Los tests son adaptadores driving. Llaman directamente al puerto driving del dominio, sin levantar servidor HTTP. <em>Tests rápidos, sin infraestructura.</em></div>
+      </div>
+      <div class="adapter-card">
+        <span class="adapter-tag at-driving">Message Consumer</span>
+        <div class="adapter-title">Event / Queue Consumer</div>
+        <div class="adapter-desc">Un mensaje de Kafka o SQS dispara un caso de uso. El adaptador deserializa el mensaje y llama al puerto driving. <em>El dominio no sabe que hay una queue.</em></div>
+      </div>
+    </div>
+
+    <div style="font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--driven);margin:24px 0 12px">Adaptadores driven — conectan el dominio con servicios externos</div>
+    <div class="adapters-grid">
+      <div class="adapter-card">
+        <span class="adapter-tag at-driven">PostgreSQL Adapter</span>
+        <div class="adapter-title">Repository implementation</div>
+        <div class="adapter-desc">Implementa <code style="font-family:var(--mono);font-size:11px;background:var(--surface2);padding:1px 4px;border-radius:3px">IOrderRepository</code> usando SQL. Si cambiamos a MongoDB, escribimos <code style="font-family:var(--mono);font-size:11px;background:var(--surface2);padding:1px 4px;border-radius:3px">MongoOrderRepository</code>. <em>El dominio no cambia.</em></div>
+      </div>
+      <div class="adapter-card">
+        <span class="adapter-tag at-driven">SendGrid Adapter</span>
+        <div class="adapter-title">Mailer implementation</div>
+        <div class="adapter-desc">Implementa <code style="font-family:var(--mono);font-size:11px;background:var(--surface2);padding:1px 4px;border-radius:3px">IMailer</code> usando la API de SendGrid. Reemplazable por SES o cualquier otro proveedor sin tocar el dominio.</div>
+      </div>
+      <div class="adapter-card">
+        <span class="adapter-tag at-driven">In-Memory Adapter</span>
+        <div class="adapter-title">Fake para tests</div>
+        <div class="adapter-desc">Implementa los puertos driven con almacenamiento en memoria. Permite testear el dominio completo <em>sin base de datos ni servicios externos.</em> Tests instantáneos.</div>
+      </div>
+      <div class="adapter-card">
+        <span class="adapter-tag at-driven">Stripe Adapter</span>
+        <div class="adapter-title">Payment gateway</div>
+        <div class="adapter-desc">Implementa <code style="font-family:var(--mono);font-size:11px;background:var(--surface2);padding:1px 4px;border-radius:3px">IPaymentGateway</code> con Stripe. En tests se usa un <em>FakePaymentGateway</em> que aprueba o rechaza según el monto.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EN EL CÓDIGO -->
+  <div class="panel" id="panel-3">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Ports &amp; Adapters en el código</div>
+        <span class="p-tagline">Del puerto a la implementación concreta</span>
+        <p class="p-desc">La implementación sigue siempre el mismo patrón: el <strong>dominio define la interfaz</strong>, la <strong>infraestructura la implementa</strong>, y la <strong>composición</strong> los conecta. El dominio nunca importa nada de la capa de adaptadores.</p>
+      </div>
+      <div class="p-letter">d</div>
+    </div>
+
+    <div class="comparison">
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-domain"></span> Puerto driven (dentro del dominio)</div>
+        <pre><span class="cm">// src/orders/ports/IOrderRepository.ts</span>
+<span class="cm">// Vive en el dominio. No importa nada.</span>
+
+<span class="kw">interface</span> <span class="cl">IOrderRepository</span> {
+  <span class="fn">save</span>(order: <span class="cl">Order</span>): <span class="cl">Promise</span>&lt;<span class="kw">void</span>&gt;
+  <span class="fn">findById</span>(id: <span class="kw">string</span>): <span class="cl">Promise</span>&lt;<span class="cl">Order</span> | <span class="kw">null</span>&gt;
+  <span class="fn">listByStatus</span>(s: <span class="kw">string</span>): <span class="cl">Promise</span>&lt;<span class="cl">Order</span>[]&gt;
+}
+
+<span class="kw">interface</span> <span class="cl">IMailer</span> {
+  <span class="fn">sendConfirmation</span>(order: <span class="cl">Order</span>): <span class="cl">Promise</span>&lt;<span class="kw">void</span>&gt;
+}</pre>
+      </div>
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-domain"></span> Caso de uso (usa los puertos)</div>
+        <pre><span class="cm">// src/orders/CreateOrderUseCase.ts</span>
+
+<span class="kw">class</span> <span class="cl">CreateOrderUseCase</span> {
+  <span class="fn">constructor</span>(
+    <span class="kw">private</span> repo:   <span class="cl">IOrderRepository</span>,
+    <span class="kw">private</span> mailer: <span class="cl">IMailer</span>
+  ) {}
+
+  <span class="kw">async</span> <span class="fn">execute</span>(data: <span class="cl">CreateOrderDTO</span>) {
+    <span class="kw">const</span> order = <span class="cl">Order</span>.<span class="fn">create</span>(data)
+    <span class="kw">await</span> <span class="kw">this</span>.repo.<span class="fn">save</span>(order)
+    <span class="kw">await</span> <span class="kw">this</span>.mailer.<span class="fn">sendConfirmation</span>(order)
+    <span class="kw">return</span> order
+  }
+}</pre>
+      </div>
+    </div>
+
+    <div class="comparison">
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-driven"></span> Adaptador driven (implementa el puerto)</div>
+        <pre><span class="cm">// src/infra/db/PostgresOrderRepository.ts</span>
+<span class="kw">import</span> { db } <span class="kw">from</span> <span class="str">'./connection'</span>
+
+<span class="kw">class</span> <span class="cl">PostgresOrderRepository</span>
+  <span class="kw">implements</span> <span class="cl">IOrderRepository</span> {
+
+  <span class="kw">async</span> <span class="fn">save</span>(order: <span class="cl">Order</span>) {
+    <span class="kw">await</span> db.<span class="fn">query</span>(
+      <span class="str">`INSERT INTO orders ...`</span>,
+      [order.id, order.total]
+    )
+  }
+  <span class="cm">// ... findById, listByStatus</span>
+}</pre>
+      </div>
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-driving"></span> Composición (conecta todo)</div>
+        <pre><span class="cm">// src/infra/composition-root.ts</span>
+<span class="cm">// El único lugar donde se conocen</span>
+<span class="cm">// las implementaciones concretas</span>
+
+<span class="kw">const</span> repo   = <span class="kw">new</span> <span class="cl">PostgresOrderRepository</span>()
+<span class="kw">const</span> mailer = <span class="kw">new</span> <span class="cl">SendGridMailer</span>()
+<span class="kw">const</span> useCase = <span class="kw">new</span> <span class="cl">CreateOrderUseCase</span>(
+  repo, mailer
+)
+
+<span class="cm">// En tests:</span>
+<span class="kw">const</span> useCase = <span class="kw">new</span> <span class="cl">CreateOrderUseCase</span>(
+  <span class="kw">new</span> <span class="cl">InMemoryOrderRepo</span>(),
+  <span class="kw">new</span> <span class="cl">FakeMailer</span>()
+)</pre>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>El beneficio más concreto: tests sin infraestructura</strong>
+      Porque el caso de uso solo conoce interfaces, podés crear implementaciones en memoria para los tests. El suite completo de tests del dominio corre en milisegundos, sin levantar base de datos, sin llamadas de red, sin configuración de entorno. Y si el dominio pasa los tests, la lógica de negocio es correcta independientemente de qué adaptadores uses en producción.
+    </div>
+  </div>
+
+  <!-- TRAMPAS -->
+  <div class="panel" id="panel-4">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Trampas comunes</div>
+        <span class="p-tagline">Cuando los puertos se convierten en tuberías vacías</span>
+        <p class="p-desc">Hexagonal Architecture puede aplicarse mecánicamente sin captar el espíritu. El resultado es una arquitectura que tiene la forma correcta pero no los beneficios —capas adicionales sin valor real.</p>
+      </div>
+      <div class="p-letter">!</div>
+    </div>
+    <ul class="trap-list">
+      <li><span class="trap-icon">🪞</span><div><strong>Puertos que son mirrors exactos de la infraestructura</strong>Si <code>IOrderRepository</code> tiene métodos como <code>executeQuery(sql, params)</code> o <code>findByRawFilter(mongoFilter)</code>, el puerto está filtrando la tecnología hacia adentro. El dominio ahora conoce SQL o MongoDB indirectamente. Los puertos deben hablar el lenguaje del dominio: <code>findPendingOrders()</code>, no <code>findWhere({status:'pending'})</code>.</div></li>
+      <li><span class="trap-icon">📋</span><div><strong>Un puerto por cada método de infraestructura</strong>Crear una interfaz de un solo método para cada operación (<code>ISaveOrder</code>, <code>IFindOrder</code>, <code>IDeleteOrder</code>) es sobre-fragmentar. Un puerto representa una <em>capacidad</em> del dominio, no una operación atómica. <code>IOrderRepository</code> agrupa todas las operaciones de persistencia de órdenes.</div></li>
+      <li><span class="trap-icon">🔄</span><div><strong>Lógica de negocio en los adaptadores driving</strong>El controller HTTP debería ser un adaptador delgado: recibe input, llama al caso de uso, devuelve output. Cuando empieza a tener lógica condicional de negocio, esa lógica no puede testearse sin levantar el servidor HTTP y los beneficios de la arquitectura se pierden.</div></li>
+      <li><span class="trap-icon">💾</span><div><strong>Adaptadores driven que transforman la forma del dominio</strong>Si el repositorio de PostgreSQL retorna filas SQL y quien consume decide cómo mapearlas a entidades, el mapping está en el lugar equivocado. El adaptador driven es responsable de convertir los datos del storage al formato de la entidad de dominio —y de volver a convertir al guardar.</div></li>
+      <li><span class="trap-icon">🏗️</span><div><strong>Aplicarla donde es overhead puro</strong>Hexagonal Architecture agrega complejidad real: más archivos, más interfaces, más indirección. Para scripts, herramientas internas simples o prototipos, el overhead no se justifica. El patrón brilla cuando el dominio es complejo, las integraciones son múltiples o el sistema necesita testearse en aislamiento.</div></li>
+    </ul>
+  </div>
+
+  <div style="margin-top:36px;padding-top:32px;border-top:1px solid var(--border)">
+    <div class="context-inner">
+      <div>
+        <div class="context-section-label">Origen</div>
+        <p class="context-text"><strong>Alistair Cockburn</strong> formuló Ports and Adapters en 2005 como respuesta a la dificultad de testear aplicaciones con dependencias directas a bases de datos y servicios externos. La motivó la pregunta: <em>"¿Cómo puedo testear mi aplicación sin la base de datos?"</em>. La respuesta fue definir interfaces que el dominio controla y que la infraestructura implementa.</p>
+      </div>
+      <div class="context-divider"></div>
+      <div>
+        <div class="context-section-label">Relación con otros patrones</div>
+        <p class="context-text">Hexagonal es la base práctica de Clean Architecture y comparte el mismo principio fundamental.</p>
+        <div class="scope-pills">
+          <span class="pill yes">Implementa DIP de SOLID</span>
+          <span class="pill yes">Precede Clean Architecture</span>
+          <span class="pill yes">Compatible con DDD</span>
+          <span class="pill partial">Overhead en sistemas simples</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="progress" id="progress">
+    <div class="prog-dot active" onclick="show(0)"></div>
+    <div class="prog-dot" onclick="show(1)"></div>
+    <div class="prog-dot" onclick="show(2)"></div>
+    <div class="prog-dot" onclick="show(3)"></div>
+    <div class="prog-dot" onclick="show(4)"></div>
+  </div>
+  <div class="nav-btns">
+    <button class="nav-btn" id="btnPrev" onclick="navigate(-1)">← Anterior</button>
+    <button class="nav-btn" id="btnNext" onclick="navigate(1)">Siguiente →</button>
+</div>
+
+	<div class="panel" id="panel-3">
+	<div class="p-header">
+      <div>
+        <div class="p-name">Ports &amp; Adapters en el código</div>
+        <span class="p-tagline">Del puerto a la implementación concreta</span>
+        <p class="p-desc">La implementación sigue siempre el mismo patrón: el <strong>dominio define la interfaz</strong>, la <strong>infraestructura la implementa</strong>, y la <strong>composición</strong> los conecta. El dominio nunca importa nada de la capa de adaptadores.</p>
+      </div>
+      <div class="p-letter">d</div>
+    </div>
+
+    <div class="comparison">
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-domain"></span> Puerto driven (dentro del dominio)</div>
+        <pre><span class="cm">// src/orders/ports/IOrderRepository.ts</span>
+<span class="cm">// Vive en el dominio. No importa nada.</span>
+
+<span class="kw">interface</span> <span class="cl">IOrderRepository</span> {
+  <span class="fn">save</span>(order: <span class="cl">Order</span>): <span class="cl">Promise</span>&lt;<span class="kw">void</span>&gt;
+  <span class="fn">findById</span>(id: <span class="kw">string</span>): <span class="cl">Promise</span>&lt;<span class="cl">Order</span> | <span class="kw">null</span>&gt;
+  <span class="fn">listByStatus</span>(s: <span class="kw">string</span>): <span class="cl">Promise</span>&lt;<span class="cl">Order</span>[]&gt;
+}
+
+<span class="kw">interface</span> <span class="cl">IMailer</span> {
+  <span class="fn">sendConfirmation</span>(order: <span class="cl">Order</span>): <span class="cl">Promise</span>&lt;<span class="kw">void</span>&gt;
+}</pre>
+      </div>
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-domain"></span> Caso de uso (usa los puertos)</div>
+        <pre><span class="cm">// src/orders/CreateOrderUseCase.ts</span>
+
+<span class="kw">class</span> <span class="cl">CreateOrderUseCase</span> {
+  <span class="fn">constructor</span>(
+    <span class="kw">private</span> repo:   <span class="cl">IOrderRepository</span>,
+    <span class="kw">private</span> mailer: <span class="cl">IMailer</span>
+  ) {}
+
+  <span class="kw">async</span> <span class="fn">execute</span>(data: <span class="cl">CreateOrderDTO</span>) {
+    <span class="kw">const</span> order = <span class="cl">Order</span>.<span class="fn">create</span>(data)
+    <span class="kw">await</span> <span class="kw">this</span>.repo.<span class="fn">save</span>(order)
+    <span class="kw">await</span> <span class="kw">this</span>.mailer.<span class="fn">sendConfirmation</span>(order)
+    <span class="kw">return</span> order
+  }
+}</pre>
+      </div>
+    </div>
+
+    <div class="comparison">
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-driven"></span> Adaptador driven (implementa el puerto)</div>
+        <pre><span class="cm">// src/infra/db/PostgresOrderRepository.ts</span>
+<span class="kw">import</span> { db } <span class="kw">from</span> <span class="str">'./connection'</span>
+
+<span class="kw">class</span> <span class="cl">PostgresOrderRepository</span>
+  <span class="kw">implements</span> <span class="cl">IOrderRepository</span> {
+
+  <span class="kw">async</span> <span class="fn">save</span>(order: <span class="cl">Order</span>) {
+    <span class="kw">await</span> db.<span class="fn">query</span>(
+      <span class="str">`INSERT INTO orders ...`</span>,
+      [order.id, order.total]
+    )
+  }
+  <span class="cm">// ... findById, listByStatus</span>
+}</pre>
+      </div>
+      <div class="code-card">
+        <div class="code-card-header"><span class="dot dot-driving"></span> Composición (conecta todo)</div>
+        <pre><span class="cm">// src/infra/composition-root.ts</span>
+<span class="cm">// El único lugar donde se conocen</span>
+<span class="cm">// las implementaciones concretas</span>
+
+<span class="kw">const</span> repo   = <span class="kw">new</span> <span class="cl">PostgresOrderRepository</span>()
+<span class="kw">const</span> mailer = <span class="kw">new</span> <span class="cl">SendGridMailer</span>()
+<span class="kw">const</span> useCase = <span class="kw">new</span> <span class="cl">CreateOrderUseCase</span>(
+  repo, mailer
+)
+
+<span class="cm">// En tests:</span>
+<span class="kw">const</span> useCase = <span class="kw">new</span> <span class="cl">CreateOrderUseCase</span>(
+  <span class="kw">new</span> <span class="cl">InMemoryOrderRepo</span>(),
+  <span class="kw">new</span> <span class="cl">FakeMailer</span>()
+)</pre>
+      </div>
+    </div>
+
+    <div class="tip">
+      <strong>El beneficio más concreto: tests sin infraestructura</strong>
+      Porque el caso de uso solo conoce interfaces, podés crear implementaciones en memoria para los tests. El suite completo de tests del dominio corre en milisegundos, sin levantar base de datos, sin llamadas de red, sin configuración de entorno. Y si el dominio pasa los tests, la lógica de negocio es correcta independientemente de qué adaptadores uses en producción.
+    </div>
+  </div>
+
+  <!-- TRAMPAS -->
+  <div class="panel" id="panel-4">
+    <div class="p-header">
+      <div>
+        <div class="p-name">Trampas comunes</div>
+        <span class="p-tagline">Cuando los puertos se convierten en tuberías vacías</span>
+        <p class="p-desc">Hexagonal Architecture puede aplicarse mecánicamente sin captar el espíritu. El resultado es una arquitectura que tiene la forma correcta pero no los beneficios —capas adicionales sin valor real.</p>
+      </div>
+      <div class="p-letter">!</div>
+    </div>
+    <ul class="trap-list">
+      <li><span class="trap-icon">🪞</span><div><strong>Puertos que son mirrors exactos de la infraestructura</strong>Si <code>IOrderRepository</code> tiene métodos como <code>executeQuery(sql, params)</code> o <code>findByRawFilter(mongoFilter)</code>, el puerto está filtrando la tecnología hacia adentro. El dominio ahora conoce SQL o MongoDB indirectamente. Los puertos deben hablar el lenguaje del dominio: <code>findPendingOrders()</code>, no <code>findWhere({status:'pending'})</code>.</div></li>
+      <li><span class="trap-icon">📋</span><div><strong>Un puerto por cada método de infraestructura</strong>Crear una interfaz de un solo método para cada operación (<code>ISaveOrder</code>, <code>IFindOrder</code>, <code>IDeleteOrder</code>) es sobre-fragmentar. Un puerto representa una <em>capacidad</em> del dominio, no una operación atómica. <code>IOrderRepository</code> agrupa todas las operaciones de persistencia de órdenes.</div></li>
+      <li><span class="trap-icon">🔄</span><div><strong>Lógica de negocio en los adaptadores driving</strong>El controller HTTP debería ser un adaptador delgado: recibe input, llama al caso de uso, devuelve output. Cuando empieza a tener lógica condicional de negocio, esa lógica no puede testearse sin levantar el servidor HTTP y los beneficios de la arquitectura se pierden.</div></li>
+      <li><span class="trap-icon">💾</span><div><strong>Adaptadores driven que transforman la forma del dominio</strong>Si el repositorio de PostgreSQL retorna filas SQL y quien consume decide cómo mapearlas a entidades, el mapping está en el lugar equivocado. El adaptador driven es responsable de convertir los datos del storage al formato de la entidad de dominio —y de volver a convertir al guardar.</div></li>
+      <li><span class="trap-icon">🏗️</span><div><strong>Aplicarla donde es overhead puro</strong>Hexagonal Architecture agrega complejidad real: más archivos, más interfaces, más indirección. Para scripts, herramientas internas simples o prototipos, el overhead no se justifica. El patrón brilla cuando el dominio es complejo, las integraciones son múltiples o el sistema necesita testearse en aislamiento.</div></li>
+    </ul>
+  </div>
+
+  <div style="margin-top:36px;padding-top:32px;border-top:1px solid var(--border)">
+    <div class="context-inner">
+      <div>
+        <div class="context-section-label">Origen</div>
+        <p class="context-text"><strong>Alistair Cockburn</strong> formuló Ports and Adapters en 2005 como respuesta a la dificultad de testear aplicaciones con dependencias directas a bases de datos y servicios externos. La motivó la pregunta: <em>"¿Cómo puedo testear mi aplicación sin la base de datos?"</em>. La respuesta fue definir interfaces que el dominio controla y que la infraestructura implementa.</p>
+      </div>
+      <div class="context-divider"></div>
+      <div>
+        <div class="context-section-label">Relación con otros patrones</div>
+        <p class="context-text">Hexagonal es la base práctica de Clean Architecture y comparte el mismo principio fundamental.</p>
+        <div class="scope-pills">
+          <span class="pill yes">Implementa DIP de SOLID</span>
+          <span class="pill yes">Precede Clean Architecture</span>
+          <span class="pill yes">Compatible con DDD</span>
+          <span class="pill partial">Overhead en sistemas simples</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="progress" id="progress">
+    <div class="prog-dot active" onclick="show(0)"></div>
+    <div class="prog-dot" onclick="show(1)"></div>
+    <div class="prog-dot" onclick="show(2)"></div>
+    <div class="prog-dot" onclick="show(3)"></div>
+    <div class="prog-dot" onclick="show(4)"></div>
+  </div>
+  <div class="nav-btns">
+    <button class="nav-btn" id="btnPrev" onclick="navigate(-1)">← Anterior</button>
+    <button class="nav-btn" id="btnNext" onclick="navigate(1)">Siguiente →</button>
+</div>
+
+	<div class="panel" id="panel-4">
+	<div class="p-header">
+      <div>
+        <div class="p-name">Trampas comunes</div>
+        <span class="p-tagline">Cuando los puertos se convierten en tuberías vacías</span>
+        <p class="p-desc">Hexagonal Architecture puede aplicarse mecánicamente sin captar el espíritu. El resultado es una arquitectura que tiene la forma correcta pero no los beneficios —capas adicionales sin valor real.</p>
+      </div>
+      <div class="p-letter">!</div>
+    </div>
+    <ul class="trap-list">
+      <li><span class="trap-icon">🪞</span><div><strong>Puertos que son mirrors exactos de la infraestructura</strong>Si <code>IOrderRepository</code> tiene métodos como <code>executeQuery(sql, params)</code> o <code>findByRawFilter(mongoFilter)</code>, el puerto está filtrando la tecnología hacia adentro. El dominio ahora conoce SQL o MongoDB indirectamente. Los puertos deben hablar el lenguaje del dominio: <code>findPendingOrders()</code>, no <code>findWhere({status:'pending'})</code>.</div></li>
+      <li><span class="trap-icon">📋</span><div><strong>Un puerto por cada método de infraestructura</strong>Crear una interfaz de un solo método para cada operación (<code>ISaveOrder</code>, <code>IFindOrder</code>, <code>IDeleteOrder</code>) es sobre-fragmentar. Un puerto representa una <em>capacidad</em> del dominio, no una operación atómica. <code>IOrderRepository</code> agrupa todas las operaciones de persistencia de órdenes.</div></li>
+      <li><span class="trap-icon">🔄</span><div><strong>Lógica de negocio en los adaptadores driving</strong>El controller HTTP debería ser un adaptador delgado: recibe input, llama al caso de uso, devuelve output. Cuando empieza a tener lógica condicional de negocio, esa lógica no puede testearse sin levantar el servidor HTTP y los beneficios de la arquitectura se pierden.</div></li>
+      <li><span class="trap-icon">💾</span><div><strong>Adaptadores driven que transforman la forma del dominio</strong>Si el repositorio de PostgreSQL retorna filas SQL y quien consume decide cómo mapearlas a entidades, el mapping está en el lugar equivocado. El adaptador driven es responsable de convertir los datos del storage al formato de la entidad de dominio —y de volver a convertir al guardar.</div></li>
+      <li><span class="trap-icon">🏗️</span><div><strong>Aplicarla donde es overhead puro</strong>Hexagonal Architecture agrega complejidad real: más archivos, más interfaces, más indirección. Para scripts, herramientas internas simples o prototipos, el overhead no se justifica. El patrón brilla cuando el dominio es complejo, las integraciones son múltiples o el sistema necesita testearse en aislamiento.</div></li>
+    </ul>
+  </div>
+
+  <div style="margin-top:36px;padding-top:32px;border-top:1px solid var(--border)">
+    <div class="context-inner">
+      <div>
+        <div class="context-section-label">Origen</div>
+        <p class="context-text"><strong>Alistair Cockburn</strong> formuló Ports and Adapters en 2005 como respuesta a la dificultad de testear aplicaciones con dependencias directas a bases de datos y servicios externos. La motivó la pregunta: <em>"¿Cómo puedo testear mi aplicación sin la base de datos?"</em>. La respuesta fue definir interfaces que el dominio controla y que la infraestructura implementa.</p>
+      </div>
+      <div class="context-divider"></div>
+      <div>
+        <div class="context-section-label">Relación con otros patrones</div>
+        <p class="context-text">Hexagonal es la base práctica de Clean Architecture y comparte el mismo principio fundamental.</p>
+        <div class="scope-pills">
+          <span class="pill yes">Implementa DIP de SOLID</span>
+          <span class="pill yes">Precede Clean Architecture</span>
+          <span class="pill yes">Compatible con DDD</span>
+          <span class="pill partial">Overhead en sistemas simples</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="progress" id="progress">
+    <div class="prog-dot active" onclick="show(0)"></div>
+    <div class="prog-dot" onclick="show(1)"></div>
+    <div class="prog-dot" onclick="show(2)"></div>
+    <div class="prog-dot" onclick="show(3)"></div>
+    <div class="prog-dot" onclick="show(4)"></div>
+  </div>
+  <div class="nav-btns">
+    <button class="nav-btn" id="btnPrev" onclick="navigate(-1)">← Anterior</button>
+    <button class="nav-btn" id="btnNext" onclick="navigate(1)">Siguiente →</button>
+</div>
+
+	<div style="margin-top:36px;padding-top:32px;border-top:1px solid var(--border)">
+		<div class="context-inner">
+	<div>
+		<div class="context-section-label">Origen del principio</div>
+		<p class="context-text"></p>
+	</div>
+	<div class="context-divider"></div>
+	<div>
+		<div class="context-section-label">¿Solo aplica a código?</div>
+		<p class="context-text"></p>
+		<div class="scope-pills">
+			<span class="pill yes">Implementa DIP de SOLID</span>
+			<span class="pill yes">Precede Clean Architecture</span>
+			<span class="pill yes">Compatible con DDD</span>
+			<span class="pill yes">Overhead en sistemas simples</span>
+		</div>
+	</div>
+</div>
+	</div>
+
+	<div class="progress" id="progress">
+		<div class="prog-dot active"></div>
+		<div class="prog-dot"></div>
+		<div class="prog-dot"></div>
+		<div class="prog-dot"></div>
+		<div class="prog-dot"></div>
+	</div>
+	<div class="nav-btns">
+		<button class="nav-btn" id="btnPrev">← Anterior</button>
+		<button class="nav-btn" id="btnNext">Siguiente →</button>
+	</div>
+</main>
+
+<footer>
+	<span>Ports &amp; Adapters · Alistair Cockburn · 2005</span>
+	<span>Gustavo Adrián Salvini · <a href="https://github.com/guspatagonico" target="_blank">@guspatagonico</a></span>
+</footer>
+
+<nav class="snav snav-bot">
+	<a class="snav-prev" href="clean-architecture.html" style="color:#a855f7;background:rgba(168,85,247,0.12);border-color:rgba(168,85,247,0.32)"><span>←</span><span class="snav-label">Clean Arch</span></a>
+	<div class="snav-spacer"></div>
+	<div class="snav-center">
+		<a class="snav-home" href="../index.html">↑&nbsp;&nbsp;Índice</a>
+		<span class="snav-pos">12&thinsp;/&thinsp;12</span>
+	</div>
+	<div class="snav-spacer"></div>
+	<div class="snav-ghost"></div>
+</nav>
+
+<script src="../js/tabs.js"></script>
+</body>
+</html>

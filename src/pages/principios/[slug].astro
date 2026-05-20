@@ -1,0 +1,79 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SiteNav from '../../components/SiteNav.astro';
+import TabNav from '../../components/TabNav.astro';
+import ProgressNav from '../../components/ProgressNav.astro';
+import ContextSection from '../../components/ContextSection.astro';
+import { getCollection } from 'astro:content';
+
+export async function getStaticPaths() {
+	const principles = await getCollection('principle');
+	return principles.map(entry => ({
+		params: { slug: entry.data.slug },
+		props: { entry },
+	}));
+}
+
+const { entry } = Astro.props;
+const page = entry.data;
+
+const allEntries = await getCollection('principle');
+const sortedPages = allEntries.map(e => e.data).sort((a, b) => a.position - b.position);
+const idx = sortedPages.findIndex(p => p.slug === page.slug);
+const prevPage = idx === 0 ? null : sortedPages[idx - 1];
+const nextPage = idx < sortedPages.length - 1 ? sortedPages[idx + 1] : null;
+const posLabel = `${String(idx + 1).padStart(2, '0')}\u2009/\u2009${String(sortedPages.length).padStart(2, '0')}`;
+---
+
+<BaseLayout
+	title={`${page.navLabel || page.title} — Principios de diseño de software`}
+	accent={page.accent}
+	widthClass={page.width === 'wide' ? 'layout-wide' : ''}
+>
+	<SiteNav
+		position="top"
+		{prevPage}
+		{nextPage}
+		{posLabel}
+		isFirstPage={idx === 0}
+	/>
+
+	<header>
+		<div class="header-label">{page.headerLabel || 'Principios de diseño · Referencia para devs'}</div>
+		<h1 set:html={page.headerTitle || ''}></h1>
+		<p>{page.headerSubtitle || ''}</p>
+	</header>
+
+	<TabNav tabs={page.tabs} />
+
+	<main>
+		{page.tabs.map((tab, i) => {
+			const letterColor = tab.tabColorVar ? `--letter-color: var(${tab.tabColorVar})` : '';
+			const interpolatedContent = tab.tabColorVar
+				? tab.content.replace(/<div class="p-letter">/g, `<div class="p-letter" style="${letterColor}">`)
+				: tab.content;
+			return (
+				<div class={`panel${i === 0 ? ' active' : ''}`} id={`panel-${i}`}>
+					<Fragment set:html={interpolatedContent} />
+				</div>
+			);
+		})}
+
+		<ContextSection origin={page.origin} scope={page.scope} />
+
+		<ProgressNav tabCount={page.tabs.length} />
+	</main>
+
+	<footer>
+		<span>{page.footerLeft || ''}</span>
+		<span>{page.footerRight || 'Gustavo Adrian Salvini · <a href="https://github.com/guspatagonico" target="_blank">@guspatagonico</a>'}</span>
+	</footer>
+
+	<SiteNav
+		position="bot"
+		{prevPage}
+		{nextPage}
+		{posLabel}
+		isFirstPage={idx === 0}
+	/>
+</BaseLayout>

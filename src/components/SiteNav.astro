@@ -1,0 +1,48 @@
+---
+import { ACCENT_HEX, rgba } from '../data/accents.mjs';
+
+const { prevPage, nextPage, posLabel, isFirstPage, position } = Astro.props;
+const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : import.meta.env.BASE_URL + '/';
+
+function siteLink(p, direction) {
+	if (!p) return null;
+	const hex = ACCENT_HEX[p.accent] || '#d4d4d8';
+	const cls = direction === 'prev' ? 'snav-prev' : 'snav-next';
+	const arrow = direction === 'prev' ? '←' : '→';
+	const label = p.navLabel || p.title || p.slug;
+	const href = `${base}principios/${p.slug}`;
+	return { cls, arrow, label, href, hex };
+}
+
+const prev = siteLink(prevPage, 'prev');
+const next = siteLink(nextPage, 'next');
+---
+
+<nav class={`snav snav-${position}`}>
+	{prev ? (
+		<a class={prev.cls} href={prev.href} style={`color:${prev.hex};background:${rgba(prev.hex, .12)};border-color:${rgba(prev.hex, .32)}`}>
+			<span>{prev.arrow}</span><span class="snav-label">{prev.label}</span>
+		</a>
+	) : (
+		<div class="snav-ghost"></div>
+	)}
+
+	<div class="snav-spacer"></div>
+
+	<div class="snav-center">
+		{posLabel && (
+			<a class="snav-home" href={base}>↑&nbsp;&nbsp;{isFirstPage ? 'Índice de secciones' : 'Índice'}</a>
+		)}
+		{posLabel && <span class="snav-pos">{posLabel}</span>}
+	</div>
+
+	<div class="snav-spacer"></div>
+
+	{next ? (
+		<a class={next.cls} href={next.href} style={`color:${next.hex};background:${rgba(next.hex, .12)};border-color:${rgba(next.hex, .32)}`}>
+			<span class="snav-label">{next.label}</span><span>{next.arrow}</span>
+		</a>
+	) : (
+		<div class="snav-ghost"></div>
+	)}
+</nav>
