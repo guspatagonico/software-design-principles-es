@@ -53,20 +53,36 @@ const rfPhases = [
 	description="Guía de referencia de 12 principios de diseño de software organizados por orden de aplicación: desde mindset (KISS, YAGNI, DRY) hasta arquitectura (Screaming, Clean, Hexagonal). Con ejemplos de código y reglas prácticas."
 	accent="index"
 	image="og/index.jpg"
-	canonicalURL="https://principles.harness.ar/"
+	canonicalURL={`${Astro.site}/`}
 	type="website"
 	jsonLd={{
 		'@context': 'https://schema.org',
-		'@type': 'WebSite',
-		name: 'Principios de Diseño de Software',
-		url: 'https://principles.harness.ar/',
-		description: 'Guía de referencia de 12 principios de diseño de software organizados por orden de aplicación en el ciclo de vida de un proyecto.',
-		inLanguage: 'es',
-		author: {
-			'@type': 'Person',
-			name: 'Gustavo Adrián Salvini',
-			url: 'https://github.com/guspatagonico',
-		},
+		'@graph': [
+			{
+				'@type': 'WebSite',
+				name: 'Principios de Diseño de Software',
+				url: `${Astro.site}/`,
+				description: 'Guía de referencia de 12 principios de diseño de software organizados por orden de aplicación en el ciclo de vida de un proyecto.',
+				inLanguage: 'es',
+				author: {
+					'@type': 'Person',
+					name: 'Gustavo Adrián Salvini',
+					url: 'https://github.com/guspatagonico',
+				},
+			},
+			{
+				'@type': 'ItemList',
+				name: 'Principios de Diseño de Software',
+				numberOfItems: principlePages.length,
+				itemListElement: principlePages.map((p, i) => ({
+					'@type': 'ListItem',
+					position: i + 1,
+					name: p.title,
+					url: `${Astro.site}/principios/${p.slug}/`,
+					description: p.description || p.headerSubtitle || '',
+				})),
+			},
+		],
 	}}
 >
 	<SiteNav position="top" prevPage={null} nextPage={firstPage} posLabel="" isFirstPage={false} />

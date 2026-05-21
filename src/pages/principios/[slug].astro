@@ -31,24 +31,48 @@ const posLabel = `${String(idx + 1).padStart(2, '0')}\u2009/\u2009${String(sorte
 	accent={page.accent}
 	widthClass={page.width === 'wide' ? 'layout-wide' : ''}
 	image={`og/${page.slug}.jpg`}
-	canonicalURL={`https://principles.harness.ar/principios/${page.slug}/`}
+	canonicalURL={`${Astro.site}/principios/${page.slug}/`}
 	type="article"
 	jsonLd={{
 		'@context': 'https://schema.org',
-		'@type': 'TechArticle',
-		headline: page.title,
-		description: page.description || page.headerSubtitle || '',
-		url: `https://principles.harness.ar/principios/${page.slug}/`,
-		inLanguage: 'es',
-		author: {
-			'@type': 'Person',
-			name: 'Gustavo Adrián Salvini',
-			url: 'https://github.com/guspatagonico',
-		},
-		about: {
-			'@type': 'Thing',
-			name: page.navLabel || page.title,
-		},
+		'@graph': [
+			{
+				'@type': 'TechArticle',
+				headline: page.title,
+				description: page.description || page.headerSubtitle || '',
+				url: `${Astro.site}/principios/${page.slug}/`,
+				inLanguage: 'es',
+				author: {
+					'@type': 'Person',
+					name: 'Gustavo Adrián Salvini',
+					url: 'https://github.com/guspatagonico',
+				},
+				about: {
+					'@type': 'Thing',
+					name: page.navLabel || page.title,
+				},
+				educationalLevel: 'intermediate',
+				learningResourceType: 'Conceptual',
+				position: page.position,
+			},
+			{
+				'@type': 'BreadcrumbList',
+				itemListElement: [
+					{
+						'@type': 'ListItem',
+						position: 1,
+						name: 'Inicio',
+				item: `${Astro.site}/`,
+				},
+				{
+					'@type': 'ListItem',
+					position: 2,
+					name: page.title,
+					item: `${Astro.site}/principios/${page.slug}/`,
+					},
+				],
+			},
+		],
 	}}
 >
 	<SiteNav

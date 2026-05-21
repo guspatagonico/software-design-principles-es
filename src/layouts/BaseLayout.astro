@@ -14,7 +14,7 @@ const {
 } = Astro.props;
 
 const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : import.meta.env.BASE_URL + '/';
-const siteURL = 'https://principles.harness.ar';
+const siteURL = Astro.site;
 const imageURL = image.startsWith('http') ? image : `${siteURL}/${image}`;
 const ogTitle = title;
 const ogDescription = description || title;

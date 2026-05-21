@@ -1,0 +1,117 @@
+{
+	"name": "Principios de Diseño de Software",
+	"description": "Guía de referencia en español con 12 principios de diseño de software — desde mindset hasta arquitectura. Con ejemplos de código, reglas prácticas y trampas comunes.",
+	"url": "https://principles.gustavosalvini.com.ar",
+	"language": "es",
+	"author": {
+		"name": "Gustavo Adrián Salvini",
+		"url": "https://github.com/guspatagonico"
+	},
+	"content_types": [
+		"reference",
+		"tutorial"
+	],
+	"resources": {
+		"llms_txt": "https://principles.gustavosalvini.com.ar/llms.txt",
+		"llms_full_txt": "https://principles.gustavosalvini.com.ar/llms-full.txt",
+		"sitemap": "https://principles.gustavosalvini.com.ar/sitemap-index.xml"
+	},
+	"principles": [
+		{
+			"title": "KISS — Keep It Simple, Stupid",
+			"url": "https://principles.gustavosalvini.com.ar/principios/kiss/",
+			"markdown": "https://principles.gustavosalvini.com.ar/llms/kiss.md",
+			"accent": "kiss",
+			"position": 1,
+			"tagline": "La solución más simple que funciona casi siempre es la correcta. La complejidad innecesaria es deuda técnica disfrazada de sofisticación."
+		},
+		{
+			"title": "YAGNI",
+			"url": "https://principles.gustavosalvini.com.ar/principios/yagni/",
+			"markdown": "https://principles.gustavosalvini.com.ar/llms/yagni.md",
+			"accent": "yagni",
+			"position": 2,
+			"tagline": "No construyas lo que todavía no necesitás. La funcionalidad que no existe no tiene bugs, no hay que mantenerla y no complica el diseño."
+		},
+		{
+			"title": "DRY",
+			"url": "https://principles.gustavosalvini.com.ar/principios/dry/",
+			"markdown": "https://principles.gustavosalvini.com.ar/llms/dry.md",
+			"accent": "dry",
+			"position": 3,
+			"tagline": "Cada pieza de conocimiento debe tener una única, inequívoca y autoritativa representación dentro de un sistema."
+		},
+		{
+			"title": "SOLID",
+			"url": "https://principles.gustavosalvini.com.ar/principios/solid/",
+			"markdown": "https://principles.gustavosalvini.com.ar/llms/solid.md",
+			"accent": "solid",
+			"position": 4,
+			"tagline": "Cinco reglas para escribir código que sea fácil de cambiar, extender y entender. Hacé clic en cada letra para explorar."
+		},
+		{
+			"title": "SoC",
+			"url": "https://principles.gustavosalvini.com.ar/principios/soc/",
+			"markdown": "https://principles.gustavosalvini.com.ar/llms/soc.md",
+			"accent": "soc",
+			"position": 5,
+			"tagline": "Cada parte del sistema debería ocuparse de una sola preocupación. Separar el <em>qué</em> del <em>cómo</em> del <em>cuándo</em> es la diferencia entre código que escala y código que colapsa."
+		},
+		{
+			"title": "Info Hiding",
+			"url": "https://principles.gustavosalvini.com.ar/principios/information-hiding/",
+			"markdown": "https://principles.gustavosalvini.com.ar/llms/information-hiding.md",
+			"accent": "information-hiding",
+			"position": 6,
+			"tagline": "Lo que no es público no puede romperse desde afuera. Cada módulo debería exponer solo lo mínimo necesario y ocultar todo lo demás detrás de una interfaz estable."
+		},
+		{
+			"title": "Law of Demeter",
+			"url": "https://principles.gustavosalvini.com.ar/principios/lod/",
+			"markdown": "https://principles.gustavosalvini.com.ar/llms/lod.md",
+			"accent": "lod",
+			"position": 7,
+			"tagline": "Hablá solo con tus amigos directos. No le hables a los amigos de tus amigos. Cada objeto debería saber lo menos posible sobre la estructura interna de los demás."
+		},
+		{
+			"title": "Fail Fast",
+			"url": "https://principles.gustavosalvini.com.ar/principios/fail-fast/",
+			"markdown": "https://principles.gustavosalvini.com.ar/llms/fail-fast.md",
+			"accent": "fail-fast",
+			"position": 8,
+			"tagline": "Cuando algo está mal, el sistema debería decirlo de inmediato y de forma ruidosa. Un bug que explota en el momento exacto en que ocurre es exponencialmente más barato que uno que se descubre tres pasos después."
+		},
+		{
+			"title": "Paquetes",
+			"url": "https://principles.gustavosalvini.com.ar/principios/pkg/",
+			"markdown": "https://principles.gustavosalvini.com.ar/llms/pkg.md",
+			"accent": "pkg",
+			"position": 9,
+			"tagline": "Seis principios de Robert C. Martin que operan a nivel de módulos y paquetes enteros —la versión macro de SOLID. Determinan cómo agrupar clases y cómo controlar las dependencias entre grupos."
+		},
+		{
+			"title": "Screaming",
+			"url": "https://principles.gustavosalvini.com.ar/principios/screaming-architecture/",
+			"markdown": "https://principles.gustavosalvini.com.ar/llms/screaming-architecture.md",
+			"accent": "screaming-architecture",
+			"position": 10,
+			"tagline": "La estructura de un proyecto debería gritar qué hace el sistema, no qué framework usa. Si abrís el código y lo primero que ves es \"Rails\" o \"Spring\", algo está mal."
+		},
+		{
+			"title": "Clean Arch",
+			"url": "https://principles.gustavosalvini.com.ar/principios/clean-architecture/",
+			"markdown": "https://principles.gustavosalvini.com.ar/llms/clean-architecture.md",
+			"accent": "clean-architecture",
+			"position": 11,
+			"tagline": "Las dependencias solo pueden apuntar hacia adentro. El núcleo de lógica de negocio no sabe nada de bases de datos, frameworks ni HTTP. Los detalles dependen de las abstracciones, nunca al revés."
+		},
+		{
+			"title": "Hexagonal",
+			"url": "https://principles.gustavosalvini.com.ar/principios/hexagonal/",
+			"markdown": "https://principles.gustavosalvini.com.ar/llms/hexagonal.md",
+			"accent": "hexagonal",
+			"position": 12,
+			"tagline": "El dominio vive en el centro. Define puertos —interfaces— que describen lo que necesita. El mundo exterior conecta a través de adaptadores que implementan esos puertos. El dominio no sabe nada de afuera."
+		}
+	]
+}
