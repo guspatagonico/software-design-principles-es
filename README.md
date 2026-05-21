@@ -2,7 +2,7 @@
 
 Guía de referencia con **12 principios de diseño de software** organizados por orden de aplicación en el ciclo de vida de un proyecto —desde las decisiones más tempranas hasta las más arquitectónicas. Sitio estático en español, construido con **Astro 6.3**.
 
-**[`principles.harness.ar`](https://principles.harness.ar/)**
+**Demo: [`principles.gustavosalvini.com.ar`](https://principles.gustavosalvini.com.ar/)**
 
 ---
 
@@ -20,12 +20,12 @@ Estoy abierto a **feedback, correcciones y sugerencias**. Si algo no se entiende
 
 Los 12 principios están organizados en **4 fases de lectura**, que reflejan el orden natural en que se aplican durante el desarrollo:
 
-| Fase | Enfoque | Principios |
-|------|---------|------------|
-| **1 · Mindset** | Actitudes de diseño que deben estar internalizadas antes de escribir código | KISS, YAGNI, DRY |
-| **2 · Diseño de código** | Cómo diseñar clases, funciones y módulos testeables y mantenibles | SOLID, SoC, Information Hiding, Law of Demeter, Fail Fast |
-| **3 · Diseño de módulos** | Cómo agrupar código en paquetes, módulos o servicios | Package Principles |
-| **4 · Arquitectura** | Decisiones estructurales del sistema completo | Screaming Architecture, Clean Architecture, Hexagonal |
+| Fase                      | Enfoque                                                                     | Principios                                                |
+| ------------------------- | --------------------------------------------------------------------------- | --------------------------------------------------------- |
+| **1 · Mindset**           | Actitudes de diseño que deben estar internalizadas antes de escribir código | KISS, YAGNI, DRY                                          |
+| **2 · Diseño de código**  | Cómo diseñar clases, funciones y módulos testeables y mantenibles           | SOLID, SoC, Information Hiding, Law of Demeter, Fail Fast |
+| **3 · Diseño de módulos** | Cómo agrupar código en paquetes, módulos o servicios                        | Package Principles                                        |
+| **4 · Arquitectura**      | Decisiones estructurales del sistema completo                               | Screaming Architecture, Clean Architecture, Hexagonal     |
 
 Cada página de principio tiene 4 secciones con pestañas: **Concepto**, **En el código**, **Reglas** y **Trampas**, más un bloque de origen y alcance.
 
@@ -33,15 +33,15 @@ Cada página de principio tiene 4 secciones con pestañas: **Concepto**, **En el
 
 ## Stack técnico
 
-| Capa | Tecnología |
-|------|-----------|
-| Framework | [Astro 6.3](https://astro.build) — SSG (`output: 'static'`) |
-| Package manager | **pnpm** (no usar npm) |
-| Validación de datos | Zod (content schema) |
-| Estilos | CSS plano con variables y data-attributes (sin preprocesadores) |
-| SEO / OG | Open Graph, Twitter Cards, JSON-LD (TechArticle, WebSite), sitemap automático |
-| OG images | Script con `sharp` que genera imágenes JPG 1200×630 por principio |
-| JS del lado cliente | `public/js/tabs.js` (vanilla, cargado con `is:inline`) |
+| Capa                | Tecnología                                                                    |
+| ------------------- | ----------------------------------------------------------------------------- |
+| Framework           | [Astro 6.3](https://astro.build) — SSG (`output: 'static'`)                   |
+| Package manager     | **pnpm** (no usar npm)                                                        |
+| Validación de datos | Zod (content schema)                                                          |
+| Estilos             | CSS plano con variables y data-attributes (sin preprocesadores)               |
+| SEO / OG            | Open Graph, Twitter Cards, JSON-LD (TechArticle, WebSite), sitemap automático |
+| OG images           | Script con `sharp` que genera imágenes JPG 1200×630 por principio             |
+| JS del lado cliente | `public/js/tabs.js` (vanilla, cargado con `is:inline`)                        |
 
 React está instalado como dependencia para funcionalidades interactivas futuras, pero las páginas de producción actuales no lo usan.
 
@@ -143,11 +143,11 @@ Editá el archivo JSON correspondiente en `src/content/principle/`. El HTML de l
 
 Cada principio tiene un color de acento único, definido en tres lugares que deben mantenerse sincronizados:
 
-| Archivo | Propósito |
-|---------|-----------|
-| `src/data/accents.mjs` | Mapa `ACCENT_HEX` y helpers `rgba()` / `accentStyle()` |
-| `src/styles/base.css` | Paleta CSS completa con `--bg`, `--surface`, `--text`, `--muted`, `--accent`, etc. |
-| `scripts/gen-og-images.mjs` | Color inline para las imágenes Open Graph |
+| Archivo                     | Propósito                                                                          |
+| --------------------------- | ---------------------------------------------------------------------------------- |
+| `src/data/accents.mjs`      | Mapa `ACCENT_HEX` y helpers `rgba()` / `accentStyle()`                             |
+| `src/styles/base.css`       | Paleta CSS completa con `--bg`, `--surface`, `--text`, `--muted`, `--accent`, etc. |
+| `scripts/gen-og-images.mjs` | Color inline para las imágenes Open Graph                                          |
 
 El atributo `data-accent` se inyecta en `<body>` desde `BaseLayout.astro`. Los componentes usan `accentStyle()` para colores inline.
 
