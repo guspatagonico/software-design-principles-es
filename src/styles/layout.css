@@ -900,8 +900,13 @@ footer a:hover { color: var(--text); }
 /* ═══════════════════════════════════════════ RESPONSIVE ═══════════════════════════════════════════ */
 
 @media (max-width: 640px) {
+	body {
+		padding-top: 48px;
+		padding-bottom: 56px;
+	}
+
 	header, .nav-wrap, main, footer {
-		padding-left: 24px; padding-right: 24px;
+		padding-left: 20px; padding-right: 20px;
 	}
 
 	.index-header,
@@ -909,9 +914,87 @@ footer a:hover { color: var(--text); }
 	.cards-wrap,
 	.reading-strip,
 	.index-footer {
-		padding-left: 24px; padding-right: 24px;
+		padding-left: 20px; padding-right: 20px;
 	}
 
+	/* Site nav: compact for tablet/phone */
+	.snav {
+		padding: 0 12px;
+		height: 48px;
+	}
+	.snav-bot {
+		height: 44px;
+	}
+	.snav-prev, .snav-next {
+		font-size: 10px;
+		padding: 5px 10px;
+		max-width: 140px;
+	}
+	.snav-home {
+		font-size: 10px;
+		padding: 5px 10px;
+	}
+	.snav-pos {
+		font-size: 9px;
+	}
+
+	/* Header spacing */
+	header {
+		padding-top: 48px;
+		padding-bottom: 40px;
+	}
+
+	/* Main spacing */
+	main {
+		margin-top: 24px;
+		padding-bottom: 72px;
+	}
+
+	/* Code readability */
+	pre {
+		font-size: 11.5px;
+	}
+
+	/* Panel header */
+	.p-header {
+		margin-bottom: 20px;
+		padding-bottom: 18px;
+		gap: 16px;
+	}
+
+	/* Cards/analogies/tips tighten up */
+	.analogy {
+		padding: 16px 18px;
+		margin: 20px 0;
+	}
+	.tip {
+		padding: 14px 18px;
+	}
+	.trap-list {
+		gap: 10px;
+	}
+	.trap-list li {
+		padding: 14px 16px;
+	}
+
+	/* Context */
+	.context-inner {
+		padding: 20px 24px;
+	}
+
+	/* Reading strip: scrollable chips on overflow */
+	.rf-chips {
+		overflow-x: auto;
+		flex-wrap: nowrap;
+		-webkit-overflow-scrolling: touch;
+		scrollbar-width: none;
+	}
+	.rf-chips::-webkit-scrollbar { display: none; }
+	.rf-chip {
+		flex-shrink: 0;
+	}
+
+	/* Grids to single column */
 	.comparison { grid-template-columns: 1fr; }
 	.rules-grid { grid-template-columns: 1fr; }
 	.context-inner { grid-template-columns: 1fr; }
@@ -919,11 +1002,228 @@ footer a:hover { color: var(--text); }
 }
 
 @media (max-width: 480px) {
+	body {
+		padding-top: 42px;
+		padding-bottom: 50px;
+	}
+
 	.cards-grid { grid-template-columns: 1fr; }
 
+	/* Site nav: ultra-compact */
+	.snav {
+		padding: 0 6px;
+		height: 42px;
+		gap: 3px;
+	}
+	.snav-bot {
+		height: 38px;
+	}
 	.snav-label { display: none; }
-	.snav { padding: 0 10px; gap: 5px; }
-	.snav-prev, .snav-next { padding: 7px 11px; }
-	.snav-home { padding: 7px 12px; }
-	.snav-ghost { width: 40px; }
+	.snav-prev, .snav-next {
+		padding: 5px 7px;
+		max-width: 104px;
+		font-size: 10px;
+	}
+	.snav-home {
+		padding: 5px 7px;
+		font-size: 9px;
+	}
+	.snav-pos {
+		display: none;
+	}
+	.snav-ghost {
+		width: 30px;
+	}
+	.snav-center {
+		gap: 3px;
+	}
+
+	/* Tabs: horizontal scroll on mobile */
+	.nav-wrap {
+		padding-left: 12px;
+		padding-right: 12px;
+	}
+	.nav {
+		overflow-x: auto;
+		-webkit-overflow-scrolling: touch;
+		scrollbar-width: none;
+		gap: 1px;
+		padding: 3px;
+	}
+	.nav::-webkit-scrollbar { display: none; }
+	.tab-btn {
+		min-width: 62px;
+		padding: 10px 5px;
+		gap: 2px;
+		flex-shrink: 0;
+	}
+	.tab-icon {
+		font-size: 15px;
+	}
+	.tab-letter {
+		font-size: 15px;
+	}
+	.tab-word {
+		font-size: 9px;
+	}
+	.nav-pill {
+		top: 3px;
+		height: calc(100% - 6px);
+		border-radius: 8px;
+	}
+
+	/* Index: compact spacing */
+	.index-header {
+		padding: 48px 20px 40px;
+	}
+	.index-header h1 {
+		font-size: clamp(36px, 8vw, 52px);
+	}
+	.header-sub {
+		font-size: 13.5px;
+		margin-top: 20px;
+	}
+	.stats-row {
+		gap: 20px;
+		margin-top: 28px;
+	}
+	.stat-num {
+		font-size: 28px;
+	}
+	.stat-label {
+		font-size: 9px;
+	}
+	.phase-header {
+		margin: 32px auto 18px;
+		padding: 0 20px;
+	}
+	.phase-inner {
+		gap: 10px;
+	}
+	.phase-title {
+		font-size: 18px;
+	}
+	.phase-desc {
+		font-size: 12px;
+		margin-top: 6px;
+	}
+	.cards-wrap {
+		padding: 0 20px;
+	}
+
+	/* Reading strip mobile */
+	.reading-strip {
+		margin-top: 40px;
+		padding: 0 20px 56px;
+	}
+	.reading-inner {
+		padding: 20px 22px;
+	}
+	.reading-title {
+		margin-bottom: 16px;
+	}
+	.rf-row {
+		padding: 10px 0;
+	}
+	.rf-chip {
+		font-size: 10px;
+		padding: 4px 10px;
+	}
+	.rf-phase-label {
+		font-size: 8px;
+		min-width: 48px;
+	}
+	.index-footer {
+		padding: 20px 20px;
+		font-size: 10px;
+	}
+
+	/* Principle pages: tighter spacing */
+	header {
+		padding-top: 36px;
+		padding-bottom: 28px;
+		padding-left: 14px;
+		padding-right: 14px;
+	}
+	.nav-wrap {
+		padding-left: 14px;
+		padding-right: 14px;
+	}
+	main {
+		padding-left: 14px;
+		padding-right: 14px;
+		padding-bottom: 56px;
+	}
+	footer {
+		padding-left: 14px;
+		padding-right: 14px;
+	}
+	.p-letter {
+		font-size: 68px;
+	}
+	.p-name {
+		font-size: clamp(22px, 5vw, 28px);
+	}
+	.p-desc {
+		font-size: 13.5px;
+	}
+
+	/* Rule cards */
+	.rule-card {
+		padding: 14px 16px;
+	}
+
+	/* Footer */
+	footer {
+		padding: 24px 14px;
+		font-size: 10px;
+	}
+}
+
+@media (max-width: 360px) {
+	body {
+		padding-top: 38px;
+		padding-bottom: 44px;
+	}
+	.snav {
+		height: 38px;
+	}
+	.snav-bot {
+		height: 34px;
+	}
+	.snav-prev, .snav-next {
+		max-width: 86px;
+		padding: 4px 5px;
+		font-size: 9px;
+	}
+	.snav-home {
+		font-size: 8px;
+		padding: 4px 5px;
+	}
+	.snav-ghost {
+		width: 22px;
+	}
+	.snav-center {
+		gap: 2px;
+	}
+	.tab-btn {
+		min-width: 52px;
+		padding: 8px 4px;
+	}
+	.tab-word {
+		font-size: 8px;
+	}
+	.tab-icon {
+		font-size: 13px;
+	}
+	.tab-letter {
+		font-size: 13px;
+	}
+}
+
+/* Desktop compensation for removed global zoom — restores readability at ≥1024px */
+@media (min-width: 1024px) {
+	html {
+		zoom: 1.16;
+	}
 }
