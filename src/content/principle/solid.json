@@ -1,6 +1,7 @@
 {
   "slug": "solid",
   "title": "SOLID",
+  "description": "SRP, OCP, LSP, ISP, DIP. Cinco reglas para escribir código que sea fácil de cambiar, extender y entender. El vocabulario fundamental del diseño orientado a objetos.",
   "accent": "solid",
   "position": 4,
   "width": "standard",

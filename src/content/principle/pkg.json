@@ -1,6 +1,7 @@
 {
   "slug": "pkg",
   "title": "Paquetes",
+  "description": "Seis principios para agrupar clases en paquetes y controlar dependencias entre módulos. La versión macro de SOLID: qué va junto y cómo se conectan los paquetes entre sí.",
   "accent": "pkg",
   "position": 9,
   "width": "wide",

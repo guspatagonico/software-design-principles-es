@@ -6,6 +6,7 @@ const principle = defineCollection({
 	schema: z.object({
 		slug: z.string(),
 		title: z.string(),
+		description: z.string().optional(),
 		accent: z.string(),
 		position: z.number(),
 		width: z.string().optional(),

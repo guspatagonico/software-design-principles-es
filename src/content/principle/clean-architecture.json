@@ -1,6 +1,7 @@
 {
   "slug": "clean-architecture",
   "title": "Clean Arch",
+  "description": "Las dependencias solo pueden apuntar hacia adentro. El núcleo de negocio no sabe nada de bases de datos, frameworks ni HTTP. Los detalles dependen de las abstracciones, nunca al revés.",
   "accent": "clean-architecture",
   "position": 11,
   "width": "standard",

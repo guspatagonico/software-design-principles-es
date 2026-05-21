@@ -1,6 +1,7 @@
 {
   "slug": "information-hiding",
   "title": "Info Hiding",
+  "description": "Ocultá las decisiones de diseño que probablemente van a cambiar. Lo que no es público no puede romperse desde afuera. Cada módulo debería exponer solo lo mínimo necesario.",
   "accent": "information-hiding",
   "position": 6,
   "width": "standard",

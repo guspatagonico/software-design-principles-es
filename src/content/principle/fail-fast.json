@@ -1,6 +1,7 @@
 {
   "slug": "fail-fast",
   "title": "Fail Fast",
+  "description": "Cuando algo está mal, el sistema debería decirlo de inmediato y de forma ruidosa. El costo de un fallo crece exponencialmente con la distancia entre dónde ocurre y dónde se detecta.",
   "accent": "fail-fast",
   "position": 8,
   "width": "standard",

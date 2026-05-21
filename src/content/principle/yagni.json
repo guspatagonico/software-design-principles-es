@@ -1,6 +1,7 @@
 {
   "slug": "yagni",
   "title": "YAGNI",
+  "description": "No implementes funcionalidad hasta que realmente la necesitás. La funcionalidad que no existe no tiene bugs, no hay que mantenerla y no complica el diseño.",
   "accent": "yagni",
   "position": 2,
   "width": "standard",

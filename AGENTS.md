@@ -1,10 +1,10 @@
 # AGENTS.md
 
 ## Project
-Spanish-language static reference site covering 12 software design principles. Built with **Astro 6.3** in SSG mode, deployed at `https://principles.harness.ar/principles/`.
+Spanish-language static reference site covering 12 software design principles. Built with **Astro 6.3** in SSG mode, deployed at `https://principles.harness.ar/`, local dev at `http://localhost:4321/`.
 
 ## Current phase
-- **Phase 1 (complete):** Modular static build script — preserved as `build.js`, `templates/`, `css/`, `js/`, `data/`. These are legacy artifacts, kept for reference.
+- **Phase 1 (complete):** Modular static build script (removed; cleared after Phase 2 migration).
 - **Phase 2 (complete):** Astro 6.3 migration. All pages render via Astro content collections and `.astro` components.
 - `_seed/` is the **prototype** — reference material, never edit it.
 
@@ -17,6 +17,8 @@ Spanish-language static reference site covering 12 software design principles. B
 
 ## Project structure
 ```
+scripts/
+├── gen-og-images.mjs     # Prebuild script: generates per-page JPG OG images
 src/
 ├── components/           # Reusable .astro components
 │   ├── ContextSection.astro   # Origin + scope block
@@ -28,7 +30,7 @@ src/
 ├── data/
 │   └── accents.mjs       # Centralized ACCENT_HEX map, rgba(), accentStyle()
 ├── layouts/
-│   └── BaseLayout.astro  # HTML shell (<head>, fonts, CSS, tabs.js)
+│   └── BaseLayout.astro  # HTML shell + SEO meta tags + OG + Twitter Cards + JSON-LD
 ├── pages/
 │   ├── index.astro       # Landing page (card grid + reading strip)
 │   └── principios/
@@ -36,10 +38,13 @@ src/
 ├── styles/
 │   ├── base.css          # Reset, fonts, all 12 accent palettes, breakpoints
 │   └── layout.css        # All shared component styles (SNAV, tabs, panels, cards)
-└── content.config.ts     # Glob loader + Zod schema for principle collection
+└── content.config.ts     # Glob loader + Zod schema (includes description field)
 public/
-└── js/
-    └── tabs.js           # Shared tab-nav script (keyboard, pill, dots)
+├── favicon.svg           # "PDS" logo in dark square, hexagonal cyan (#67e8f9)
+├── robots.txt            # Allows all crawlers, points to sitemap
+├── js/
+│   └── tabs.js           # Shared tab-nav script (keyboard, pill, dots)
+└── og/                   # Generated at prebuild — 13 JPG OG images (1200×630)
 ```
 
 ## Content flow
@@ -53,6 +58,40 @@ public/
 - **Central map:** `src/data/accents.mjs` exports `ACCENT_HEX` (12 principles + index neutral) and helpers `rgba(hex, alpha)` / `accentStyle(accent, alphaBg, alphaBorder)`.
 - **CSS palettes:** `src/styles/base.css` defines `[data-accent="kiss"]`, `[data-accent="solid"]`, etc. with full `--bg`, `--surface`, `--text`, `--muted`, `--accent`, `--accent-r`, `--accent-rb` plus page-specific special vars (SOLID tabs, SoC `--what`/`--how`/`--when`, Info Hiding `--pub`/`--priv`/`--iface`, etc.).
 - **Injection:** `BaseLayout.astro` sets `data-accent` on `<body>`. Components use `accentStyle()` for inline link colors.
+
+## SEO / GEO metadata system
+- **Hub:** `BaseLayout.astro` is the single source for all page metadata. Every page passes `title`, `description`, `accent`, `image`, `canonicalURL`, `type`, and `jsonLd` as props.
+- **Meta tags generated:** `<meta name="description">`, `<link rel="canonical">`, full OGP (og:title, og:description, og:type, og:url, og:image 1200×630, og:site_name, og:locale=es_ES), Twitter Cards (summary_large_image), and JSON-LD structured data.
+- **JSON-LD schemas:** Index uses `WebSite`; principle pages use `TechArticle` with author `@guspatagonico`.
+- **Canonical URLs:** Index → `https://principles.harness.ar/`, principles → `https://principles.harness.ar/principios/{slug}/`.
+- **Sitemap:** `@astrojs/sitemap` integration in `astro.config.mjs` generates `sitemap-index.xml`.
+- **Robots.txt:** Allows all crawlers, points to `https://principles.harness.ar/sitemap-index.xml`.
+- **Favicon:** `public/favicon.svg` — dark square with "PDS" logo, hexagonal cyan (#67e8f9).
+- **Descriptions:** Added as optional `z.string()` to content schema; populated in all 12 JSON files from `cardDesc`/`headerSubtitle`.
+
+## OG image generation
+- **Script:** `scripts/gen-og-images.mjs` — runs before every build via `package.json` `"prebuild"`.
+- **Tech:** Uses `sharp` (already in deps) to rasterize parametrized SVG templates → JPG (1200×630, quality 90).
+- **Per-page uniqueness:** Each principle gets its own image with its accent color, `navLabel` (big) + `cardTitle` (subtitle).
+- **Design (all images):**
+  - Dark gradient background (`#0a0a0a` → `#161616`)
+  - 5px accent-colored left bar (15% opacity)
+  - "PDS" logo box (top-left, 44×44, accent-colored)
+  - "Principios de Diseño de Software" site title
+  - Principle name in accent color (72px, bold, centered)
+  - Principle subtitle in gray (31px)
+  - "Una guía de referencia para developers" (21px)
+  - Divider line + `https://github.com/guspatagonico` (20px)
+- **Output:** `public/og/{slug}.jpg` (12) + `public/og/index.jpg` (1).
+- **Image reference:** `BaseLayout.astro` default is `og/index.jpg`; `[slug].astro` passes `og/{page.slug}.jpg`.
+- **Accent colors:** Inlined from `ACCENT_HEX` in the script (same values as `src/data/accents.mjs`).
+- **SVG text:** Uses `font-family="system-ui,-apple-system,sans-serif"`; `&amp;` entities in JSON must remain un-decoded for valid XML.
+
+## Build pipeline
+- **Prebuild:** `node scripts/gen-og-images.mjs` → generates 13 JPGs in `public/og/`.
+- **Build:** `pnpm astro build` → copies `public/` to `dist/`, builds all static routes, generates sitemap.
+- **Output:** 13 HTML pages + sitemap-index.xml + og/ JPGs in `dist/`.
+- **Dev:** `pnpm astro dev` (does NOT run prebuild; OG images must exist from a prior build).
 
 ## Key patterns
 - **Base URL:** Use `import.meta.env.BASE_URL` (not `Astro.base`, which is undefined in template expressions). Always normalize trailing slash: `link.replace(/\/$/, '')`.

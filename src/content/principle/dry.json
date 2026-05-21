@@ -1,6 +1,7 @@
 {
   "slug": "dry",
   "title": "DRY",
+  "description": "Cada pieza de conocimiento debe tener una única representación. El riesgo no es el copy-paste: es la divergencia silenciosa cuando algo cambia en un lugar pero no en los otros.",
   "accent": "dry",
   "position": 3,
   "width": "standard",

@@ -48,7 +48,27 @@ const rfPhases = [
 ];
 ---
 
-<BaseLayout title="Índice — Principios de Diseño de Software" accent="index">
+<BaseLayout
+	title="Principios de Diseño de Software — 12 principios, 4 fases, una guía de referencia"
+	description="Guía de referencia de 12 principios de diseño de software organizados por orden de aplicación: desde mindset (KISS, YAGNI, DRY) hasta arquitectura (Screaming, Clean, Hexagonal). Con ejemplos de código y reglas prácticas."
+	accent="index"
+	image="og/index.jpg"
+	canonicalURL="https://principles.harness.ar/"
+	type="website"
+	jsonLd={{
+		'@context': 'https://schema.org',
+		'@type': 'WebSite',
+		name: 'Principios de Diseño de Software',
+		url: 'https://principles.harness.ar/',
+		description: 'Guía de referencia de 12 principios de diseño de software organizados por orden de aplicación en el ciclo de vida de un proyecto.',
+		inLanguage: 'es',
+		author: {
+			'@type': 'Person',
+			name: 'Gustavo Adrián Salvini',
+			url: 'https://github.com/guspatagonico',
+		},
+	}}
+>
 	<SiteNav position="top" prevPage={null} nextPage={firstPage} posLabel="" isFirstPage={false} />
 
 	<header class="index-header">

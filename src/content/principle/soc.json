@@ -1,6 +1,7 @@
 {
   "slug": "soc",
   "title": "SoC",
+  "description": "Cada unidad de código debería ocuparse de una sola preocupación. Separá el qué del cómo del cuándo. Es el principio más fundamental del diseño de software.",
   "accent": "soc",
   "position": 5,
   "width": "standard",

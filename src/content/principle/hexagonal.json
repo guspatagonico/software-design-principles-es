@@ -1,6 +1,7 @@
 {
   "slug": "hexagonal",
   "title": "Hexagonal",
+  "description": "El dominio en el centro, el mundo afuera. Define puertos (interfaces) y conecta el exterior con adaptadores intercambiables. El dominio no sabe nada de infraestructura.",
   "accent": "hexagonal",
   "position": 12,
   "width": "wide",

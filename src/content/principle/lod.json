@@ -1,6 +1,7 @@
 {
   "slug": "lod",
   "title": "Law of Demeter",
+  "description": "Hablá solo con tus amigos directos. No navegues a través de la estructura interna de otros objetos. Cada objeto debería saber lo menos posible sobre los demás.",
   "accent": "lod",
   "position": 7,
   "width": "standard",

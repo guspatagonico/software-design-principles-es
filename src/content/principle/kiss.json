@@ -1,6 +1,7 @@
 {
   "slug": "kiss",
   "title": "KISS — Keep It Simple, Stupid",
+  "description": "La solución más simple que funciona es casi siempre la correcta. El código que no existe no puede tener bugs. El freno natural contra la sobreingeniería antes de que empiece.",
   "accent": "kiss",
   "position": 1,
   "width": "standard",

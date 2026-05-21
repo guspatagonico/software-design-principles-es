@@ -1,6 +1,7 @@
 {
   "slug": "screaming-architecture",
   "title": "Screaming",
+  "description": "La estructura de carpetas de un proyecto debería gritar qué hace, no qué framework usa. El dominio manda; la tecnología sirve.",
   "accent": "screaming-architecture",
   "position": 10,
   "width": "standard",

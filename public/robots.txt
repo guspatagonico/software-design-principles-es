@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://principles.harness.ar/sitemap-index.xml
