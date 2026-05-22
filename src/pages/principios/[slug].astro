@@ -31,6 +31,9 @@ const normalizePreIndentation = (html) => html.replace(/<pre>([\s\S]*?)<\/pre>/g
 	});
 	return `<pre>${normalizedBody}</pre>`;
 });
+
+const attachSoCTabBehavior = page.slug === 'soc';
+const attachPkgTabBehavior = page.slug === 'pkg';
 ---
 
 <BaseLayout
@@ -99,6 +102,42 @@ const normalizePreIndentation = (html) => html.replace(/<pre>([\s\S]*?)<\/pre>/g
 	</header>
 
 	<TabNav tabs={page.tabs} />
+	{attachSoCTabBehavior && (
+		<script is:inline>
+			{`
+				(function () {
+					const syncSocCards = () => {
+						document.querySelectorAll('.arch-card').forEach(card => {
+							const isExpanded = card.classList.contains('expanded');
+							card.setAttribute('aria-expanded', isExpanded ? 'true' : 'false');
+						});
+					};
+
+					document.addEventListener('click', event => {
+						const card = event.target.closest('.arch-card');
+						if (!card) return;
+						card.classList.toggle('expanded');
+						syncSocCards();
+					});
+
+					syncSocCards();
+				})();
+			`}
+		</script>
+	)}
+	{attachPkgTabBehavior && (
+		<script is:inline>
+			{`
+				(function () {
+					document.addEventListener('click', event => {
+						const card = event.target.closest('.principle-card');
+						if (!card) return;
+						card.classList.toggle('expanded');
+					});
+				})();
+			`}
+		</script>
+	)}
 
 	<main>
 		{page.tabs.map((tab, i) => {
