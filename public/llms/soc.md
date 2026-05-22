@@ -10,7 +10,7 @@ Cada unidad de código debería ocuparse de una sola preocupación. Separá el q
 
 Una preocupación, un lugar
 
-SoC dice que cada módulo, clase o función debería tener **una única preocupación**: una dimensión del problema que resuelve. Una "preocupación" es cualquier aspecto del sistema que tiene razones propias para cambiar —la lógica de negocio, la presentación, el acceso a datos, la orquestación.
+SoC dice que cada módulo, clase o función debería tener **una única preocupación**: una dimensión del problema que resuelve. Una "preocupación" es cualquier aspecto del sistema que tiene razones propias para cambiar - la lógica de negocio, la presentación, el acceso a datos, la orquestación.
 
 Es el principio más fundamental del diseño de software. SRP de SOLID es SoC aplicado a clases. Los principios de cohesión de paquetes son SoC aplicado a módulos. MVC, Clean Architecture y Hexagonal son SoC aplicado a la arquitectura entera.
 
@@ -73,28 +73,28 @@ El problema visible antes de volverse invisible
 
 Las violaciones de SoC en el código son fáciles de detectar cuando son nuevas y **muy difíciles de ver cuando llevan meses** acumulándose. Lo que empieza como "agrego esto acá para que sea más rápido" termina siendo un sistema donde nada se puede cambiar de forma aislada.
 
-Viola SoC — todo mezclado
+Viola SoC - todo mezclado
 
 ```js
 // ruta HTTP que hace de todo
 app.post('/checkout', async (req, res) => {
-  // validación
-  if (!req.body.items?.length)
-    return res.status(400).json(...)
+ // validación
+ if (!req.body.items?.length)
+ return res.status(400).json(...)
 
-  // lógica de negocio
-  const total = req.body.items
-    .reduce((s,i) => s + i.price, 0)
-  const tax = total * 0.21
+ // lógica de negocio
+ const total = req.body.items
+.reduce((s,i) => s + i.price, 0)
+ const tax = total * 0.21
 
-  // acceso a datos
-  await db.query(
-    'INSERT INTO orders ...', [...]
-  )
-  // envío de email
-  await sendgrid.send({ to: ... })
+ // acceso a datos
+ await db.query(
+ 'INSERT INTO orders...', [...]
+)
+ // envío de email
+ await sendgrid.send({ to:... })
 
-  res.json({ ok: true })
+ res.json({ ok: true })
 })
 ```
 
@@ -103,33 +103,33 @@ Respeta SoC
 ```js
 // ruta: solo orquesta (cuándo)
 app.post('/checkout', async (req, res) => {
-  const result = await
-    checkoutService.process(req.body)
-  res.json(result)
+ const result = await
+ checkoutService.process(req.body)
+ res.json(result)
 })
 
 // servicio: orquesta pasos (cuándo)
 async process(data) {
-  const order = Order.create(data) // qué
-  await orderRepo.save(order)    // cómo
-  await mailer.sendConfirm(order)// cómo
-  return order
+ const order = Order.create(data) // qué
+ await orderRepo.save(order)  // cómo
+ await mailer.sendConfirm(order)// cómo
+ return order
 }
 ```
 
-Viola SoC — lógica en la vista
+Viola SoC - lógica en la vista
 
 ```js
 // componente React con
 // lógica de negocio dentro
 function OrderSummary({ items }) {
-  // esto no debería estar acá
-  const tax = items
-    .reduce((s,i) => s + i.price, 0)
-    * 0.21
-  const free = total > 500
+ // esto no debería estar acá
+ const tax = items
+.reduce((s,i) => s + i.price, 0)
+ * 0.21
+ const free = total > 500
 
-  return <div>{tax}</div>
+ return <div>{tax}</div>
 }
 ```
 
@@ -138,15 +138,15 @@ Respeta SoC
 ```js
 // dominio: calcula (qué)
 class Order {
-  calcTax()      { return ... }
-  hasFreeShip()  { return ... }
+ calcTax() { return... }
+ hasFreeShip() { return... }
 }
 
 // vista: solo presenta (cómo)
 function OrderSummary({ order }) {
-  return <div>
-    {order.calcTax()}
-  </div>
+ return <div>
+ {order.calcTax()}
+ </div>
 }
 ```
 
@@ -192,7 +192,7 @@ Presentación · Negocio · Datos
 
 Organiza el sistema en capas horizontales donde **cada capa solo depende de la capa inmediatamente inferior**. La capa de presentación no sabe nada de base de datos; la capa de datos no sabe nada de la interfaz de usuario.
 
-Presentación UI, API, CLI — entrada/salida
+Presentación UI, API, CLI - entrada/salida
 
 ↓
 
@@ -212,7 +212,7 @@ El dominio en el centro, la infraestructura afuera
 
 ▾
 
-Alistair Cockburn (2005). El **dominio vive en el centro** y no depende de nada externo. Define _puertos_ —interfaces— que describen lo que necesita. Los _adaptadores_ implementan esas interfaces conectando con el mundo real: base de datos, HTTP, email, eventos.
+Alistair Cockburn (2005). El **dominio vive en el centro** y no depende de nada externo. Define _puertos_ (interfaces) que describen lo que necesita. Los _adaptadores_ implementan esas interfaces conectando con el mundo real: base de datos, HTTP, email, eventos.
 
 Adaptadores externos HTTP, BD, queues, servicios externos
 
@@ -234,7 +234,7 @@ La regla de dependencia: siempre hacia adentro
 
 ▾
 
-Robert C. Martin (2012). Formaliza Hexagonal con una regla estricta: **las dependencias solo pueden apuntar hacia adentro**. El núcleo —entidades y casos de uso— no importa nada del exterior. Los frameworks, la base de datos y la UI son detalles que se enchufan desde afuera.
+Robert C. Martin (2012). Formaliza Hexagonal con una regla estricta: **las dependencias solo pueden apuntar hacia adentro**. El núcleo (entidades y casos de uso) no importa nada del exterior. Los frameworks, la base de datos y la UI son detalles que se enchufan desde afuera.
 
 El beneficio principal: podés reemplazar el framework web, la base de datos o la UI **sin tocar una línea de lógica de negocio**. Los casos de uso son testeables con tests unitarios puros, sin mocks de infraestructura.
 
@@ -270,4 +270,4 @@ Las violaciones de SoC raramente son decisiones conscientes. Son **atajos razona
     
 -   🌀
     
-    **Separación por capa técnica en lugar de por preocupación** Una carpeta `services/` con 40 archivos que mezclan lógica de órdenes, de usuarios, de pagos y de notificaciones no es separación de preocupaciones —es separación de tipos de archivo. Una preocupación verdadera es "todo lo relacionado con el ciclo de vida de un pedido", no "todos los archivos que son services".
+    **Separación por capa técnica en lugar de por preocupación** Una carpeta `services/` con 40 archivos que mezclan lógica de órdenes, de usuarios, de pagos y de notificaciones no es separación de preocupaciones - es separación de tipos de archivo. Una preocupación verdadera es "todo lo relacionado con el ciclo de vida de un pedido", no "todos los archivos que son services".

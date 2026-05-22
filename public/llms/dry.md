@@ -24,22 +24,22 @@ El problema real no es el copy-paste, es la sincronización
 
 La duplicación de código es un síntoma. El problema de fondo es que cuando la lógica cambia en un lugar pero no en el otro, el sistema queda en un **estado inconsistente que es difícil de detectar**.
 
-Viola DRY — lógica repetida
+Viola DRY - lógica repetida
 
 ```js
 function createOrder(items) {
-  const total = items
-    .reduce((s, i) => s + i.price, 0)
-  const tax = total * 0.21
-  return { total, tax }
+ const total = items
+.reduce((s, i) => s + i.price, 0)
+ const tax = total * 0.21
+ return { total, tax }
 }
 
 function createQuote(items) {
-  const total = items
-    .reduce((s, i) => s + i.price, 0)
-  const tax = total * 0.21
-  // IVA duplicado en dos lugares
-  return { total, tax, valid: true }
+ const total = items
+.reduce((s, i) => s + i.price, 0)
+ const tax = total * 0.21
+ // IVA duplicado en dos lugares
+ return { total, tax, valid: true }
 }
 ```
 
@@ -49,20 +49,20 @@ Respeta DRY
 const TAX_RATE = 0.21
 
 function calcTotals(items) {
-  const total = items
-    .reduce((s, i) => s + i.price, 0)
-  return { total, tax: total * TAX_RATE }
+ const total = items
+.reduce((s, i) => s + i.price, 0)
+ return { total, tax: total * TAX_RATE }
 }
 
 function createOrder(items) {
-  return calcTotals(items)
+ return calcTotals(items)
 }
 function createQuote(items) {
-  return { ...calcTotals(items), valid: true }
+ return {...calcTotals(items), valid: true }
 }
 ```
 
-Viola DRY — schema duplicado
+Viola DRY - schema duplicado
 
 ```
 // En la BD (migration)
@@ -83,7 +83,7 @@ Respeta DRY
 ```js
 // Una fuente de verdad
 const USER_SCHEMA = {
-  name: { maxLength: 100 }
+ name: { maxLength: 100 }
 }
 
 // Backend lee de ahí
@@ -102,7 +102,7 @@ DRY, WET y DAMP
 
 No toda duplicación es mala
 
-DRY tiene dos opuestos conocidos. **WET** (Write Everything Twice) es la violación directa. **DAMP** (Descriptive And Meaningful Phrases) es una alternativa deliberada para contextos donde la claridad importa más que la deduplicación —especialmente en tests.
+DRY tiene dos opuestos conocidos. **WET** (Write Everything Twice) es la violación directa. **DAMP** (Descriptive And Meaningful Phrases) es una alternativa deliberada para contextos donde la claridad importa más que la deduplicación - especialmente en tests.
 
 DRY
 
@@ -122,37 +122,37 @@ Descriptive And Meaningful Phrases
 
 Duplicación aceptada cuando hace el código más legible. _Especialmente en tests:_ un test debe poder leerse sin saltar a helpers externos. La claridad tiene más valor que la deduplicación.
 
-DRY extremo en tests — problema
+DRY extremo en tests - problema
 
 ```js
 // Helper compartido, "DRY"
 function makeUser(overrides) {
-  return { id: 1, role: 'user', ...overrides }
+ return { id: 1, role: 'user',...overrides }
 }
 
 test('admin can delete', () => {
-  const u = makeUser({ role: 'admin' })
-  // ¿Qué tiene este usuario?
-  // Hay que ir a leer makeUser()
+ const u = makeUser({ role: 'admin' })
+ // ¿Qué tiene este usuario?
+ // Hay que ir a leer makeUser()
 })
 ```
 
-DAMP en tests — preferible
+DAMP en tests - preferible
 
 ```js
 test('admin can delete', () => {
-  const user = {
-    id: 42,
-    role: 'admin',
-    active: true
-  }
-  // Todo el contexto está acá,
-  // el test se lee solo ✓
-  expect(canDelete(user)).toBe(true)
+ const user = {
+ id: 42,
+ role: 'admin',
+ active: true
+ }
+ // Todo el contexto está acá,
+ // el test se lee solo ✓
+ expect(canDelete(user)).toBe(true)
 })
 ```
 
-> **TIP:** **Regla práctica** Usá DRY en código de producción: lógica de negocio, validaciones, constantes, esquemas. Usá DAMP en tests: cada test debería ser autocontenido y legible sin contexto externo. Los tests son documentación —la claridad es más importante que evitar la repetición.
+> **TIP:** **Regla práctica** Usá DRY en código de producción: lógica de negocio, validaciones, constantes, esquemas. Usá DAMP en tests: cada test debería ser autocontenido y legible sin contexto externo. Los tests son documentación - la claridad es más importante que evitar la repetición.
 
 ## Trampas
 
@@ -172,7 +172,7 @@ El error más común con DRY es **abstraer demasiado temprano** basándose en si
     
 -   🌀
     
-    **La abstracción prematura por la regla de tres** Hay una heurística popular que dice "cuando copias algo por tercera vez, abstraelo". Es razonable como punto de partida, pero el número de copias no determina si algo merece una abstracción —lo determina si representan el mismo conocimiento o no.
+    **La abstracción prematura por la regla de tres** Hay una heurística popular que dice "cuando copias algo por tercera vez, abstraelo". Es razonable como punto de partida, pero el número de copias no determina si algo merece una abstracción - lo determina si representan el mismo conocimiento o no.
     
 -   🧩
     

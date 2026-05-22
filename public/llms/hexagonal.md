@@ -1,6 +1,6 @@
 # Hexagonal
 
-> El dominio vive en el centro. Define puertos —interfaces— que describen lo que necesita. El mundo exterior conecta a través de adaptadores que implementan esos puertos. El dominio no sabe nada de afuera.
+> El dominio vive en el centro. Define puertos (interfaces) que describen lo que necesita. El mundo exterior conecta a través de adaptadores que implementan esos puertos. El dominio no sabe nada de afuera.
 
 El dominio en el centro, el mundo afuera. Define puertos (interfaces) y conecta el exterior con adaptadores intercambiables. El dominio no sabe nada de infraestructura.
 
@@ -10,12 +10,12 @@ El dominio en el centro, el mundo afuera. Define puertos (interfaces) y conecta 
 
 El dominio en el centro · El mundo afuera
 
-Alistair Cockburn la formuló en 2005. La idea central: la aplicación debería ser igualmente usable por **cualquier medio externo** —HTTP, CLI, tests, eventos— y debería poder funcionar en **aislamiento completo** de bases de datos, servicios externos y frameworks. Todo eso se logra con puertos y adaptadores.
+Alistair Cockburn la formuló en 2005. La idea central: la aplicación debería ser igualmente usable por **cualquier medio externo** (HTTP, CLI, tests, eventos) y debería poder funcionar en **aislamiento completo** de bases de datos, servicios externos y frameworks. Todo eso se logra con puertos y adaptadores.
 
 *[Diagrama: representación visual del concepto]*
 
-> 🔌 El tomacorriente de tu casa no sabe qué enchufás en él —un teléfono, una lámpara o un cargador de laptop. Define un contrato (forma, voltaje) y cualquier dispositivo que lo cumpla funciona. _El dominio define los puertos; los adaptadores son los enchufes que conectan el mundo exterior._
-> **TIP:** **El nombre "hexagonal" es arbitrario** Cockburn eligió el hexágono como forma porque tiene suficientes lados para dibujar varios puertos. No hay nada mágico en el número seis. Por eso el nombre más descriptivo es **Ports and Adapters** —es lo que realmente importa en el patrón.
+> 🔌 El tomacorriente de tu casa no sabe qué enchufás en él - un teléfono, una lámpara o un cargador de laptop. Define un contrato (forma, voltaje) y cualquier dispositivo que lo cumpla funciona. _El dominio define los puertos; los adaptadores son los enchufes que conectan el mundo exterior._
+> **TIP:** **El nombre "hexagonal" es arbitrario** Cockburn eligió el hexágono como forma porque tiene suficientes lados para dibujar varios puertos. No hay nada mágico en el número seis. Por eso el nombre más descriptivo es **Ports and Adapters** - es lo que realmente importa en el patrón.
 
 ## Los puertos
 
@@ -23,7 +23,7 @@ Los puertos
 
 Las interfaces que el dominio define para comunicarse con el exterior
 
-Un **puerto** es simplemente una interfaz —un contrato— definida por el dominio. Describe lo que el dominio necesita o lo que el dominio ofrece, sin saber nada sobre quién lo implementa. Hay dos tipos con roles completamente distintos.
+Un **puerto** es simplemente una interfaz (un contrato) definida por el dominio. Describe lo que el dominio necesita o lo que el dominio ofrece, sin saber nada sobre quién lo implementa. Hay dos tipos con roles completamente distintos.
 
 Driving ports · Puertos primarios
 
@@ -49,8 +49,8 @@ IMailer → sendConfirmation(order)
 
 IPaymentGateway → charge(amount, card)
 
-> 🎭 Los puertos _driving_ son como el escenario de un teatro: definen qué actuaciones son posibles. Los puertos _driven_ son como la tramoya: el escenario no sabe si hay humanos moviendo los telones o un sistema automático —solo sabe que cuando los pide, aparecen.
-> **TIP:** **¿Dónde viven los puertos?** Los puertos —ambos tipos— viven _dentro del dominio_. Son interfaces definidas por el dominio para sus propias necesidades. Los adaptadores viven afuera e implementan esas interfaces. Esto garantiza que la dependencia siempre apunta hacia adentro: la infraestructura depende del dominio, nunca al revés.
+> 🎭 Los puertos _driving_ son como el escenario de un teatro: definen qué actuaciones son posibles. Los puertos _driven_ son como la tramoya: el escenario no sabe si hay humanos moviendo los telones o un sistema automático - solo sabe que cuando los pide, aparecen.
+> **TIP:** **¿Dónde viven los puertos?** Los puertos (ambos tipos) viven _dentro del dominio_. Son interfaces definidas por el dominio para sus propias necesidades. Los adaptadores viven afuera e implementan esas interfaces. Esto garantiza que la dependencia siempre apunta hacia adentro: la infraestructura depende del dominio, nunca al revés.
 
 ## Los adaptadores
 
@@ -60,7 +60,7 @@ Los traductores entre el dominio y el mundo exterior
 
 Un **adaptador** es la implementación concreta de un puerto. Traduce entre el lenguaje del dominio y el lenguaje de la tecnología específica que conecta. Es intercambiable: podés reemplazar un adaptador por otro sin tocar el dominio.
 
-Adaptadores driving — conectan el exterior con el dominio
+Adaptadores driving - conectan el exterior con el dominio
 
 HTTP Controller
 
@@ -86,7 +86,7 @@ Event / Queue Consumer
 
 Un mensaje de Kafka o SQS dispara un caso de uso. El adaptador deserializa el mensaje y llama al puerto driving. _El dominio no sabe que hay una queue._
 
-Adaptadores driven — conectan el dominio con servicios externos
+Adaptadores driven - conectan el dominio con servicios externos
 
 PostgreSQL Adapter
 
@@ -127,13 +127,13 @@ Puerto driven (dentro del dominio)
 // Vive en el dominio. No importa nada.
 
 interface IOrderRepository {
-  save(order: Order): Promise<void>
-  findById(id: string): Promise<Order | null>
-  listByStatus(s: string): Promise<Order[]>
+ save(order: Order): Promise<void>
+ findById(id: string): Promise<Order | null>
+ listByStatus(s: string): Promise<Order[]>
 }
 
 interface IMailer {
-  sendConfirmation(order: Order): Promise<void>
+ sendConfirmation(order: Order): Promise<void>
 }
 ```
 
@@ -143,17 +143,17 @@ Caso de uso (usa los puertos)
 // src/orders/CreateOrderUseCase.ts
 
 class CreateOrderUseCase {
-  constructor(
-    private repo:   IOrderRepository,
-    private mailer: IMailer
-  ) {}
+ constructor(
+ private repo: IOrderRepository,
+ private mailer: IMailer
+) {}
 
-  async execute(data: CreateOrderDTO) {
-    const order = Order.create(data)
-    await this.repo.save(order)
-    await this.mailer.sendConfirmation(order)
-    return order
-  }
+ async execute(data: CreateOrderDTO) {
+ const order = Order.create(data)
+ await this.repo.save(order)
+ await this.mailer.sendConfirmation(order)
+ return order
+ }
 }
 ```
 
@@ -164,15 +164,15 @@ Adaptador driven (implementa el puerto)
 import { db } from './connection'
 
 class PostgresOrderRepository
-  implements IOrderRepository {
+ implements IOrderRepository {
 
-  async save(order: Order) {
-    await db.query(
-      `INSERT INTO orders ...`,
-      [order.id, order.total]
-    )
-  }
-  // ... findById, listByStatus
+ async save(order: Order) {
+ await db.query(
+ `INSERT INTO orders...`,
+ [order.id, order.total]
+)
+ }
+ //... findById, listByStatus
 }
 ```
 
@@ -183,16 +183,16 @@ Composición (conecta todo)
 // El único lugar donde se conocen
 // las implementaciones concretas
 
-const repo   = new PostgresOrderRepository()
+const repo = new PostgresOrderRepository()
 const mailer = new SendGridMailer()
 const useCase = new CreateOrderUseCase(
-  repo, mailer
+ repo, mailer
 )
 
 // En tests:
 const useCase = new CreateOrderUseCase(
-  new InMemoryOrderRepo(),
-  new FakeMailer()
+ new InMemoryOrderRepo(),
+ new FakeMailer()
 )
 ```
 
@@ -204,7 +204,7 @@ Trampas comunes
 
 Cuando los puertos se convierten en tuberías vacías
 
-Hexagonal Architecture puede aplicarse mecánicamente sin captar el espíritu. El resultado es una arquitectura que tiene la forma correcta pero no los beneficios —capas adicionales sin valor real.
+Hexagonal Architecture puede aplicarse mecánicamente sin captar el espíritu. El resultado es una arquitectura que tiene la forma correcta pero no los beneficios - capas adicionales sin valor real.
 
 -   🪞
     
@@ -220,7 +220,7 @@ Hexagonal Architecture puede aplicarse mecánicamente sin captar el espíritu. E
     
 -   💾
     
-    **Adaptadores driven que transforman la forma del dominio**Si el repositorio de PostgreSQL retorna filas SQL y quien consume decide cómo mapearlas a entidades, el mapping está en el lugar equivocado. El adaptador driven es responsable de convertir los datos del storage al formato de la entidad de dominio —y de volver a convertir al guardar.
+    **Adaptadores driven que transforman la forma del dominio**Si el repositorio de PostgreSQL retorna filas SQL y quien consume decide cómo mapearlas a entidades, el mapping está en el lugar equivocado. El adaptador driven es responsable de convertir los datos del storage al formato de la entidad de dominio - y de volver a convertir al guardar.
     
 -   🏗️
     

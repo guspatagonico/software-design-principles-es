@@ -10,7 +10,7 @@ Ocultá las decisiones de diseño que probablemente van a cambiar. Lo que no es 
 
 Lo que no ves no te puede romper
 
-Information Hiding dice que cada módulo debería **ocultar sus decisiones de diseño internas** detrás de una interfaz estable. Los detalles de implementación —cómo almacena datos, qué algoritmo usa, qué estructura interna tiene— no deberían ser visibles para nadie más.
+Information Hiding dice que cada módulo debería **ocultar sus decisiones de diseño internas** detrás de una interfaz estable. Los detalles de implementación (cómo almacena datos, qué algoritmo usa, qué estructura interna tiene) no deberían ser visibles para nadie más.
 
 El principio lo formuló **David Parnas en 1972** como criterio para modularizar sistemas: cada módulo debería ser responsable de ocultar una _decisión de diseño que es probable que cambie_. Si algo cambia, solo ese módulo debería verse afectado.
 
@@ -44,7 +44,7 @@ Lo que el mundo ve
 
 El resto no existe para el cliente. Cambiar la implementación interna no le afecta.
 
-> ☕ Cuando usás un café de cápsula no sabés qué temperatura exacta calienta el agua, qué presión de extracción usa ni qué materiales tienen los conductos internos. Usás la interfaz —botón, taza, cápsula— y el resto está oculto. _Si el fabricante cambia el sistema de calentamiento en la próxima versión, vos seguís usando el mismo botón._
+> ☕ Cuando usás un café de cápsula no sabés qué temperatura exacta calienta el agua, qué presión de extracción usa ni qué materiales tienen los conductos internos. Usás la interfaz (botón, taza, cápsula) y el resto está oculto. _Si el fabricante cambia el sistema de calentamiento en la próxima versión, vos seguís usando el mismo botón._
 > 🔑 Information Hiding no es solo sobre `private` y `public`. Es una _decisión de diseño_: qué aspectos del módulo son su contrato estable con el mundo, y cuáles son detalles que pueden cambiar libremente sin romper a nadie.
 > **TIP:** **La pregunta de Parnas** Al diseñar un módulo, preguntate: _"¿Qué decisiones de diseño podrían cambiar en el futuro?"_ Esas son exactamente las cosas que deberías ocultar. Lo que exponés es tu contrato: debería ser estable. Lo que ocultás son tus detalles de implementación: pueden cambiar libremente.
 
@@ -54,7 +54,7 @@ El resto no existe para el cliente. Cambiar la implementación interna no le afe
 
 Las decisiones que probablemente van a cambiar
 
-Parnas fue muy específico: lo que hay que ocultar son las **decisiones de diseño que son propensas a cambiar**. No todo lo interno merece ocultarse por el principio en sí —se oculta lo que, si estuviera expuesto, crearía acoplamiento que hace costosos los cambios futuros.
+Parnas fue muy específico: lo que hay que ocultar son las **decisiones de diseño que son propensas a cambiar**. No todo lo interno merece ocultarse por el principio en sí - se oculta lo que, si estuviera expuesto, crearía acoplamiento que hace costosos los cambios futuros.
 
 🗄️ Mecanismo de almacenamiento
 
@@ -94,7 +94,7 @@ Los campos internos de un objeto que forman su estado. Exponerlos directamente p
 
 ✗ exponer order.status = 'cancelled'
 
-✓ ocultar order.cancel() — valida y cambia
+✓ ocultar order.cancel() - valida y cambia
 
 🔧 Configuración y parámetros técnicos
 
@@ -114,70 +114,70 @@ Diseñar interfaces, no implementaciones
 
 Information Hiding se aplica en cada capa: en el modificador de acceso de un campo, en el diseño de una API, en la estructura de un módulo. La pregunta siempre es la misma: **¿quién necesita saber esto y por qué?**
 
-Viola IH — estado expuesto
+Viola IH - estado expuesto
 
 ```
 class ShoppingCart {
-  items = []       // público 😬
-  total = 0       // público 😬
-  discount = 0    // público 😬
+ items = [] // público 😬
+ total = 0 // público 😬
+ discount = 0 // público 😬
 }
 
 // El cliente puede hacer:
 cart.items.push({ price: -999 })
-cart.total = 0  // bypass gratis
+cart.total = 0 // bypass gratis
 ```
 
-Respeta IH — estado encapsulado
+Respeta IH - estado encapsulado
 
 ```
 class ShoppingCart {
-  #items = []     // privado ✓
-  #discount = 0   // privado ✓
+ #items = [] // privado ✓
+ #discount = 0 // privado ✓
 
-  addItem(item) {
-    this.#items.push(item)
-  }
-  getTotal() {
-    return this.#items
-      .reduce((s,i)=>s+i.price,0)
-      * (1 - this.#discount)
-  }
+ addItem(item) {
+ this.#items.push(item)
+ }
+ getTotal() {
+ return this.#items
+.reduce((s,i)=>s+i.price,0)
+ * (1 - this.#discount)
+ }
 }
 ```
 
-Viola IH — implementación filtrada
+Viola IH - implementación filtrada
 
 ```js
 // El módulo expone
 // detalles de SQL
 async function getOrders(filters) {
-  return db.query(`
-    SELECT o.*, c.name, c.email
-    FROM orders o
-    JOIN customers c ON c.id = o.cid
-    WHERE o.status = $1
-  `, [filters.status])
+ return db.query(`
+ SELECT o.*, c.name, c.email
+ FROM orders o
+ JOIN customers c ON c.id = o.cid
+ WHERE o.status = $1
+ `, [filters.status])
 }
 // el llamador recibe filas crudas
 // y sabe del esquema de BD 😬
 ```
 
-Respeta IH — interfaz de dominio
+Respeta IH - interfaz de dominio
 
 ```js
 // El módulo retorna objetos
 // de dominio, no filas SQL
 async function getOrders(filters) {
-  const rows = await db.query(...)
-  return rows.map(toOrder)
+ const rows = await db.query(...)
+ return rows.map(toOrder)
 }
 
 // toOrder() es privado al módulo
 // El esquema SQL no se filtra ✓
 ```
 
-Modificadores de visibilidad — cuándo usar cada uno
+Modificadores de visibilidad - cuándo usar cada uno
 
 Visibilidad
 
@@ -195,7 +195,7 @@ protected
 
 La clase y sus subclases
 
-Comportamiento que las subclases necesitan extender pero que no es parte del contrato público. Usarlo con criterio —es una forma de acoplamiento con la jerarquía.
+Comportamiento que las subclases necesitan extender pero que no es parte del contrato público. Usarlo con criterio - es una forma de acoplamiento con la jerarquía.
 
 internal / package
 
@@ -215,7 +215,7 @@ El contrato estable del módulo. Solo lo que el cliente _necesita_ para usar el 
 
 Encapsulación vs Information Hiding
 
-No son lo mismo — aunque van siempre juntos
+No son lo mismo - aunque van siempre juntos
 
 Son conceptos distintos que se confunden habitualmente. **Encapsulación** es el mecanismo del lenguaje para agrupar datos y comportamiento. **Information Hiding** es el principio de diseño que decide qué ocultar y por qué. La encapsulación es la herramienta; IH es la intención.
 
@@ -223,7 +223,7 @@ Encapsulación
 
 El mecanismo
 
-Agrupar datos y las operaciones que los manejan en una misma unidad —la clase. Es una **característica del lenguaje**: clases, objetos, métodos, campos.  
+Agrupar datos y las operaciones que los manejan en una misma unidad - la clase. Es una **característica del lenguaje**: clases, objetos, métodos, campos.  
   
 La encapsulación te _da la capacidad_ de ocultar cosas. No te dice qué ocultar ni por qué. Podés tener encapsulación perfecta (todo en clases) y violar completamente Information Hiding (todo público).
 
@@ -235,7 +235,7 @@ El principio
 
 Decidir conscientemente qué aspectos del módulo son públicos y cuáles son detalles de implementación que deben estar ocultos. Es una **decisión de diseño**.  
   
-IH te dice _qué_ ocultar y _por qué_: las decisiones que pueden cambiar. Puede aplicarse incluso sin POO —en módulos, en APIs, en interfaces de microservicios.
+IH te dice _qué_ ocultar y _por qué_: las decisiones que pueden cambiar. Puede aplicarse incluso sin POO - en módulos, en APIs, en interfaces de microservicios.
 
 Diseño → Contratos estables, detalles variables ocultos
 
@@ -257,7 +257,7 @@ El objetivo real
 
 Clase bien diseñada: los campos son privados, la interfaz pública es mínima y estable. _El mecanismo sirve al principio._
 
-> **TIP:** **La distinción en una sola oración** Encapsulación te permite poner un candado en la puerta. Information Hiding te dice qué poner detrás de ese candado —y más importante: _por qué_.
+> **TIP:** **La distinción en una sola oración** Encapsulación te permite poner un candado en la puerta. Information Hiding te dice qué poner detrás de ese candado - y más importante: _por qué_.
 
 ## Trampas
 
@@ -265,11 +265,11 @@ Trampas comunes
 
 Cuando la interfaz pública filtra más de lo que debería
 
-Las violaciones de Information Hiding se llaman **"leaky abstractions"** —abstracciones que filtran detalles de implementación hacia afuera. El código que depende de esos detalles se rompe cuando la implementación cambia.
+Las violaciones de Information Hiding se llaman **"leaky abstractions"** - abstracciones que filtran detalles de implementación hacia afuera. El código que depende de esos detalles se rompe cuando la implementación cambia.
 
 -   🔓
     
-    **Getters y setters para todos los campos** Agregar automáticamente `getX()` y `setX()` para cada campo de la clase no es Information Hiding —es exponer todos los campos con nombres más largos. Un setter que solo asigna un valor hace que el campo sea efectivamente público. Los métodos deberían exponer _comportamiento_, no acceso al estado interno.
+    **Getters y setters para todos los campos** Agregar automáticamente `getX()` y `setX()` para cada campo de la clase no es Information Hiding - es exponer todos los campos con nombres más largos. Un setter que solo asigna un valor hace que el campo sea efectivamente público. Los métodos deberían exponer _comportamiento_, no acceso al estado interno.
     
 -   💉
     
@@ -292,4 +292,4 @@ Las violaciones de Information Hiding se llaman **"leaky abstractions"** —abst
     **Nombres que filtran la implementación** Métodos como `saveToPostgres()`, `fetchFromRedis()` o `serializeToJSON()` en la interfaz pública revelan detalles de implementación en el nombre. Si cambiás de Postgres a MongoDB, el nombre del método queda mentiroso. Los contratos públicos deberían hablar el lenguaje del dominio: `persist()`, `getFromCache()`, `serialize()`.
     
 
-> **TIP:** **El test del reemplazo libre** Si podés cambiar la implementación interna de un módulo —el algoritmo, la base de datos, la librería, la estructura de datos— sin que ningún código externo note la diferencia ni necesite modificarse, Information Hiding está bien aplicado. Si algún cliente se rompe por un cambio puramente interno, hay una abstracción con pérdidas.
+> **TIP:** **El test del reemplazo libre** Si podés cambiar la implementación interna de un módulo (el algoritmo, la base de datos, la librería, la estructura de datos) sin que ningún código externo note la diferencia ni necesite modificarse, Information Hiding está bien aplicado. Si algún cliente se rompe por un cambio puramente interno, hay una abstracción con pérdidas.

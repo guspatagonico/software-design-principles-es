@@ -1,6 +1,6 @@
 # Paquetes
 
-> Seis principios de Robert C. Martin que operan a nivel de módulos y paquetes enteros —la versión macro de SOLID. Determinan cómo agrupar clases y cómo controlar las dependencias entre grupos.
+> Seis principios de Robert C. Martin que operan a nivel de módulos y paquetes enteros - la versión macro de SOLID. Determinan cómo agrupar clases y cómo controlar las dependencias entre grupos.
 
 Seis principios para agrupar clases en paquetes y controlar dependencias entre módulos. La versión macro de SOLID: qué va junto y cómo se conectan los paquetes entre sí.
 
@@ -21,17 +21,17 @@ Principios de cohesión
 
 Responden a: _¿Qué clases van en el mismo paquete?_  
   
-REP — Reuse/Release Equivalence  
-CCP — Common Closure  
-CRP — Common Reuse
+REP (Reuse/Release Equivalence  
+CCP) Common Closure  
+CRP - Common Reuse
 
 Principios de acoplamiento
 
 Responden a: _¿Cómo se relacionan los paquetes?_  
   
-ADP — Acyclic Dependencies  
-SDP — Stable Dependencies  
-SAP — Stable Abstractions
+ADP (Acyclic Dependencies  
+SDP) Stable Dependencies  
+SAP - Stable Abstractions
 
 > **TIP:** **¿Por qué importan en un proyecto nuevo?** Ignorar estos principios al inicio no duele. Duele cuando el proyecto tiene seis meses: un cambio en un módulo rompe tres más, no podés testear nada de forma aislada, y cada release es un evento estresante. Estos principios evitan exactamente ese escenario.
 
@@ -41,7 +41,7 @@ Principios de cohesión
 
 ¿Qué clases van juntas en un paquete?
 
-Estos tres principios te ayudan a tomar la decisión más difícil del diseño modular: **qué código agrupa con qué otro código**. No hay una respuesta única —los tres principios están en tensión entre sí y reflejan distintas prioridades.
+Estos tres principios te ayudan a tomar la decisión más difícil del diseño modular: **qué código agrupa con qué otro código**. No hay una respuesta única - los tres principios están en tensión entre sí y reflejan distintas prioridades.
 
 Principios de cohesión 3 principios
 
@@ -61,10 +61,10 @@ Viola REP
 
 ```
 // paquete: utils
-parseDate()      // fechas
-sendEmail()      // emails
-calcTax()        // impuestos
-resizeImage()    // imágenes
+parseDate() // fechas
+sendEmail() // emails
+calcTax() // impuestos
+resizeImage() // imágenes
 // "utils" no es un concepto
 // nadie lo reutiliza completo
 ```
@@ -126,7 +126,7 @@ No forzar dependencias innecesarias
 
 ▾
 
-Las clases que **no se usan juntas no deberían estar en el mismo paquete**. Si dependés de un paquete, dependés de todo él —incluyendo las partes que no usás. Eso significa que cambios en cosas que no te interesan pueden romper tu build.
+Las clases que **no se usan juntas no deberían estar en el mismo paquete**. Si dependés de un paquete, dependés de todo él - incluyendo las partes que no usás. Eso significa que cambios en cosas que no te interesan pueden romper tu build.
 
 CRP es la contracara de CCP: mientras CCP agrupa lo que cambia junto, CRP separa lo que no se usa junto. La tensión entre ambos es normal y hay que gestionarla según las prioridades del proyecto.
 
@@ -157,7 +157,7 @@ Ciclo detectado
 ```
 orders → billing
 billing → users
-users → orders  ← ciclo 💥
+users → orders ← ciclo 💥
 
 // Para testear orders
 // necesitás billing y users
@@ -169,8 +169,8 @@ Sin ciclos
 
 ```
 orders → billing → users
-         ↓
-      payments
+ ↓
+ payments
 
 // Grafo acíclico dirigido (DAG)
 // Cada paquete se puede
@@ -187,7 +187,7 @@ Dependé de lo que es más estable que vos
 
 ▾
 
-Un paquete debería depender solo de paquetes **más estables que él mismo**. La estabilidad se mide por cuánto cuesta cambiar un paquete: un paquete del que dependen muchos otros es difícil de cambiar —es estable. Uno del que nadie depende es fácil de cambiar —es inestable.
+Un paquete debería depender solo de paquetes **más estables que él mismo**. La estabilidad se mide por cuánto cuesta cambiar un paquete: un paquete del que dependen muchos otros es difícil de cambiar (es estable. Uno del que nadie depende es fácil de cambiar) es inestable.
 
 Si un paquete volátil (que cambia seguido) depende de un paquete estable, está bien. Si un paquete estable depende de uno volátil, cualquier cambio en el volátil fuerza cambios en cascada en todo lo que depende del estable.
 
@@ -197,8 +197,8 @@ Viola SDP
 // core-domain (estable,
 // 10 paquetes dependen de él)
 // depende de:
-ui-components  ← cambia cada sprint
-feature-flags  ← cambia cada semana
+ui-components ← cambia cada sprint
+feature-flags ← cambia cada semana
 // Un cambio en UI rompe core 💥
 ```
 
@@ -207,8 +207,8 @@ Respeta SDP
 ```
 // core-domain (estable)
 // depende de:
-shared-types   ← muy estable
-base-errors    ← muy estable
+shared-types ← muy estable
+base-errors ← muy estable
 
 // ui-components (volátil)
 // depende de core-domain ✓
@@ -236,7 +236,7 @@ Los seis principios no siempre apuntan en la misma dirección
 
 Los tres principios de cohesión están **en tensión permanente** entre sí. No podés maximizar los tres a la vez; el diseño es una decisión sobre qué priorizar según el tipo de proyecto.
 
-> ⚖️ REP dice "agrupá lo que se reutiliza junto". CCP dice "agrupá lo que cambia junto". CRP dice "no agrupés lo que no se usa junto". _Un paquete perfecto según los tres principios no existe en la práctica —hay que elegir qué importa más._
+> ⚖️ REP dice "agrupá lo que se reutiliza junto". CCP dice "agrupá lo que cambia junto". CRP dice "no agrupés lo que no se usa junto". _Un paquete perfecto según los tres principios no existe en la práctica - hay que elegir qué importa más._
 
 Principio
 
@@ -318,7 +318,7 @@ Las violaciones de estos principios **no duelen al principio**. Se acumulan sile
     
 -   📐
     
-    **Organizar por capa técnica en lugar de por dominio** Una estructura `controllers / services / repositories` viola CCP: un cambio en la lógica de "órdenes" toca un archivo en cada una de las tres carpetas. Una estructura `orders / billing / users` —organizada por dominio— localiza los cambios.
+    **Organizar por capa técnica en lugar de por dominio** Una estructura `controllers / services / repositories` viola CCP: un cambio en la lógica de "órdenes" toca un archivo en cada una de las tres carpetas. Una estructura `orders / billing / users` (organizada por dominio) localiza los cambios.
     
 -   🔍
     

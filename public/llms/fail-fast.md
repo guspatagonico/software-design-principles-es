@@ -45,7 +45,7 @@ se propagan...
 costo enorme
 
 > 🏗️ En construcción, cuando un ladrillo está mal colocado, mejor descubrirlo ahora que cuando el edificio tiene diez pisos arriba. El costo de reparar la cimentación crece con cada capa que se agrega encima. _El mismo principio aplica a los bugs: cuanto más tarde se detectan, más código construiste encima del error._
-> 🩺 Un sistema que no falla ruidosamente cuando tiene un problema es como un paciente que no siente dolor cuando debería. El dolor es una señal de alarma del cuerpo —molesta, pero es mucho mejor que no sentirlo y que la enfermedad progrese sin síntomas. _Las excepciones son el dolor del software._
+> 🩺 Un sistema que no falla ruidosamente cuando tiene un problema es como un paciente que no siente dolor cuando debería. El dolor es una señal de alarma del cuerpo - molesta, pero es mucho mejor que no sentirlo y que la enfermedad progrese sin síntomas. _Las excepciones son el dolor del software._
 > **TIP:** **La regla de Jim Shore** "Comprobá frecuentemente, fallá ruidosamente, no continúes con estado inválido." Un sistema que detecta un problema y sigue ejecutando como si no hubiera pasado nada es mucho más peligroso que uno que se detiene inmediatamente. El primero corrompe datos; el segundo solo interrumpe.
 
 ## Cuándo aplicar
@@ -56,7 +56,7 @@ Las cuatro señales de alarma que deben fallar pronto
 
 Fail Fast no significa lanzar excepciones por todo. Significa identificar los **puntos críticos donde un estado inválido no debería propagarse** y cortarlo ahí. Hay cuatro categorías principales donde siempre aplica.
 
-01 — Precondiciones
+01 - Precondiciones
 
 Validar entradas al inicio de cada función
 
@@ -65,7 +65,7 @@ Antes de ejecutar cualquier lógica, verificar que los argumentos son válidos. 
 ✓ if (!userId) throw new Error('userId requerido')  
 ✓ if (amount <= 0) throw new Error('amount > 0')
 
-02 — Bordes del sistema
+02 - Bordes del sistema
 
 Validar todo lo que entra desde afuera
 
@@ -74,16 +74,16 @@ HTTP requests, archivos, mensajes de queues, respuestas de APIs externas. Todo l
 ✗ aceptar JSON sin parsear ni validar schema  
 ✓ validar con Zod/Joi/Pydantic en el controller
 
-03 — Invariantes de dominio
+03 - Invariantes de dominio
 
 Reglas que nunca deben violarse
 
-Las condiciones que el sistema asume que siempre son verdaderas. Si se violan, hay un bug —no una condición de negocio. _Usar assertions para detectarlos en el momento exacto en que ocurren._
+Las condiciones que el sistema asume que siempre son verdaderas. Si se violan, hay un bug - no una condición de negocio. _Usar assertions para detectarlos en el momento exacto en que ocurren._
 
 ✓ assert(items.length > 0, 'order sin items')  
 ✓ assert(total >= 0, 'total negativo')
 
-04 — Errores de configuración
+04 - Errores de configuración
 
 Fallar al inicio, no en runtime
 
@@ -93,7 +93,7 @@ Si falta una variable de entorno, una clave de API o una conexión a base de dat
 ✓ verificar todas las vars al inicio del proceso
 
 > 🛫 Un avión no despega con un motor defectuoso esperando que "quizás no sea tan grave". La verificación pre-vuelo es un Fail Fast sistemático. _Es preferible cancelar el vuelo en tierra que descubrir el problema a 10.000 metros de altura._
-> **TIP:** **El punto de validación correcto** Fail Fast no significa validar en todos los niveles del sistema. Significa validar _en el punto más cercano a la fuente del dato_. Los datos externos se validan en el borde. Las precondiciones de una función se validan al entrar. Los invariantes se verifican donde se modifica el estado. No repitas la validación en cada capa —eso viola DRY.
+> **TIP:** **El punto de validación correcto** Fail Fast no significa validar en todos los niveles del sistema. Significa validar _en el punto más cercano a la fuente del dato_. Los datos externos se validan en el borde. Las precondiciones de una función se validan al entrar. Los invariantes se verifican donde se modifica el estado. No repitas la validación en cada capa - eso viola DRY.
 
 ## En el código
 
@@ -107,33 +107,33 @@ Fallo tardío y silencioso
 
 ```js
 function processOrder(order) {
-  // no validamos nada
-  const total = order.items
-    .reduce((s, i) => s + i.price, 0)
+ // no validamos nada
+ const total = order.items
+.reduce((s, i) => s + i.price, 0)
 
-  // si order.customer es null:
-  // falla acá con un error
-  // que no dice nada útil 💥
-  sendEmail(order.customer.email)
+ // si order.customer es null:
+ // falla acá con un error
+ // que no dice nada útil 💥
+ sendEmail(order.customer.email)
 
-  saveToDb(total, order.customer.id)
+ saveToDb(total, order.customer.id)
 }
 ```
 
-Fail Fast — guard clauses
+Fail Fast - guard clauses
 
 ```js
 function processOrder(order) {
-  // validamos antes de empezar
-  if (!order)
-    throw new Error('order requerida')
-  if (!order.customer?.email)
-    throw new Error('email de cliente falta')
-  if (!order.items?.length)
-    throw new Error('orden sin items')
+ // validamos antes de empezar
+ if (!order)
+ throw new Error('order requerida')
+ if (!order.customer?.email)
+ throw new Error('email de cliente falta')
+ if (!order.items?.length)
+ throw new Error('orden sin items')
 
-  // ahora el flujo principal
-  // trabaja con datos válidos ✓
+ // ahora el flujo principal
+ // trabaja con datos válidos ✓
 }
 ```
 
@@ -141,13 +141,13 @@ Config que falla tarde
 
 ```js
 async function sendEmail(to, body) {
-  // se lee cuando se usa
-  const key = process.env.SENDGRID_KEY
+ // se lee cuando se usa
+ const key = process.env.SENDGRID_KEY
 
-  // si KEY no existe, falla acá
-  // cuando el primer email se envía
-  // quizás horas después del deploy 💥
-  await sendgrid.send({ to, body, key })
+ // si KEY no existe, falla acá
+ // cuando el primer email se envía
+ // quizás horas después del deploy 💥
+ await sendgrid.send({ to, body, key })
 }
 ```
 
@@ -156,24 +156,24 @@ Config que falla al arrancar
 ```js
 // al inicio del proceso
 const REQUIRED_VARS = [
-  'SENDGRID_KEY', 'DATABASE_URL',
-  'JWT_SECRET', 'APP_PORT'
+ 'SENDGRID_KEY', 'DATABASE_URL',
+ 'JWT_SECRET', 'APP_PORT'
 ]
 
 for (const v of REQUIRED_VARS) {
-  if (!process.env[v])
-    throw new Error(`Falta: ${v}`)
+ if (!process.env[v])
+ throw new Error(`Falta: ${v}`)
 }
 // si llegamos acá, todo OK ✓
 ```
 
-Retornar null — fallo diferido
+Retornar null - fallo diferido
 
 ```js
 function findUser(id) {
-  const user = db.query(id)
-  if (!user) return null // 😬
-  return user
+ const user = db.query(id)
+ if (!user) return null // 😬
+ return user
 }
 
 // Quien llama recibe null y
@@ -182,14 +182,14 @@ function findUser(id) {
 // tres llamadas después 💥
 ```
 
-Lanzar excepción — fallo inmediato
+Lanzar excepción - fallo inmediato
 
 ```js
 function findUser(id) {
-  const user = db.query(id)
-  if (!user)
-    throw new UserNotFoundError(id)
-  return user // siempre válido ✓
+ const user = db.query(id)
+ if (!user)
+ throw new UserNotFoundError(id)
+ return user // siempre válido ✓
 }
 
 // El error ocurre exactamente
@@ -203,9 +203,9 @@ function findUser(id) {
 
 Fail Fast vs Fail Safe
 
-No son opuestos — son herramientas para contextos distintos
+No son opuestos - son herramientas para contextos distintos
 
-Fail Safe es el otro extremo: diseñar el sistema para que, cuando algo falla, **degrade de forma controlada** en lugar de detenerse completamente. No son contradictorios —son complementarios y se aplican en capas distintas del sistema.
+Fail Safe es el otro extremo: diseñar el sistema para que, cuando algo falla, **degrade de forma controlada** en lugar de detenerse completamente. No son contradictorios - son complementarios y se aplican en capas distintas del sistema.
 
 Fail Fast
 
@@ -249,7 +249,7 @@ Bug de programación (null inesperado, tipo incorrecto)
 
 Fail Fast
 
-Es un bug —necesita ser detectado y corregido, no ignorado
+Es un bug - necesita ser detectado y corregido, no ignorado
 
 Configuración inválida al arrancar
 
@@ -279,7 +279,7 @@ Datos corruptos en base de datos
 
 Fail Fast
 
-Datos inválidos no deben propagarse —mejor detener y alertar
+Datos inválidos no deben propagarse - mejor detener y alertar
 
 > **TIP:** **La regla de las capas** Fail Fast aplica en el _interior_ del sistema: en las funciones, los servicios, el dominio. Fail Safe aplica en las _fronteras externas_: la comunicación con servicios de terceros, los recursos de red, las integraciones. El núcleo falla fuerte para que los bugs sean obvios; el borde falla con gracia para que los problemas externos no colapsen todo.
 
@@ -293,26 +293,26 @@ Violar Fail Fast casi siempre parece **la opción más segura** en el momento. R
 
 -   🔇
     
-    **Swallowing exceptions — tragar el error** El antipatrón más dañino. Un bloque `try/catch` que captura la excepción y no hace nada con ella —o solo loguea "algo salió mal"— convierte un fallo ruidoso en uno silencioso. El sistema continúa en un estado inválido y el bug aparece mucho después, irreconocible.
+    **Swallowing exceptions - tragar el error** El antipatrón más dañino. Un bloque `try/catch` que captura la excepción y no hace nada con ella (o solo loguea "algo salió mal") convierte un fallo ruidoso en uno silencioso. El sistema continúa en un estado inválido y el bug aparece mucho después, irreconocible.
     
-    ✗ try { ... } catch (e) { console.log('error') }  
-    ✓ try { ... } catch (e) { throw new AppError('contexto', e) }
+    ✗ try {... } catch (e) { console.log('error') }  
+    ✓ try {... } catch (e) { throw new AppError('contexto', e) }
     
 -   👻
     
-    **Retornar null, -1 o "" como señal de error** Retornar `null` cuando no se encuentra algo, `-1` cuando falla un índice, o `""` cuando falta un valor transfiere la responsabilidad de detectar el error al llamador —que quizás no lo chequea. La excepción falla en el origen; el `null` falla tres llamadas después con un NullPointerException sin contexto.
+    **Retornar null, -1 o "" como señal de error** Retornar `null` cuando no se encuentra algo, `-1` cuando falla un índice, o `""` cuando falta un valor transfiere la responsabilidad de detectar el error al llamador - que quizás no lo chequea. La excepción falla en el origen; el `null` falla tres llamadas después con un NullPointerException sin contexto.
     
 -   🧢
     
-    **Valores por defecto que ocultan errores de configuración** `const timeout = process.env.TIMEOUT ?? 5000` parece prudente. Pero si `TIMEOUT` debería estar configurado y no lo está, el valor por defecto enmascara una mala configuración. El sistema funciona con un timeout incorrecto sin que nadie se entere. La alternativa es fallar al inicio si la variable es obligatoria.
+    **Valores por defecto que ocultan errores de configuración** `const timeout = process.env.TIMEOUT?? 5000` parece prudente. Pero si `TIMEOUT` debería estar configurado y no lo está, el valor por defecto enmascara una mala configuración. El sistema funciona con un timeout incorrecto sin que nadie se entere. La alternativa es fallar al inicio si la variable es obligatoria.
     
 -   🌊
     
-    **Continuar después de detectar un estado inválido** Verificar que algo está mal y seguir de todas formas: `if (!user) { log('user not found'); return user; }` —el log dice que el usuario no existe, pero se retorna `undefined` de todos modos. El código que llama recibe `undefined` y falla más tarde. Si el estado es inválido, _no continúes_.
+    **Continuar después de detectar un estado inválido** Verificar que algo está mal y seguir de todas formas: `if (!user) { log('user not found'); return user; }` - el log dice que el usuario no existe, pero se retorna `undefined` de todos modos. El código que llama recibe `undefined` y falla más tarde. Si el estado es inválido, _no continúes_.
     
 -   🔄
     
-    **Validar solo en desarrollo, no en producción** Deshabilitar assertions o validaciones en producción "por performance" es una forma de Fail Slow selectivo. Los bugs que solo se manifiestan en producción —con datos reales, bajo carga real— son los más difíciles de diagnosticar. Las assertions tienen un costo mínimo y salvan horas de debugging.
+    **Validar solo en desarrollo, no en producción** Deshabilitar assertions o validaciones en producción "por performance" es una forma de Fail Slow selectivo. Los bugs que solo se manifiestan en producción (con datos reales, bajo carga real) son los más difíciles de diagnosticar. Las assertions tienen un costo mínimo y salvan horas de debugging.
     
 -   📨
     

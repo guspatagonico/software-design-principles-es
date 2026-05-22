@@ -6,7 +6,7 @@
 
 ## Fase 1 · Mindset — Antes de escribir una sola línea
 
-- [KISS — Keep It Simple, Stupid](https://principles.gustavosalvini.com.ar/principios/kiss/): La solución más simple que funciona casi siempre es la correcta. La complejidad innecesaria es deuda técnica disfrazada de sofisticación.
+- [KISS - Keep It Simple, Stupid](https://principles.gustavosalvini.com.ar/principios/kiss/): La solución más simple que funciona casi siempre es la correcta. La complejidad innecesaria es deuda técnica disfrazada de sofisticación.
 - [YAGNI](https://principles.gustavosalvini.com.ar/principios/yagni/): No construyas lo que todavía no necesitás. La funcionalidad que no existe no tiene bugs, no hay que mantenerla y no complica el diseño.
 - [DRY](https://principles.gustavosalvini.com.ar/principios/dry/): Cada pieza de conocimiento debe tener una única, inequívoca y autoritativa representación dentro de un sistema.
 
@@ -20,13 +20,13 @@
 
 ## Fase 3 · Diseño de módulos — Cuando el sistema empieza a crecer
 
-- [Paquetes](https://principles.gustavosalvini.com.ar/principios/pkg/): Seis principios de Robert C. Martin que operan a nivel de módulos y paquetes enteros —la versión macro de SOLID. Determinan cómo agrupar clases y cómo controlar las dependencias entre grupos.
+- [Paquetes](https://principles.gustavosalvini.com.ar/principios/pkg/): Seis principios de Robert C. Martin que operan a nivel de módulos y paquetes enteros - la versión macro de SOLID. Determinan cómo agrupar clases y cómo controlar las dependencias entre grupos.
 
 ## Fase 4 · Arquitectura — Cuando diseñás la estructura completa del sistema
 
 - [Screaming](https://principles.gustavosalvini.com.ar/principios/screaming-architecture/): La estructura de un proyecto debería gritar qué hace el sistema, no qué framework usa. Si abrís el código y lo primero que ves es "Rails" o "Spring", algo está mal.
 - [Clean Arch](https://principles.gustavosalvini.com.ar/principios/clean-architecture/): Las dependencias solo pueden apuntar hacia adentro. El núcleo de lógica de negocio no sabe nada de bases de datos, frameworks ni HTTP. Los detalles dependen de las abstracciones, nunca al revés.
-- [Hexagonal](https://principles.gustavosalvini.com.ar/principios/hexagonal/): El dominio vive en el centro. Define puertos —interfaces— que describen lo que necesita. El mundo exterior conecta a través de adaptadores que implementan esos puertos. El dominio no sabe nada de afuera.
+- [Hexagonal](https://principles.gustavosalvini.com.ar/principios/hexagonal/): El dominio vive en el centro. Define puertos (interfaces) que describen lo que necesita. El mundo exterior conecta a través de adaptadores que implementan esos puertos. El dominio no sabe nada de afuera.
 
 ## Contenido completo
 
@@ -34,7 +34,7 @@
 
 ## Archivos por principio
 
-- [KISS — Keep It Simple, Stupid](https://principles.gustavosalvini.com.ar/llms/kiss.md): La solución más simple que funciona casi siempre es la correcta. La complejidad innecesaria es deuda técnica disfrazada de sofisticación.
+- [KISS - Keep It Simple, Stupid](https://principles.gustavosalvini.com.ar/llms/kiss.md): La solución más simple que funciona casi siempre es la correcta. La complejidad innecesaria es deuda técnica disfrazada de sofisticación.
 - [YAGNI](https://principles.gustavosalvini.com.ar/llms/yagni.md): No construyas lo que todavía no necesitás. La funcionalidad que no existe no tiene bugs, no hay que mantenerla y no complica el diseño.
 - [DRY](https://principles.gustavosalvini.com.ar/llms/dry.md): Cada pieza de conocimiento debe tener una única, inequívoca y autoritativa representación dentro de un sistema.
 - [SOLID](https://principles.gustavosalvini.com.ar/llms/solid.md): Cinco reglas para escribir código que sea fácil de cambiar, extender y entender. Hacé clic en cada letra para explorar.
@@ -42,10 +42,10 @@
 - [Info Hiding](https://principles.gustavosalvini.com.ar/llms/information-hiding.md): Lo que no es público no puede romperse desde afuera. Cada módulo debería exponer solo lo mínimo necesario y ocultar todo lo demás detrás ...
 - [Law of Demeter](https://principles.gustavosalvini.com.ar/llms/lod.md): Hablá solo con tus amigos directos. No le hables a los amigos de tus amigos. Cada objeto debería saber lo menos posible sobre la estructu...
 - [Fail Fast](https://principles.gustavosalvini.com.ar/llms/fail-fast.md): Cuando algo está mal, el sistema debería decirlo de inmediato y de forma ruidosa. Un bug que explota en el momento exacto en que ocurre e...
-- [Paquetes](https://principles.gustavosalvini.com.ar/llms/pkg.md): Seis principios de Robert C. Martin que operan a nivel de módulos y paquetes enteros —la versión macro de SOLID. Determinan cómo agrupar ...
+- [Paquetes](https://principles.gustavosalvini.com.ar/llms/pkg.md): Seis principios de Robert C. Martin que operan a nivel de módulos y paquetes enteros - la versión macro de SOLID. Determinan cómo agrupar...
 - [Screaming](https://principles.gustavosalvini.com.ar/llms/screaming-architecture.md): La estructura de un proyecto debería gritar qué hace el sistema, no qué framework usa. Si abrís el código y lo primero que ves es "Rails"...
 - [Clean Arch](https://principles.gustavosalvini.com.ar/llms/clean-architecture.md): Las dependencias solo pueden apuntar hacia adentro. El núcleo de lógica de negocio no sabe nada de bases de datos, frameworks ni HTTP. Lo...
-- [Hexagonal](https://principles.gustavosalvini.com.ar/llms/hexagonal.md): El dominio vive en el centro. Define puertos —interfaces— que describen lo que necesita. El mundo exterior conecta a través de adaptadore...
+- [Hexagonal](https://principles.gustavosalvini.com.ar/llms/hexagonal.md): El dominio vive en el centro. Define puertos (interfaces) que describen lo que necesita. El mundo exterior conecta a través de adaptadore...
 
 ## Información adicional
 

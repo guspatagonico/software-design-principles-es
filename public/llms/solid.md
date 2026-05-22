@@ -10,7 +10,7 @@ Single Responsibility
 
 Una clase, una razón para cambiar
 
-Una clase debe tener **una sola responsabilidad**. Si una clase hace demasiadas cosas, cualquier cambio en una de ellas puede romper las otras —y la clase se vuelve imposible de testear de forma aislada.
+Una clase debe tener **una sola responsabilidad**. Si una clase hace demasiadas cosas, cualquier cambio en una de ellas puede romper las otras - y la clase se vuelve imposible de testear de forma aislada.
 
 > 🍳 Pensalo así: en un restaurante, el cocinero cocina, el mozo atiende y el cajero cobra. Si el cocinero también cobrara y atendiera las mesas, un problema en cocina paralizaría todo el servicio. _Cada rol tiene su propia razón de cambiar._
 
@@ -18,17 +18,17 @@ Viola SRP
 
 ```
 class User {
-  getName() { /* … */ }
+ getName() { /* … */ }
 
-  saveToDatabase() {
-    // guarda en BD
-    // ¿por qué User sabe de BD?
-  }
+ saveToDatabase() {
+ // guarda en BD
+ // ¿por qué User sabe de BD?
+ }
 
-  sendWelcomeEmail() {
-    // envía email
-    // ¿y también de emails?
-  }
+ sendWelcomeEmail() {
+ // envía email
+ // ¿y también de emails?
+ }
 }
 ```
 
@@ -36,17 +36,17 @@ Respeta SRP
 
 ```
 class User {
-  getName() { /* … */ }
+ getName() { /* … */ }
 }
 
 class UserRepository {
-  save(user) { /* solo BD */ }
+ save(user) { /* solo BD */ }
 }
 
 class Mailer {
-  sendWelcome(user) {
-    /* solo emails */
-  }
+ sendWelcome(user) {
+ /* solo emails */
+ }
 }
 ```
 
@@ -66,14 +66,14 @@ Viola OCP
 
 ```
 class DiscountCalc {
-  calc(type, price) {
-    if (type === 'vip')
-      return price * 0.8
-    if (type === 'promo')
-      return price * 0.9
-    // cada nuevo descuento
-    // edita esta clase 😬
-  }
+ calc(type, price) {
+ if (type === 'vip')
+ return price * 0.8
+ if (type === 'promo')
+ return price * 0.9
+ // cada nuevo descuento
+ // edita esta clase 😬
+ }
 }
 ```
 
@@ -81,16 +81,16 @@ Respeta OCP
 
 ```js
 class VipDiscount {
-  apply(p) { return p * 0.8 }
+ apply(p) { return p * 0.8 }
 }
 class PromoDiscount {
-  apply(p) { return p * 0.9 }
+ apply(p) { return p * 0.9 }
 }
 // nuevo descuento = nueva clase
 // sin tocar las anteriores ✓
 
 function applyDiscount(disc, p) {
-  return disc.apply(p)
+ return disc.apply(p)
 }
 ```
 
@@ -110,16 +110,16 @@ Viola LSP
 
 ```
 class Bird {
-  fly() { /* vuela */ }
+ fly() { /* vuela */ }
 }
 
 class Penguin extends Bird {
-  fly() {
-    throw "¡No puedo volar!"
-    // rompe el contrato 💥
-    // todo código que use Bird
-    // ahora puede explotar
-  }
+ fly() {
+ throw "¡No puedo volar!"
+ // rompe el contrato 💥
+ // todo código que use Bird
+ // ahora puede explotar
+ }
 }
 ```
 
@@ -129,12 +129,12 @@ Respeta LSP
 class Bird { /* base */ }
 
 class FlyingBird extends Bird {
-  fly() { /* vuela ✓ */ }
+ fly() { /* vuela ✓ */ }
 }
 
 class Penguin extends Bird {
-  swim() { /* nada ✓ */ }
-  // no hereda fly()
+ swim() { /* nada ✓ */ }
+ // no hereda fly()
 }
 ```
 
@@ -146,7 +146,7 @@ Interface Segregation
 
 Interfaces específicas, no monolíticas
 
-Es mejor tener **muchas interfaces pequeñas** que una sola grande. Una clase no debería verse obligada a implementar métodos que nunca va a usar —eso genera código vacío o que lanza errores.
+Es mejor tener **muchas interfaces pequeñas** que una sola grande. Una clase no debería verse obligada a implementar métodos que nunca va a usar - eso genera código vacío o que lanza errores.
 
 > 🎛️ Un control remoto de TV tiene botones para TV. No tiene freno de mano ni limpiaparabrisas. Si tuviera de todo, sería imposible de usar. _Cada dispositivo tiene solo los controles que le corresponden._
 
@@ -154,10 +154,10 @@ Viola ISP
 
 ```
 interface Animal {
-  eat()
-  fly()  // los perros no vuelan
-  swim() // los pájaros no nadan
-  bark() // los peces no ladran
+ eat()
+ fly() // los perros no vuelan
+ swim() // los pájaros no nadan
+ bark() // los peces no ladran
 }
 
 // Todos implementan métodos
@@ -168,13 +168,13 @@ Respeta ISP
 
 ```
 interface Flyable {
-  fly()
+ fly()
 }
 interface Swimmable {
-  swim()
+ swim()
 }
 interface Barkable {
-  bark()
+ bark()
 }
 // Cada clase implementa
 // solo lo que necesita ✓
@@ -196,16 +196,16 @@ Viola DIP
 
 ```
 class OrderService {
-  constructor() {
-    this.db = new MySQLDatabase()
-    // acoplado a MySQL 💥
-    // ¿cambio a Postgres?
-    // hay que editar esta clase
-  }
+ constructor() {
+ this.db = new MySQLDatabase()
+ // acoplado a MySQL 💥
+ // ¿cambio a Postgres?
+ // hay que editar esta clase
+ }
 
-  createOrder(data) {
-    this.db.save(data)
-  }
+ createOrder(data) {
+ this.db.save(data)
+ }
 }
 ```
 
@@ -213,15 +213,15 @@ Respeta DIP
 
 ```
 class OrderService {
-  constructor(db: Database) {
-    this.db = db
-    // recibe cualquier impl.
-    // que cumpla la interfaz ✓
-  }
+ constructor(db: Database) {
+ this.db = db
+ // recibe cualquier impl.
+ // que cumpla la interfaz ✓
+ }
 
-  createOrder(data) {
-    this.db.save(data)
-  }
+ createOrder(data) {
+ this.db.save(data)
+ }
 }
 ```
 

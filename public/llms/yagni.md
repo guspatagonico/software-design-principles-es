@@ -10,10 +10,10 @@ No implementes funcionalidad hasta que realmente la necesitás. La funcionalidad
 
 No construyas el futuro imaginario
 
-YAGNI viene de Extreme Programming (XP) y dice algo simple pero difícil de seguir: **no implementes funcionalidad hasta que realmente la necesitás**. El problema no es que los devs sean malos prediciendo el futuro —es que nadie puede predecirlo bien.
+YAGNI viene de Extreme Programming (XP) y dice algo simple pero difícil de seguir: **no implementes funcionalidad hasta que realmente la necesitás**. El problema no es que los devs sean malos prediciendo el futuro - es que nadie puede predecirlo bien.
 
 > 🏠 No construís el garage antes de tener auto. No ponés tres habitaciones extra "por si viene gente". Construís lo que necesitás ahora, con espacio para crecer, pero sin construir el crecimiento de antemano. _Cada metro cuadrado tiene un costo de mantenimiento._
-> 📦 En software, el código que escribís "por si acaso" necesita ser mantenido, testeado, documentado y entendido por el próximo dev. Y el 80% de las veces, la funcionalidad anticipada nunca se usa —o cuando sí se usa, los requisitos son completamente distintos a los que imaginaste. _Escribiste código inútil que ahora es una carga._
+> 📦 En software, el código que escribís "por si acaso" necesita ser mantenido, testeado, documentado y entendido por el próximo dev. Y el 80% de las veces, la funcionalidad anticipada nunca se usa - o cuando sí se usa, los requisitos son completamente distintos a los que imaginaste. _Escribiste código inútil que ahora es una carga._
 > **TIP:** **La pregunta de YAGNI** Antes de agregar algo, preguntate: _"¿Hay un requisito concreto hoy que justifique esto?"_. Si la respuesta es "sería útil si...", "en el futuro podría...", o "qué pasa si...", es YAGNI. Cerrá el editor y seguí con lo que sí se necesita.
 
 ## En el código
@@ -28,15 +28,15 @@ Viola YAGNI
 
 ```
 class PaymentProcessor {
-  // Solo usamos Stripe hoy
-  processStripe(amount) { … }
+ // Solo usamos Stripe hoy
+ processStripe(amount) { … }
 
-  // "Por si acaso" agregamos
-  processPaypal(amount) { … }
-  processMercadoPago(a) { … }
-  processBitcoin(amount) { … }
-  processBankTransfer(a) { … }
-  // Nadie los pidió 😬
+ // "Por si acaso" agregamos
+ processPaypal(amount) { … }
+ processMercadoPago(a) { … }
+ processBitcoin(amount) { … }
+ processBankTransfer(a) { … }
+ // Nadie los pidió 😬
 }
 ```
 
@@ -44,29 +44,29 @@ Respeta YAGNI
 
 ```
 class PaymentProcessor {
-  process(amount) {
-    // Solo Stripe, que es
-    // lo que necesitamos hoy
-    return stripe.charge(amount)
-  }
+ process(amount) {
+ // Solo Stripe, que es
+ // lo que necesitamos hoy
+ return stripe.charge(amount)
+ }
 }
 
 // Cuando llegue el requisito
 // de Paypal, lo agregamos ✓
 ```
 
-Viola YAGNI — parámetros fantasma
+Viola YAGNI - parámetros fantasma
 
 ```js
 function getUser(
-  id,
-  includeDeleted = false,
-  withPermissions = false,
-  format = 'json',
-  version = 1
+ id,
+ includeDeleted = false,
+ withPermissions = false,
+ format = 'json',
+ version = 1
 ) {
-  // Los últimos 4 parámetros
-  // nunca se usan en la app
+ // Los últimos 4 parámetros
+ // nunca se usan en la app
 }
 ```
 
@@ -74,9 +74,9 @@ Respeta YAGNI
 
 ```js
 function getUser(id) {
-  // Hace exactamente lo que
-  // se necesita ahora
-  return db.find('users', id)
+ // Hace exactamente lo que
+ // se necesita ahora
+ return db.find('users', id)
 }
 
 // Cuando necesitemos filtrar
@@ -91,11 +91,11 @@ function getUser(id) {
 
 YAGNI no es excusa para ignorar el contexto
 
-YAGNI tiene límites. Hay situaciones donde **la anticipación razonada** —distinta a la especulación— está justificada. La clave es que el requisito futuro sea **conocido y comprometido**, no imaginado.
+YAGNI tiene límites. Hay situaciones donde **la anticipación razonada** (distinta a la especulación) está justificada. La clave es que el requisito futuro sea **conocido y comprometido**, no imaginado.
 
 -   📋
     
-    **El requisito está en el roadmap confirmado** Si el Product Owner ya comprometió que en dos semanas van a necesitar soporte multi-idioma, tiene sentido diseñar las strings de texto de forma externalizable desde ahora. El requisito no es especulativo —es conocido y tiene fecha.
+    **El requisito está en el roadmap confirmado** Si el Product Owner ya comprometió que en dos semanas van a necesitar soporte multi-idioma, tiene sentido diseñar las strings de texto de forma externalizable desde ahora. El requisito no es especulativo - es conocido y tiene fecha.
     
 -   💸
     
@@ -103,11 +103,11 @@ YAGNI tiene límites. Hay situaciones donde **la anticipación razonada** —dis
     
 -   🔐
     
-    **Seguridad y privacidad** Ciertos controles de seguridad son más fáciles de diseñar desde el principio que de retrofitear. El cifrado de datos sensibles, el manejo de tokens, la auditoría de accesos —no son funcionalidad especulativa, son requerimientos implícitos de cualquier sistema.
+    **Seguridad y privacidad** Ciertos controles de seguridad son más fáciles de diseñar desde el principio que de retrofitear. El cifrado de datos sensibles, el manejo de tokens, la auditoría de accesos - no son funcionalidad especulativa, son requerimientos implícitos de cualquier sistema.
     
 -   📈
     
-    **Escala conocida y cercana** Si sabés que el sistema va a pasar de 100 a 100.000 usuarios en seis meses —porque hay un contrato firmado— diseñar para esa escala ahora es razonable. Si es una esperanza, no lo es.
+    **Escala conocida y cercana** Si sabés que el sistema va a pasar de 100 a 100.000 usuarios en seis meses (porque hay un contrato firmado) diseñar para esa escala ahora es razonable. Si es una esperanza, no lo es.
     
 
 > **TIP:** **La distinción clave** _Especulación_ es "podría pasar". _Anticipación razonada_ es "va a pasar y tenemos evidencia concreta". YAGNI se aplica a la primera. La segunda es simplemente buen diseño informado.
@@ -126,7 +126,7 @@ Nadie viola YAGNI pensando que está haciendo algo malo. Las violaciones siempre
     
 -   🌐
     
-    **Internacionalización desde el día uno sin usuarios internacionales** Externalizar todas las strings, agregar soporte de locales, manejar plurales en varios idiomas —cuando la app solo va a estar en español y no hay ningún plan concreto de expandirse.
+    **Internacionalización desde el día uno sin usuarios internacionales** Externalizar todas las strings, agregar soporte de locales, manejar plurales en varios idiomas - cuando la app solo va a estar en español y no hay ningún plan concreto de expandirse.
     
 -   ⚙️
     

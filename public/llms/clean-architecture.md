@@ -32,7 +32,7 @@ Frameworks
 
 Entities ← las dependencias solo van en esta dirección
 
-> 🧅 Como una cebolla: las capas externas envuelven a las internas. Podés pelar y reemplazar la capa exterior sin tocar el corazón. _El núcleo de la cebolla no sabe que tiene capas encima —y no necesita saberlo._
+> 🧅 Como una cebolla: las capas externas envuelven a las internas. Podés pelar y reemplazar la capa exterior sin tocar el corazón. _El núcleo de la cebolla no sabe que tiene capas encima - y no necesita saberlo._
 > **TIP:** **La regla en una oración** Si estás en una capa interna y necesitás hacer un `import` de algo de una capa más externa, estás violando la Dependency Rule. El dominio no importa Express. Los casos de uso no importan Sequelize. Las entidades no importan nada de infraestructura.
 
 ## Las capas
@@ -41,17 +41,17 @@ Las cuatro capas
 
 De adentro hacia afuera: estabilidad decreciente
 
-Cada capa tiene una responsabilidad específica. Las capas internas son **más estables** —cambian menos y son las más valiosas. Las capas externas son más volátiles y son reemplazables.
+Cada capa tiene una responsabilidad específica. Las capas internas son **más estables** - cambian menos y son las más valiosas. Las capas externas son más volátiles y son reemplazables.
 
-1\. Entities — Entidades
+1\. Entities - Entidades
 
 Más estable
 
-Las _reglas de negocio de la empresa_. Las que existirían aunque el sistema fuera papel y lápiz. No saben de bases de datos, de HTTP ni de ningún framework. Son los objetos más puros del sistema —clases o estructuras de datos con las reglas críticas de negocio.
+Las _reglas de negocio de la empresa_. Las que existirían aunque el sistema fuera papel y lápiz. No saben de bases de datos, de HTTP ni de ningún framework. Son los objetos más puros del sistema - clases o estructuras de datos con las reglas críticas de negocio.
 
 OrderCustomerProductInvoiceMoneyreglas de dominio
 
-2\. Use Cases — Casos de uso
+2\. Use Cases - Casos de uso
 
 Lógica de aplicación
 
@@ -71,7 +71,7 @@ OrderControllerOrderPresenterPostgresOrderRepositorySendGridMailer
 
 Más volátil
 
-La capa más externa. Frameworks web, bases de datos, UI, dispositivos externos, servicios de terceros. _Escribimos poco código en esta capa_ —principalmente pegamento que conecta los detalles externos con la capa de adaptadores. Es la capa más fácil de reemplazar.
+La capa más externa. Frameworks web, bases de datos, UI, dispositivos externos, servicios de terceros. _Escribimos poco código en esta capa_ - principalmente pegamento que conecta los detalles externos con la capa de adaptadores. Es la capa más fácil de reemplazar.
 
 Express / FastifyPostgreSQL / MongoDBReact / VueSendGrid SDKAWS SDK
 
@@ -91,13 +91,13 @@ import { db } from '../db/postgres'
 import { sendgrid } from 'sendgrid'
 
 class CreateOrderUseCase {
-  async execute(data) {
-    const order = new Order(data)
-    // conoce Postgres directamente
-    await db.query('INSERT...')
-    // conoce SendGrid directamente
-    await sendgrid.send(...)
-  }
+ async execute(data) {
+ const order = new Order(data)
+ // conoce Postgres directamente
+ await db.query('INSERT...')
+ // conoce SendGrid directamente
+ await sendgrid.send(...)
+ }
 }
 ```
 
@@ -106,17 +106,17 @@ Respeta la Dependency Rule
 ```js
 // Use case define interfaces (puertos)
 class CreateOrderUseCase {
-  constructor(
-    orderRepo: IOrderRepository,
-    mailer:    IMailer
-  ) { ... }
+ constructor(
+ orderRepo: IOrderRepository,
+ mailer: IMailer
+) {... }
 
-  async execute(data) {
-    const order = new Order(data)
-    await this.orderRepo.save(order)
-    await this.mailer.sendConfirm(order)
-  }
-  // No sabe qué hay detrás ✓
+ async execute(data) {
+ const order = new Order(data)
+ await this.orderRepo.save(order)
+ await this.mailer.sendConfirm(order)
+ }
+ // No sabe qué hay detrás ✓
 }
 ```
 
@@ -126,9 +126,9 @@ La interfaz (definida en capa interna)
 // Vive en la capa de Use Cases
 // No importa nada de infraestructura
 interface IOrderRepository {
-  save(order: Order): Promise<void>
-  findById(id: string): Promise<Order>
-  findByStatus(s: string): Promise<Order[]>
+ save(order: Order): Promise<void>
+ findById(id: string): Promise<Order>
+ findByStatus(s: string): Promise<Order[]>
 }
 ```
 
@@ -140,11 +140,11 @@ La implementación (capa externa)
 import { db } from '../postgres'
 
 class PostgresOrderRepository
-  implements IOrderRepository {
+ implements IOrderRepository {
 
-  async save(order: Order) {
-    await db.query('INSERT...')
-  }
+ async save(order: Order) {
+ await db.query('INSERT...')
+ }
 }
 ```
 
@@ -168,11 +168,11 @@ La Dependency Rule es fácil de entender y difícil de mantener bajo presión. L
     
 -   🌐
     
-    **Lógica de negocio en los controllers**El controller debería recibir el request, extraer los datos, llamar al caso de uso y devolver la respuesta. Cualquier lógica condicional de negocio en el controller está en la capa equivocada —y no puede testearse sin levantar el servidor HTTP.
+    **Lógica de negocio en los controllers**El controller debería recibir el request, extraer los datos, llamar al caso de uso y devolver la respuesta. Cualquier lógica condicional de negocio en el controller está en la capa equivocada - y no puede testearse sin levantar el servidor HTTP.
     
 -   💾
     
-    **Casos de uso que conocen el esquema de BD**Si un caso de uso construye una query SQL, conoce el nombre de una tabla o mapea columnas, la Dependency Rule está rota. Esa lógica pertenece al repositorio —el adaptador que implementa la interfaz de persistencia definida por el caso de uso.
+    **Casos de uso que conocen el esquema de BD**Si un caso de uso construye una query SQL, conoce el nombre de una tabla o mapea columnas, la Dependency Rule está rota. Esa lógica pertenece al repositorio - el adaptador que implementa la interfaz de persistencia definida por el caso de uso.
     
 -   ⚡
     

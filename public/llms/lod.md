@@ -10,17 +10,17 @@ Hablá solo con tus amigos directos. No navegues a través de la estructura inte
 
 Principio del mínimo conocimiento
 
-La LoD dice que un objeto debería **conocer lo menos posible sobre la estructura interna de otros objetos**. Solo debería hablar con sus "amigos directos" —los objetos con los que tiene una relación inmediata— y nunca con los amigos de sus amigos.
+La LoD dice que un objeto debería **conocer lo menos posible sobre la estructura interna de otros objetos**. Solo debería hablar con sus "amigos directos" (los objetos con los que tiene una relación inmediata) y nunca con los amigos de sus amigos.
 
 Surgió en 1987 en la Universidad Northeastern durante el proyecto Demeter. La idea central: **cada unidad de código debería tener conocimiento limitado sobre otras unidades**. Solo conoce a las que están directamente relacionadas con ella.
 
 > 🏘️ Si necesitás pedirle sal a tu vecino, golpeás su puerta y se la pedís a él directamente. No abrís su puerta, entrás a su cocina, abrís su alacena y sacás la sal vos. _Interactuás con tu vecino, no con su alacena. No necesitás saber cómo tiene organizada su cocina._
 
-● El anti-patrón: "train wreck" — cadena de llamadas
+● El anti-patrón: "train wreck" - cadena de llamadas
 
 order.getCustomer() · getAddress() · getCity() · toUpperCase()
 
-order — amigo directo ✓ customer — amigo de order ✗ address — amigo de customer ✗ city — amigo de address ✗
+order (amigo directo ✓ customer) amigo de order ✗ address (amigo de customer ✗ city) amigo de address ✗
 
 > 🚆 El nombre "train wreck" (choque de trenes) describe visualmente la cadena de puntos. Cada punto es un vagón que se engancha al anterior. Si cualquier eslabón devuelve `null`, el tren descarrila. _Y el código que escribe esta cadena ahora conoce la estructura interna de cuatro objetos distintos._
 > **TIP:** **La señal de alarma más rápida** Contá los puntos en una expresión. Un punto es casi siempre razonable. Dos puntos merece revisión. Tres o más puntos encadenados sobre objetos distintos es casi siempre una violación de LoD. (Los puntos sobre el mismo objeto en un fluent interface son la excepción, como veremos.)
@@ -65,13 +65,13 @@ Regla 04
 
 Componentes directos del objeto
 
-Los atributos de instancia de tu clase —las _propiedades que te pertenecen_— son amigos directos. No sus contenidos internos.
+Los atributos de instancia de tu clase (las _propiedades que te pertenecen_) son amigos directos. No sus contenidos internos.
 
 ✓ this.mailer.send()  
 ✗ this.mailer.smtp.connect()
 
-> 👥 Sos vos, tus herramientas (atributos), lo que te traen (parámetros) y lo que fabricás en el momento (objetos creados localmente). Todo lo demás son conocidos de tus conocidos —y con ellos _no hablás directamente._
-> **TIP:** **Lo que NO está en la lista** Los objetos que obtenés llamando un método de otro objeto no son amigos directos. Si `order.getCustomer()` te devuelve un `Customer`, ese `Customer` es un extraño —es amigo de `order`, no tuyo. No deberías llamar métodos sobre él directamente.
+> 👥 Sos vos, tus herramientas (atributos), lo que te traen (parámetros) y lo que fabricás en el momento (objetos creados localmente). Todo lo demás son conocidos de tus conocidos - y con ellos _no hablás directamente._
+> **TIP:** **Lo que NO está en la lista** Los objetos que obtenés llamando un método de otro objeto no son amigos directos. Si `order.getCustomer()` te devuelve un `Customer`, ese `Customer` es un extraño - es amigo de `order`, no tuyo. No deberías llamar métodos sobre él directamente.
 
 ## En el código
 
@@ -81,103 +81,103 @@ Reemplazar navegación por delegación
 
 La solución a casi todas las violaciones de LoD es la misma: en lugar de **navegar** a través de la estructura interna de un objeto para obtener lo que necesitás, le **delegás** la tarea a ese objeto directamente. Él sabe dónde está todo; vos no necesitás saberlo.
 
-Viola LoD — navegación
+Viola LoD - navegación
 
 ```js
 class ShippingService {
-  ship(order) {
-    // atravesamos 3 objetos
-    const city = order
-      .getCustomer()  // extraño
-      .getAddress()   // extraño
-      .getCity()      // extraño
+ ship(order) {
+ // atravesamos 3 objetos
+ const city = order
+.getCustomer() // extraño
+.getAddress() // extraño
+.getCity() // extraño
 
-    sendTo(city)
-  }
+ sendTo(city)
+ }
 }
 ```
 
-Respeta LoD — delegación
+Respeta LoD - delegación
 
 ```
 class Order {
-  // Order conoce al Customer
-  getShippingCity() {
-    return this.customer
-      .getCity() // Customer lo delega
-  }
+ // Order conoce al Customer
+ getShippingCity() {
+ return this.customer
+.getCity() // Customer lo delega
+ }
 }
 
 class ShippingService {
-  ship(order) {
-    sendTo(order.getShippingCity())
-  }
+ ship(order) {
+ sendTo(order.getShippingCity())
+ }
 }
 ```
 
-Viola LoD — decisiones sobre extraños
+Viola LoD - decisiones sobre extraños
 
 ```
 class Discount {
-  apply(order) {
-    // ¿cuánto sabe Discount
-    // sobre la estructura de Order?
-    if (order.getCustomer()
-               .getMembership()
-               .isGold()) {
-      order.setDiscount(0.2)
-    }
-  }
+ apply(order) {
+ // ¿cuánto sabe Discount
+ // sobre la estructura de Order?
+ if (order.getCustomer()
+.getMembership()
+.isGold()) {
+ order.setDiscount(0.2)
+ }
+ }
 }
 ```
 
-Respeta LoD — preguntar lo justo
+Respeta LoD - preguntar lo justo
 
 ```
 class Order {
-  isEligibleForGoldDiscount() {
-    return this.customer
-      .isGoldMember() // delega
-  }
+ isEligibleForGoldDiscount() {
+ return this.customer
+.isGoldMember() // delega
+ }
 }
 
 class Discount {
-  apply(order) {
-    if (order.isEligibleForGoldDiscount())
-      order.setDiscount(0.2)
-  }
+ apply(order) {
+ if (order.isEligibleForGoldDiscount())
+ order.setDiscount(0.2)
+ }
 }
 ```
 
-Viola LoD — config anidada
+Viola LoD - config anidada
 
 ```js
 // Demasiado conocimiento
 // sobre la estructura de config
 const host = app
-  .getConfig()
-  .getDatabase()
-  .getConnection()
-  .getHost()
+.getConfig()
+.getDatabase()
+.getConnection()
+.getHost()
 
 // Si cambia la estructura
 // de Config, rompés acá 💥
 ```
 
-Respeta LoD — fachada directa
+Respeta LoD - fachada directa
 
 ```js
 // Config expone lo que
 // los clientes necesitan
 class Config {
-  getDatabaseHost() {
-    return this.db.connection.host
-  }
+ getDatabaseHost() {
+ return this.db.connection.host
+ }
 }
 
 const host = app
-  .getConfig()
-  .getDatabaseHost() // ✓
+.getConfig()
+.getDatabaseHost() // ✓
 ```
 
 > **TIP:** **La regla del "un punto" como heurística** En la mayoría de los casos, una línea con más de un encadenamiento de puntos sobre objetos distintos merece revisión. El primer punto (sobre tu amigo directo) es siempre válido. El segundo ya puede ser una señal. A partir del tercero, casi seguro estás violando LoD.
@@ -190,43 +190,43 @@ Decí lo que querés que pase, no preguntes para decidir vos
 
 **Tell, Don't Ask** es el principio hermano de la LoD. En lugar de pedirle datos a un objeto para tomar una decisión externa sobre él, **le decís directamente lo que querés que haga**. El objeto usa sus propios datos para decidir, sin exponer su estructura interna.
 
-Ask — el problema
+Ask - el problema
 
 Pedir datos y decidir afuera
 
 Preguntás el estado interno del objeto, lo traés hacia afuera y tomás la decisión en el llamador. El objeto pierde el control sobre su propio comportamiento. _La lógica sobre el objeto vive fuera del objeto._
 
-Tell — la solución
+Tell - la solución
 
 Decir qué hacer, no cómo
 
 Le decís al objeto qué resultado querés. Él usa sus propios datos para decidir cómo lograrlo. _La lógica sobre el objeto vive dentro del objeto, donde debería estar._
 
-Ask — pedir para decidir afuera
+Ask - pedir para decidir afuera
 
 ```
 // Preguntamos el estado interno
 if (account.getBalance() >= amount
-    && account.isActive()
-    && !account.isFrozen()) {
-  account.setBalance(
-    account.getBalance() - amount
-  )
+ && account.isActive()
+ &&!account.isFrozen()) {
+ account.setBalance(
+ account.getBalance() - amount
+)
 }
 // El llamador sabe demasiado
 // sobre las reglas de Account 😬
 ```
 
-Tell — decir qué queremos
+Tell - decir qué queremos
 
 ```
 class Account {
-  debit(amount) {
-    // Account maneja sus reglas
-    if (!this.canDebit(amount))
-      throw new Error('fondos insuf.')
-    this.balance -= amount
-  }
+ debit(amount) {
+ // Account maneja sus reglas
+ if (!this.canDebit(amount))
+ throw new Error('fondos insuf.')
+ this.balance -= amount
+ }
 }
 
 account.debit(amount) // ✓
@@ -238,7 +238,7 @@ Cuándo sí es aceptable preguntar
 
 -   ✅
     
-    **Queries de solo lectura sin efecto** Preguntar el estado de un objeto para mostrarlo en una vista —sin tomar decisiones de negocio sobre él— es razonable. `order.getTotal()` para mostrar el precio en pantalla no viola Tell, Don't Ask porque no produce efectos secundarios basados en ese valor.
+    **Queries de solo lectura sin efecto** Preguntar el estado de un objeto para mostrarlo en una vista (sin tomar decisiones de negocio sobre él) es razonable. `order.getTotal()` para mostrar el precio en pantalla no viola Tell, Don't Ask porque no produce efectos secundarios basados en ese valor.
     
 -   ✅
     
@@ -251,7 +251,7 @@ Cuándo sí es aceptable preguntar
 
 Trampas comunes
 
-Cuándo LoD se aplica mal —en ambas direcciones
+Cuándo LoD se aplica mal - en ambas direcciones
 
 La LoD tiene dos tipos de errores: violaciones reales que aumentan el acoplamiento, y **aplicación excesiva** que genera métodos de delegación innecesarios. Como todo principio, requiere criterio.
 
@@ -261,7 +261,7 @@ La LoD tiene dos tipos de errores: violaciones reales que aumentan el acoplamien
     
 -   🌊
     
-    **Confundir fluent interfaces con violaciones de LoD** `QueryBuilder.select('*').from('users').where('active', true).limit(10)` no viola LoD. Cada método devuelve _el mismo objeto_ (`this`), no un objeto distinto. Los fluent interfaces son un patrón de diseño intencional —los puntos están sobre el mismo "amigo". La LoD habla de navegar a través de objetos distintos.
+    **Confundir fluent interfaces con violaciones de LoD** `QueryBuilder.select('*').from('users').where('active', true).limit(10)` no viola LoD. Cada método devuelve _el mismo objeto_ (`this`), no un objeto distinto. Los fluent interfaces son un patrón de diseño intencional - los puntos están sobre el mismo "amigo". La LoD habla de navegar a través de objetos distintos.
     
 -   🧱
     
@@ -269,7 +269,7 @@ La LoD tiene dos tipos de errores: violaciones reales que aumentan el acoplamien
     
 -   📦
     
-    **LoD aplicada a estructuras de datos puras** La LoD aplica a _objetos con comportamiento_, no a estructuras de datos simples. Acceder a `response.data.user.email` en una respuesta de API, un DTO o un JSON no es una violación —son datos planos sin lógica de negocio. No tiene sentido agregar métodos de delegación a una estructura de datos.
+    **LoD aplicada a estructuras de datos puras** La LoD aplica a _objetos con comportamiento_, no a estructuras de datos simples. Acceder a `response.data.user.email` en una respuesta de API, un DTO o un JSON no es una violación - son datos planos sin lógica de negocio. No tiene sentido agregar métodos de delegación a una estructura de datos.
     
 -   🔍
     

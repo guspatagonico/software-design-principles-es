@@ -5,7 +5,7 @@
 
 ---
 
-# KISS — Keep It Simple, Stupid
+# KISS - Keep It Simple, Stupid
 
 > La solución más simple que funciona casi siempre es la correcta. La complejidad innecesaria es deuda técnica disfrazada de sofisticación.
 
@@ -20,8 +20,8 @@ La simplicidad es una feature, no una limitación
 KISS es un principio de diseño que dice que los sistemas funcionan mejor cuando son simples. Surgió en la ingeniería aeronáutica de la Navy de EE.UU. en los años 60 y fue adoptado por el desarrollo de software porque aplica perfectamente: **el código que no existe no puede tener bugs**, y el código simple es más fácil de leer, testear y modificar.
 
 > ✏️ Un lápiz resuelve el problema de escribir en el espacio igual que un bolígrafo de tinta especialmente presurizado. La NASA usó el segundo. Los rusos usaron el lápiz. _La solución correcta no es la más sofisticada, sino la más adecuada al problema._
-> 🗓️ El código que escribís hoy lo va a leer alguien —probablemente vos mismo— dentro de seis meses a las 11 de la noche intentando arreglar un bug en producción. _Escribí para ese momento, no para impresionar en una entrevista._
-> **TIP:** **La pregunta clave** Antes de agregar una abstracción, un patrón o una capa nueva, preguntate: _¿esto resuelve un problema real que tengo ahora, o un problema imaginario que podría tener en el futuro?_ Si es lo segundo, probablemente estás violando KISS —y también YAGNI.
+> 🗓️ El código que escribís hoy lo va a leer alguien (probablemente vos mismo) dentro de seis meses a las 11 de la noche intentando arreglar un bug en producción. _Escribí para ese momento, no para impresionar en una entrevista._
+> **TIP:** **La pregunta clave** Antes de agregar una abstracción, un patrón o una capa nueva, preguntate: _¿esto resuelve un problema real que tengo ahora, o un problema imaginario que podría tener en el futuro?_ Si es lo segundo, probablemente estás violando KISS - y también YAGNI.
 
 ## En el código
 
@@ -36,10 +36,10 @@ Viola KISS
 ```js
 // ¿Qué hace esto?
 const result = data
-  .filter(x => !x.d)
-  .reduce((a, c) =>
-    ({...a, [c.k]: [...(a[c.k]||[]), c.v]}),
-  {})
+.filter(x =>!x.d)
+.reduce((a, c) =>
+ ({...a, [c.k]: [...(a[c.k]||[]), c.v]}),
+ {})
 
 // Hay que ejecutarlo en la mente
 // para saber qué hace 🤯
@@ -50,26 +50,26 @@ Respeta KISS
 ```js
 // Filtrá los activos
 const activeItems = data
-  .filter(item => !item.deleted)
+.filter(item =>!item.deleted)
 
 // Agrupalos por categoría
 const byCategory = {}
 for (const item of activeItems) {
-  const key = item.category
-  byCategory[key] ??= []
-  byCategory[key].push(item.value)
+ const key = item.category
+ byCategory[key]??= []
+ byCategory[key].push(item.value)
 }
 ```
 
-Viola KISS — sobre-abstracción
+Viola KISS - sobre-abstracción
 
 ```
 class UserValidatorFactoryStrategy {
-  createValidator(type) {
-    return new ValidatorFactory()
-      .getStrategy(type)
-      .build()
-  }
+ createValidator(type) {
+ return new ValidatorFactory()
+.getStrategy(type)
+.build()
+ }
 }
 // Tres clases para validar
 // un email 🙃
@@ -79,8 +79,8 @@ Respeta KISS
 
 ```js
 function isValidEmail(email) {
-  return email.includes('@')
-    && email.includes('.')
+ return email.includes('@')
+ && email.includes('.')
 }
 
 // Fácil de leer, fácil de
@@ -113,7 +113,7 @@ Una variable llamada `x` o `d` obliga a quien lee a ejecutar el código en la me
 
 Menos capas de abstracción
 
-Cada capa de abstracción es un costo cognitivo. Agregala solo cuando el beneficio —reuso, testabilidad, flexibilidad real— supera ese costo.
+Cada capa de abstracción es un costo cognitivo. Agregala solo cuando el beneficio (reuso, testabilidad, flexibilidad real) supera ese costo.
 
 04
 
@@ -133,7 +133,7 @@ Código borrable > código flexible
 
 El mejor código no es el más reutilizable, sino el más fácil de reemplazar cuando los requisitos cambian. La flexibilidad anticipada casi nunca apunta en la dirección correcta.
 
-> **TIP:** **El test del colega** Mostrále tu función a un colega sin contexto. Si en 30 segundos no puede decirte qué hace, la función viola KISS. El objetivo es código que se explica solo —el comentario más claro es no necesitar comentarios.
+> **TIP:** **El test del colega** Mostrále tu función a un colega sin contexto. Si en 30 segundos no puede decirte qué hace, la función viola KISS. El objetivo es código que se explica solo - el comentario más claro es no necesitar comentarios.
 
 ## Trampas
 
@@ -157,7 +157,7 @@ KISS no significa "escribí el código más corto posible" ni "no uses patrones"
     
 -   🔄
     
-    **Confundir KISS con código sin estructura** KISS no es excusa para escribir funciones de 400 líneas o archivos con todo mezclado. La estructura que ayuda a entender el código —separación en módulos, nombres claros, funciones cortas— es precisamente lo que hace el código simple.
+    **Confundir KISS con código sin estructura** KISS no es excusa para escribir funciones de 400 líneas o archivos con todo mezclado. La estructura que ayuda a entender el código (separación en módulos, nombres claros, funciones cortas) es precisamente lo que hace el código simple.
     
 -   ⚙️
     
@@ -188,10 +188,10 @@ No implementes funcionalidad hasta que realmente la necesitás. La funcionalidad
 
 No construyas el futuro imaginario
 
-YAGNI viene de Extreme Programming (XP) y dice algo simple pero difícil de seguir: **no implementes funcionalidad hasta que realmente la necesitás**. El problema no es que los devs sean malos prediciendo el futuro —es que nadie puede predecirlo bien.
+YAGNI viene de Extreme Programming (XP) y dice algo simple pero difícil de seguir: **no implementes funcionalidad hasta que realmente la necesitás**. El problema no es que los devs sean malos prediciendo el futuro - es que nadie puede predecirlo bien.
 
 > 🏠 No construís el garage antes de tener auto. No ponés tres habitaciones extra "por si viene gente". Construís lo que necesitás ahora, con espacio para crecer, pero sin construir el crecimiento de antemano. _Cada metro cuadrado tiene un costo de mantenimiento._
-> 📦 En software, el código que escribís "por si acaso" necesita ser mantenido, testeado, documentado y entendido por el próximo dev. Y el 80% de las veces, la funcionalidad anticipada nunca se usa —o cuando sí se usa, los requisitos son completamente distintos a los que imaginaste. _Escribiste código inútil que ahora es una carga._
+> 📦 En software, el código que escribís "por si acaso" necesita ser mantenido, testeado, documentado y entendido por el próximo dev. Y el 80% de las veces, la funcionalidad anticipada nunca se usa - o cuando sí se usa, los requisitos son completamente distintos a los que imaginaste. _Escribiste código inútil que ahora es una carga._
 > **TIP:** **La pregunta de YAGNI** Antes de agregar algo, preguntate: _"¿Hay un requisito concreto hoy que justifique esto?"_. Si la respuesta es "sería útil si...", "en el futuro podría...", o "qué pasa si...", es YAGNI. Cerrá el editor y seguí con lo que sí se necesita.
 
 ## En el código
@@ -206,15 +206,15 @@ Viola YAGNI
 
 ```
 class PaymentProcessor {
-  // Solo usamos Stripe hoy
-  processStripe(amount) { … }
+ // Solo usamos Stripe hoy
+ processStripe(amount) { … }
 
-  // "Por si acaso" agregamos
-  processPaypal(amount) { … }
-  processMercadoPago(a) { … }
-  processBitcoin(amount) { … }
-  processBankTransfer(a) { … }
-  // Nadie los pidió 😬
+ // "Por si acaso" agregamos
+ processPaypal(amount) { … }
+ processMercadoPago(a) { … }
+ processBitcoin(amount) { … }
+ processBankTransfer(a) { … }
+ // Nadie los pidió 😬
 }
 ```
 
@@ -222,29 +222,29 @@ Respeta YAGNI
 
 ```
 class PaymentProcessor {
-  process(amount) {
-    // Solo Stripe, que es
-    // lo que necesitamos hoy
-    return stripe.charge(amount)
-  }
+ process(amount) {
+ // Solo Stripe, que es
+ // lo que necesitamos hoy
+ return stripe.charge(amount)
+ }
 }
 
 // Cuando llegue el requisito
 // de Paypal, lo agregamos ✓
 ```
 
-Viola YAGNI — parámetros fantasma
+Viola YAGNI - parámetros fantasma
 
 ```js
 function getUser(
-  id,
-  includeDeleted = false,
-  withPermissions = false,
-  format = 'json',
-  version = 1
+ id,
+ includeDeleted = false,
+ withPermissions = false,
+ format = 'json',
+ version = 1
 ) {
-  // Los últimos 4 parámetros
-  // nunca se usan en la app
+ // Los últimos 4 parámetros
+ // nunca se usan en la app
 }
 ```
 
@@ -252,9 +252,9 @@ Respeta YAGNI
 
 ```js
 function getUser(id) {
-  // Hace exactamente lo que
-  // se necesita ahora
-  return db.find('users', id)
+ // Hace exactamente lo que
+ // se necesita ahora
+ return db.find('users', id)
 }
 
 // Cuando necesitemos filtrar
@@ -269,11 +269,11 @@ function getUser(id) {
 
 YAGNI no es excusa para ignorar el contexto
 
-YAGNI tiene límites. Hay situaciones donde **la anticipación razonada** —distinta a la especulación— está justificada. La clave es que el requisito futuro sea **conocido y comprometido**, no imaginado.
+YAGNI tiene límites. Hay situaciones donde **la anticipación razonada** (distinta a la especulación) está justificada. La clave es que el requisito futuro sea **conocido y comprometido**, no imaginado.
 
 -   📋
     
-    **El requisito está en el roadmap confirmado** Si el Product Owner ya comprometió que en dos semanas van a necesitar soporte multi-idioma, tiene sentido diseñar las strings de texto de forma externalizable desde ahora. El requisito no es especulativo —es conocido y tiene fecha.
+    **El requisito está en el roadmap confirmado** Si el Product Owner ya comprometió que en dos semanas van a necesitar soporte multi-idioma, tiene sentido diseñar las strings de texto de forma externalizable desde ahora. El requisito no es especulativo - es conocido y tiene fecha.
     
 -   💸
     
@@ -281,11 +281,11 @@ YAGNI tiene límites. Hay situaciones donde **la anticipación razonada** —dis
     
 -   🔐
     
-    **Seguridad y privacidad** Ciertos controles de seguridad son más fáciles de diseñar desde el principio que de retrofitear. El cifrado de datos sensibles, el manejo de tokens, la auditoría de accesos —no son funcionalidad especulativa, son requerimientos implícitos de cualquier sistema.
+    **Seguridad y privacidad** Ciertos controles de seguridad son más fáciles de diseñar desde el principio que de retrofitear. El cifrado de datos sensibles, el manejo de tokens, la auditoría de accesos - no son funcionalidad especulativa, son requerimientos implícitos de cualquier sistema.
     
 -   📈
     
-    **Escala conocida y cercana** Si sabés que el sistema va a pasar de 100 a 100.000 usuarios en seis meses —porque hay un contrato firmado— diseñar para esa escala ahora es razonable. Si es una esperanza, no lo es.
+    **Escala conocida y cercana** Si sabés que el sistema va a pasar de 100 a 100.000 usuarios en seis meses (porque hay un contrato firmado) diseñar para esa escala ahora es razonable. Si es una esperanza, no lo es.
     
 
 > **TIP:** **La distinción clave** _Especulación_ es "podría pasar". _Anticipación razonada_ es "va a pasar y tenemos evidencia concreta". YAGNI se aplica a la primera. La segunda es simplemente buen diseño informado.
@@ -304,7 +304,7 @@ Nadie viola YAGNI pensando que está haciendo algo malo. Las violaciones siempre
     
 -   🌐
     
-    **Internacionalización desde el día uno sin usuarios internacionales** Externalizar todas las strings, agregar soporte de locales, manejar plurales en varios idiomas —cuando la app solo va a estar en español y no hay ningún plan concreto de expandirse.
+    **Internacionalización desde el día uno sin usuarios internacionales** Externalizar todas las strings, agregar soporte de locales, manejar plurales en varios idiomas - cuando la app solo va a estar en español y no hay ningún plan concreto de expandirse.
     
 -   ⚙️
     
@@ -346,22 +346,22 @@ El problema real no es el copy-paste, es la sincronización
 
 La duplicación de código es un síntoma. El problema de fondo es que cuando la lógica cambia en un lugar pero no en el otro, el sistema queda en un **estado inconsistente que es difícil de detectar**.
 
-Viola DRY — lógica repetida
+Viola DRY - lógica repetida
 
 ```js
 function createOrder(items) {
-  const total = items
-    .reduce((s, i) => s + i.price, 0)
-  const tax = total * 0.21
-  return { total, tax }
+ const total = items
+.reduce((s, i) => s + i.price, 0)
+ const tax = total * 0.21
+ return { total, tax }
 }
 
 function createQuote(items) {
-  const total = items
-    .reduce((s, i) => s + i.price, 0)
-  const tax = total * 0.21
-  // IVA duplicado en dos lugares
-  return { total, tax, valid: true }
+ const total = items
+.reduce((s, i) => s + i.price, 0)
+ const tax = total * 0.21
+ // IVA duplicado en dos lugares
+ return { total, tax, valid: true }
 }
 ```
 
@@ -371,20 +371,20 @@ Respeta DRY
 const TAX_RATE = 0.21
 
 function calcTotals(items) {
-  const total = items
-    .reduce((s, i) => s + i.price, 0)
-  return { total, tax: total * TAX_RATE }
+ const total = items
+.reduce((s, i) => s + i.price, 0)
+ return { total, tax: total * TAX_RATE }
 }
 
 function createOrder(items) {
-  return calcTotals(items)
+ return calcTotals(items)
 }
 function createQuote(items) {
-  return { ...calcTotals(items), valid: true }
+ return {...calcTotals(items), valid: true }
 }
 ```
 
-Viola DRY — schema duplicado
+Viola DRY - schema duplicado
 
 ```
 // En la BD (migration)
@@ -405,7 +405,7 @@ Respeta DRY
 ```js
 // Una fuente de verdad
 const USER_SCHEMA = {
-  name: { maxLength: 100 }
+ name: { maxLength: 100 }
 }
 
 // Backend lee de ahí
@@ -424,7 +424,7 @@ DRY, WET y DAMP
 
 No toda duplicación es mala
 
-DRY tiene dos opuestos conocidos. **WET** (Write Everything Twice) es la violación directa. **DAMP** (Descriptive And Meaningful Phrases) es una alternativa deliberada para contextos donde la claridad importa más que la deduplicación —especialmente en tests.
+DRY tiene dos opuestos conocidos. **WET** (Write Everything Twice) es la violación directa. **DAMP** (Descriptive And Meaningful Phrases) es una alternativa deliberada para contextos donde la claridad importa más que la deduplicación - especialmente en tests.
 
 DRY
 
@@ -444,37 +444,37 @@ Descriptive And Meaningful Phrases
 
 Duplicación aceptada cuando hace el código más legible. _Especialmente en tests:_ un test debe poder leerse sin saltar a helpers externos. La claridad tiene más valor que la deduplicación.
 
-DRY extremo en tests — problema
+DRY extremo en tests - problema
 
 ```js
 // Helper compartido, "DRY"
 function makeUser(overrides) {
-  return { id: 1, role: 'user', ...overrides }
+ return { id: 1, role: 'user',...overrides }
 }
 
 test('admin can delete', () => {
-  const u = makeUser({ role: 'admin' })
-  // ¿Qué tiene este usuario?
-  // Hay que ir a leer makeUser()
+ const u = makeUser({ role: 'admin' })
+ // ¿Qué tiene este usuario?
+ // Hay que ir a leer makeUser()
 })
 ```
 
-DAMP en tests — preferible
+DAMP en tests - preferible
 
 ```js
 test('admin can delete', () => {
-  const user = {
-    id: 42,
-    role: 'admin',
-    active: true
-  }
-  // Todo el contexto está acá,
-  // el test se lee solo ✓
-  expect(canDelete(user)).toBe(true)
+ const user = {
+ id: 42,
+ role: 'admin',
+ active: true
+ }
+ // Todo el contexto está acá,
+ // el test se lee solo ✓
+ expect(canDelete(user)).toBe(true)
 })
 ```
 
-> **TIP:** **Regla práctica** Usá DRY en código de producción: lógica de negocio, validaciones, constantes, esquemas. Usá DAMP en tests: cada test debería ser autocontenido y legible sin contexto externo. Los tests son documentación —la claridad es más importante que evitar la repetición.
+> **TIP:** **Regla práctica** Usá DRY en código de producción: lógica de negocio, validaciones, constantes, esquemas. Usá DAMP en tests: cada test debería ser autocontenido y legible sin contexto externo. Los tests son documentación - la claridad es más importante que evitar la repetición.
 
 ## Trampas
 
@@ -494,7 +494,7 @@ El error más común con DRY es **abstraer demasiado temprano** basándose en si
     
 -   🌀
     
-    **La abstracción prematura por la regla de tres** Hay una heurística popular que dice "cuando copias algo por tercera vez, abstraelo". Es razonable como punto de partida, pero el número de copias no determina si algo merece una abstracción —lo determina si representan el mismo conocimiento o no.
+    **La abstracción prematura por la regla de tres** Hay una heurística popular que dice "cuando copias algo por tercera vez, abstraelo". Es razonable como punto de partida, pero el número de copias no determina si algo merece una abstracción - lo determina si representan el mismo conocimiento o no.
     
 -   🧩
     
@@ -518,7 +518,7 @@ Single Responsibility
 
 Una clase, una razón para cambiar
 
-Una clase debe tener **una sola responsabilidad**. Si una clase hace demasiadas cosas, cualquier cambio en una de ellas puede romper las otras —y la clase se vuelve imposible de testear de forma aislada.
+Una clase debe tener **una sola responsabilidad**. Si una clase hace demasiadas cosas, cualquier cambio en una de ellas puede romper las otras - y la clase se vuelve imposible de testear de forma aislada.
 
 > 🍳 Pensalo así: en un restaurante, el cocinero cocina, el mozo atiende y el cajero cobra. Si el cocinero también cobrara y atendiera las mesas, un problema en cocina paralizaría todo el servicio. _Cada rol tiene su propia razón de cambiar._
 
@@ -526,17 +526,17 @@ Viola SRP
 
 ```
 class User {
-  getName() { /* … */ }
+ getName() { /* … */ }
 
-  saveToDatabase() {
-    // guarda en BD
-    // ¿por qué User sabe de BD?
-  }
+ saveToDatabase() {
+ // guarda en BD
+ // ¿por qué User sabe de BD?
+ }
 
-  sendWelcomeEmail() {
-    // envía email
-    // ¿y también de emails?
-  }
+ sendWelcomeEmail() {
+ // envía email
+ // ¿y también de emails?
+ }
 }
 ```
 
@@ -544,17 +544,17 @@ Respeta SRP
 
 ```
 class User {
-  getName() { /* … */ }
+ getName() { /* … */ }
 }
 
 class UserRepository {
-  save(user) { /* solo BD */ }
+ save(user) { /* solo BD */ }
 }
 
 class Mailer {
-  sendWelcome(user) {
-    /* solo emails */
-  }
+ sendWelcome(user) {
+ /* solo emails */
+ }
 }
 ```
 
@@ -574,14 +574,14 @@ Viola OCP
 
 ```
 class DiscountCalc {
-  calc(type, price) {
-    if (type === 'vip')
-      return price * 0.8
-    if (type === 'promo')
-      return price * 0.9
-    // cada nuevo descuento
-    // edita esta clase 😬
-  }
+ calc(type, price) {
+ if (type === 'vip')
+ return price * 0.8
+ if (type === 'promo')
+ return price * 0.9
+ // cada nuevo descuento
+ // edita esta clase 😬
+ }
 }
 ```
 
@@ -589,16 +589,16 @@ Respeta OCP
 
 ```js
 class VipDiscount {
-  apply(p) { return p * 0.8 }
+ apply(p) { return p * 0.8 }
 }
 class PromoDiscount {
-  apply(p) { return p * 0.9 }
+ apply(p) { return p * 0.9 }
 }
 // nuevo descuento = nueva clase
 // sin tocar las anteriores ✓
 
 function applyDiscount(disc, p) {
-  return disc.apply(p)
+ return disc.apply(p)
 }
 ```
 
@@ -618,16 +618,16 @@ Viola LSP
 
 ```
 class Bird {
-  fly() { /* vuela */ }
+ fly() { /* vuela */ }
 }
 
 class Penguin extends Bird {
-  fly() {
-    throw "¡No puedo volar!"
-    // rompe el contrato 💥
-    // todo código que use Bird
-    // ahora puede explotar
-  }
+ fly() {
+ throw "¡No puedo volar!"
+ // rompe el contrato 💥
+ // todo código que use Bird
+ // ahora puede explotar
+ }
 }
 ```
 
@@ -637,12 +637,12 @@ Respeta LSP
 class Bird { /* base */ }
 
 class FlyingBird extends Bird {
-  fly() { /* vuela ✓ */ }
+ fly() { /* vuela ✓ */ }
 }
 
 class Penguin extends Bird {
-  swim() { /* nada ✓ */ }
-  // no hereda fly()
+ swim() { /* nada ✓ */ }
+ // no hereda fly()
 }
 ```
 
@@ -654,7 +654,7 @@ Interface Segregation
 
 Interfaces específicas, no monolíticas
 
-Es mejor tener **muchas interfaces pequeñas** que una sola grande. Una clase no debería verse obligada a implementar métodos que nunca va a usar —eso genera código vacío o que lanza errores.
+Es mejor tener **muchas interfaces pequeñas** que una sola grande. Una clase no debería verse obligada a implementar métodos que nunca va a usar - eso genera código vacío o que lanza errores.
 
 > 🎛️ Un control remoto de TV tiene botones para TV. No tiene freno de mano ni limpiaparabrisas. Si tuviera de todo, sería imposible de usar. _Cada dispositivo tiene solo los controles que le corresponden._
 
@@ -662,10 +662,10 @@ Viola ISP
 
 ```
 interface Animal {
-  eat()
-  fly()  // los perros no vuelan
-  swim() // los pájaros no nadan
-  bark() // los peces no ladran
+ eat()
+ fly() // los perros no vuelan
+ swim() // los pájaros no nadan
+ bark() // los peces no ladran
 }
 
 // Todos implementan métodos
@@ -676,13 +676,13 @@ Respeta ISP
 
 ```
 interface Flyable {
-  fly()
+ fly()
 }
 interface Swimmable {
-  swim()
+ swim()
 }
 interface Barkable {
-  bark()
+ bark()
 }
 // Cada clase implementa
 // solo lo que necesita ✓
@@ -704,16 +704,16 @@ Viola DIP
 
 ```
 class OrderService {
-  constructor() {
-    this.db = new MySQLDatabase()
-    // acoplado a MySQL 💥
-    // ¿cambio a Postgres?
-    // hay que editar esta clase
-  }
+ constructor() {
+ this.db = new MySQLDatabase()
+ // acoplado a MySQL 💥
+ // ¿cambio a Postgres?
+ // hay que editar esta clase
+ }
 
-  createOrder(data) {
-    this.db.save(data)
-  }
+ createOrder(data) {
+ this.db.save(data)
+ }
 }
 ```
 
@@ -721,15 +721,15 @@ Respeta DIP
 
 ```
 class OrderService {
-  constructor(db: Database) {
-    this.db = db
-    // recibe cualquier impl.
-    // que cumpla la interfaz ✓
-  }
+ constructor(db: Database) {
+ this.db = db
+ // recibe cualquier impl.
+ // que cumpla la interfaz ✓
+ }
 
-  createOrder(data) {
-    this.db.save(data)
-  }
+ createOrder(data) {
+ this.db.save(data)
+ }
 }
 ```
 
@@ -749,7 +749,7 @@ Cada unidad de código debería ocuparse de una sola preocupación. Separá el q
 
 Una preocupación, un lugar
 
-SoC dice que cada módulo, clase o función debería tener **una única preocupación**: una dimensión del problema que resuelve. Una "preocupación" es cualquier aspecto del sistema que tiene razones propias para cambiar —la lógica de negocio, la presentación, el acceso a datos, la orquestación.
+SoC dice que cada módulo, clase o función debería tener **una única preocupación**: una dimensión del problema que resuelve. Una "preocupación" es cualquier aspecto del sistema que tiene razones propias para cambiar - la lógica de negocio, la presentación, el acceso a datos, la orquestación.
 
 Es el principio más fundamental del diseño de software. SRP de SOLID es SoC aplicado a clases. Los principios de cohesión de paquetes son SoC aplicado a módulos. MVC, Clean Architecture y Hexagonal son SoC aplicado a la arquitectura entera.
 
@@ -812,28 +812,28 @@ El problema visible antes de volverse invisible
 
 Las violaciones de SoC en el código son fáciles de detectar cuando son nuevas y **muy difíciles de ver cuando llevan meses** acumulándose. Lo que empieza como "agrego esto acá para que sea más rápido" termina siendo un sistema donde nada se puede cambiar de forma aislada.
 
-Viola SoC — todo mezclado
+Viola SoC - todo mezclado
 
 ```js
 // ruta HTTP que hace de todo
 app.post('/checkout', async (req, res) => {
-  // validación
-  if (!req.body.items?.length)
-    return res.status(400).json(...)
+ // validación
+ if (!req.body.items?.length)
+ return res.status(400).json(...)
 
-  // lógica de negocio
-  const total = req.body.items
-    .reduce((s,i) => s + i.price, 0)
-  const tax = total * 0.21
+ // lógica de negocio
+ const total = req.body.items
+.reduce((s,i) => s + i.price, 0)
+ const tax = total * 0.21
 
-  // acceso a datos
-  await db.query(
-    'INSERT INTO orders ...', [...]
-  )
-  // envío de email
-  await sendgrid.send({ to: ... })
+ // acceso a datos
+ await db.query(
+ 'INSERT INTO orders...', [...]
+)
+ // envío de email
+ await sendgrid.send({ to:... })
 
-  res.json({ ok: true })
+ res.json({ ok: true })
 })
 ```
 
@@ -842,33 +842,33 @@ Respeta SoC
 ```js
 // ruta: solo orquesta (cuándo)
 app.post('/checkout', async (req, res) => {
-  const result = await
-    checkoutService.process(req.body)
-  res.json(result)
+ const result = await
+ checkoutService.process(req.body)
+ res.json(result)
 })
 
 // servicio: orquesta pasos (cuándo)
 async process(data) {
-  const order = Order.create(data) // qué
-  await orderRepo.save(order)    // cómo
-  await mailer.sendConfirm(order)// cómo
-  return order
+ const order = Order.create(data) // qué
+ await orderRepo.save(order)  // cómo
+ await mailer.sendConfirm(order)// cómo
+ return order
 }
 ```
 
-Viola SoC — lógica en la vista
+Viola SoC - lógica en la vista
 
 ```js
 // componente React con
 // lógica de negocio dentro
 function OrderSummary({ items }) {
-  // esto no debería estar acá
-  const tax = items
-    .reduce((s,i) => s + i.price, 0)
-    * 0.21
-  const free = total > 500
+ // esto no debería estar acá
+ const tax = items
+.reduce((s,i) => s + i.price, 0)
+ * 0.21
+ const free = total > 500
 
-  return <div>{tax}</div>
+ return <div>{tax}</div>
 }
 ```
 
@@ -877,15 +877,15 @@ Respeta SoC
 ```js
 // dominio: calcula (qué)
 class Order {
-  calcTax()      { return ... }
-  hasFreeShip()  { return ... }
+ calcTax() { return... }
+ hasFreeShip() { return... }
 }
 
 // vista: solo presenta (cómo)
 function OrderSummary({ order }) {
-  return <div>
-    {order.calcTax()}
-  </div>
+ return <div>
+ {order.calcTax()}
+ </div>
 }
 ```
 
@@ -931,7 +931,7 @@ Presentación · Negocio · Datos
 
 Organiza el sistema en capas horizontales donde **cada capa solo depende de la capa inmediatamente inferior**. La capa de presentación no sabe nada de base de datos; la capa de datos no sabe nada de la interfaz de usuario.
 
-Presentación UI, API, CLI — entrada/salida
+Presentación UI, API, CLI - entrada/salida
 
 ↓
 
@@ -951,7 +951,7 @@ El dominio en el centro, la infraestructura afuera
 
 ▾
 
-Alistair Cockburn (2005). El **dominio vive en el centro** y no depende de nada externo. Define _puertos_ —interfaces— que describen lo que necesita. Los _adaptadores_ implementan esas interfaces conectando con el mundo real: base de datos, HTTP, email, eventos.
+Alistair Cockburn (2005). El **dominio vive en el centro** y no depende de nada externo. Define _puertos_ (interfaces) que describen lo que necesita. Los _adaptadores_ implementan esas interfaces conectando con el mundo real: base de datos, HTTP, email, eventos.
 
 Adaptadores externos HTTP, BD, queues, servicios externos
 
@@ -973,7 +973,7 @@ La regla de dependencia: siempre hacia adentro
 
 ▾
 
-Robert C. Martin (2012). Formaliza Hexagonal con una regla estricta: **las dependencias solo pueden apuntar hacia adentro**. El núcleo —entidades y casos de uso— no importa nada del exterior. Los frameworks, la base de datos y la UI son detalles que se enchufan desde afuera.
+Robert C. Martin (2012). Formaliza Hexagonal con una regla estricta: **las dependencias solo pueden apuntar hacia adentro**. El núcleo (entidades y casos de uso) no importa nada del exterior. Los frameworks, la base de datos y la UI son detalles que se enchufan desde afuera.
 
 El beneficio principal: podés reemplazar el framework web, la base de datos o la UI **sin tocar una línea de lógica de negocio**. Los casos de uso son testeables con tests unitarios puros, sin mocks de infraestructura.
 
@@ -1009,7 +1009,7 @@ Las violaciones de SoC raramente son decisiones conscientes. Son **atajos razona
     
 -   🌀
     
-    **Separación por capa técnica en lugar de por preocupación** Una carpeta `services/` con 40 archivos que mezclan lógica de órdenes, de usuarios, de pagos y de notificaciones no es separación de preocupaciones —es separación de tipos de archivo. Una preocupación verdadera es "todo lo relacionado con el ciclo de vida de un pedido", no "todos los archivos que son services".
+    **Separación por capa técnica en lugar de por preocupación** Una carpeta `services/` con 40 archivos que mezclan lógica de órdenes, de usuarios, de pagos y de notificaciones no es separación de preocupaciones - es separación de tipos de archivo. Una preocupación verdadera es "todo lo relacionado con el ciclo de vida de un pedido", no "todos los archivos que son services".
 
 ---
 
@@ -1025,7 +1025,7 @@ Ocultá las decisiones de diseño que probablemente van a cambiar. Lo que no es 
 
 Lo que no ves no te puede romper
 
-Information Hiding dice que cada módulo debería **ocultar sus decisiones de diseño internas** detrás de una interfaz estable. Los detalles de implementación —cómo almacena datos, qué algoritmo usa, qué estructura interna tiene— no deberían ser visibles para nadie más.
+Information Hiding dice que cada módulo debería **ocultar sus decisiones de diseño internas** detrás de una interfaz estable. Los detalles de implementación (cómo almacena datos, qué algoritmo usa, qué estructura interna tiene) no deberían ser visibles para nadie más.
 
 El principio lo formuló **David Parnas en 1972** como criterio para modularizar sistemas: cada módulo debería ser responsable de ocultar una _decisión de diseño que es probable que cambie_. Si algo cambia, solo ese módulo debería verse afectado.
 
@@ -1059,7 +1059,7 @@ Lo que el mundo ve
 
 El resto no existe para el cliente. Cambiar la implementación interna no le afecta.
 
-> ☕ Cuando usás un café de cápsula no sabés qué temperatura exacta calienta el agua, qué presión de extracción usa ni qué materiales tienen los conductos internos. Usás la interfaz —botón, taza, cápsula— y el resto está oculto. _Si el fabricante cambia el sistema de calentamiento en la próxima versión, vos seguís usando el mismo botón._
+> ☕ Cuando usás un café de cápsula no sabés qué temperatura exacta calienta el agua, qué presión de extracción usa ni qué materiales tienen los conductos internos. Usás la interfaz (botón, taza, cápsula) y el resto está oculto. _Si el fabricante cambia el sistema de calentamiento en la próxima versión, vos seguís usando el mismo botón._
 > 🔑 Information Hiding no es solo sobre `private` y `public`. Es una _decisión de diseño_: qué aspectos del módulo son su contrato estable con el mundo, y cuáles son detalles que pueden cambiar libremente sin romper a nadie.
 > **TIP:** **La pregunta de Parnas** Al diseñar un módulo, preguntate: _"¿Qué decisiones de diseño podrían cambiar en el futuro?"_ Esas son exactamente las cosas que deberías ocultar. Lo que exponés es tu contrato: debería ser estable. Lo que ocultás son tus detalles de implementación: pueden cambiar libremente.
 
@@ -1069,7 +1069,7 @@ El resto no existe para el cliente. Cambiar la implementación interna no le afe
 
 Las decisiones que probablemente van a cambiar
 
-Parnas fue muy específico: lo que hay que ocultar son las **decisiones de diseño que son propensas a cambiar**. No todo lo interno merece ocultarse por el principio en sí —se oculta lo que, si estuviera expuesto, crearía acoplamiento que hace costosos los cambios futuros.
+Parnas fue muy específico: lo que hay que ocultar son las **decisiones de diseño que son propensas a cambiar**. No todo lo interno merece ocultarse por el principio en sí - se oculta lo que, si estuviera expuesto, crearía acoplamiento que hace costosos los cambios futuros.
 
 🗄️ Mecanismo de almacenamiento
 
@@ -1109,7 +1109,7 @@ Los campos internos de un objeto que forman su estado. Exponerlos directamente p
 
 ✗ exponer order.status = 'cancelled'
 
-✓ ocultar order.cancel() — valida y cambia
+✓ ocultar order.cancel() - valida y cambia
 
 🔧 Configuración y parámetros técnicos
 
@@ -1129,70 +1129,70 @@ Diseñar interfaces, no implementaciones
 
 Information Hiding se aplica en cada capa: en el modificador de acceso de un campo, en el diseño de una API, en la estructura de un módulo. La pregunta siempre es la misma: **¿quién necesita saber esto y por qué?**
 
-Viola IH — estado expuesto
+Viola IH - estado expuesto
 
 ```
 class ShoppingCart {
-  items = []       // público 😬
-  total = 0       // público 😬
-  discount = 0    // público 😬
+ items = [] // público 😬
+ total = 0 // público 😬
+ discount = 0 // público 😬
 }
 
 // El cliente puede hacer:
 cart.items.push({ price: -999 })
-cart.total = 0  // bypass gratis
+cart.total = 0 // bypass gratis
 ```
 
-Respeta IH — estado encapsulado
+Respeta IH - estado encapsulado
 
 ```
 class ShoppingCart {
-  #items = []     // privado ✓
-  #discount = 0   // privado ✓
+ #items = [] // privado ✓
+ #discount = 0 // privado ✓
 
-  addItem(item) {
-    this.#items.push(item)
-  }
-  getTotal() {
-    return this.#items
-      .reduce((s,i)=>s+i.price,0)
-      * (1 - this.#discount)
-  }
+ addItem(item) {
+ this.#items.push(item)
+ }
+ getTotal() {
+ return this.#items
+.reduce((s,i)=>s+i.price,0)
+ * (1 - this.#discount)
+ }
 }
 ```
 
-Viola IH — implementación filtrada
+Viola IH - implementación filtrada
 
 ```js
 // El módulo expone
 // detalles de SQL
 async function getOrders(filters) {
-  return db.query(`
-    SELECT o.*, c.name, c.email
-    FROM orders o
-    JOIN customers c ON c.id = o.cid
-    WHERE o.status = $1
-  `, [filters.status])
+ return db.query(`
+ SELECT o.*, c.name, c.email
+ FROM orders o
+ JOIN customers c ON c.id = o.cid
+ WHERE o.status = $1
+ `, [filters.status])
 }
 // el llamador recibe filas crudas
 // y sabe del esquema de BD 😬
 ```
 
-Respeta IH — interfaz de dominio
+Respeta IH - interfaz de dominio
 
 ```js
 // El módulo retorna objetos
 // de dominio, no filas SQL
 async function getOrders(filters) {
-  const rows = await db.query(...)
-  return rows.map(toOrder)
+ const rows = await db.query(...)
+ return rows.map(toOrder)
 }
 
 // toOrder() es privado al módulo
 // El esquema SQL no se filtra ✓
 ```
 
-Modificadores de visibilidad — cuándo usar cada uno
+Modificadores de visibilidad - cuándo usar cada uno
 
 Visibilidad
 
@@ -1210,7 +1210,7 @@ protected
 
 La clase y sus subclases
 
-Comportamiento que las subclases necesitan extender pero que no es parte del contrato público. Usarlo con criterio —es una forma de acoplamiento con la jerarquía.
+Comportamiento que las subclases necesitan extender pero que no es parte del contrato público. Usarlo con criterio - es una forma de acoplamiento con la jerarquía.
 
 internal / package
 
@@ -1230,7 +1230,7 @@ El contrato estable del módulo. Solo lo que el cliente _necesita_ para usar el 
 
 Encapsulación vs Information Hiding
 
-No son lo mismo — aunque van siempre juntos
+No son lo mismo - aunque van siempre juntos
 
 Son conceptos distintos que se confunden habitualmente. **Encapsulación** es el mecanismo del lenguaje para agrupar datos y comportamiento. **Information Hiding** es el principio de diseño que decide qué ocultar y por qué. La encapsulación es la herramienta; IH es la intención.
 
@@ -1238,7 +1238,7 @@ Encapsulación
 
 El mecanismo
 
-Agrupar datos y las operaciones que los manejan en una misma unidad —la clase. Es una **característica del lenguaje**: clases, objetos, métodos, campos.  
+Agrupar datos y las operaciones que los manejan en una misma unidad - la clase. Es una **característica del lenguaje**: clases, objetos, métodos, campos.  
   
 La encapsulación te _da la capacidad_ de ocultar cosas. No te dice qué ocultar ni por qué. Podés tener encapsulación perfecta (todo en clases) y violar completamente Information Hiding (todo público).
 
@@ -1250,7 +1250,7 @@ El principio
 
 Decidir conscientemente qué aspectos del módulo son públicos y cuáles son detalles de implementación que deben estar ocultos. Es una **decisión de diseño**.  
   
-IH te dice _qué_ ocultar y _por qué_: las decisiones que pueden cambiar. Puede aplicarse incluso sin POO —en módulos, en APIs, en interfaces de microservicios.
+IH te dice _qué_ ocultar y _por qué_: las decisiones que pueden cambiar. Puede aplicarse incluso sin POO - en módulos, en APIs, en interfaces de microservicios.
 
 Diseño → Contratos estables, detalles variables ocultos
 
@@ -1272,7 +1272,7 @@ El objetivo real
 
 Clase bien diseñada: los campos son privados, la interfaz pública es mínima y estable. _El mecanismo sirve al principio._
 
-> **TIP:** **La distinción en una sola oración** Encapsulación te permite poner un candado en la puerta. Information Hiding te dice qué poner detrás de ese candado —y más importante: _por qué_.
+> **TIP:** **La distinción en una sola oración** Encapsulación te permite poner un candado en la puerta. Information Hiding te dice qué poner detrás de ese candado - y más importante: _por qué_.
 
 ## Trampas
 
@@ -1280,11 +1280,11 @@ Trampas comunes
 
 Cuando la interfaz pública filtra más de lo que debería
 
-Las violaciones de Information Hiding se llaman **"leaky abstractions"** —abstracciones que filtran detalles de implementación hacia afuera. El código que depende de esos detalles se rompe cuando la implementación cambia.
+Las violaciones de Information Hiding se llaman **"leaky abstractions"** - abstracciones que filtran detalles de implementación hacia afuera. El código que depende de esos detalles se rompe cuando la implementación cambia.
 
 -   🔓
     
-    **Getters y setters para todos los campos** Agregar automáticamente `getX()` y `setX()` para cada campo de la clase no es Information Hiding —es exponer todos los campos con nombres más largos. Un setter que solo asigna un valor hace que el campo sea efectivamente público. Los métodos deberían exponer _comportamiento_, no acceso al estado interno.
+    **Getters y setters para todos los campos** Agregar automáticamente `getX()` y `setX()` para cada campo de la clase no es Information Hiding - es exponer todos los campos con nombres más largos. Un setter que solo asigna un valor hace que el campo sea efectivamente público. Los métodos deberían exponer _comportamiento_, no acceso al estado interno.
     
 -   💉
     
@@ -1307,7 +1307,7 @@ Las violaciones de Information Hiding se llaman **"leaky abstractions"** —abst
     **Nombres que filtran la implementación** Métodos como `saveToPostgres()`, `fetchFromRedis()` o `serializeToJSON()` en la interfaz pública revelan detalles de implementación en el nombre. Si cambiás de Postgres a MongoDB, el nombre del método queda mentiroso. Los contratos públicos deberían hablar el lenguaje del dominio: `persist()`, `getFromCache()`, `serialize()`.
     
 
-> **TIP:** **El test del reemplazo libre** Si podés cambiar la implementación interna de un módulo —el algoritmo, la base de datos, la librería, la estructura de datos— sin que ningún código externo note la diferencia ni necesite modificarse, Information Hiding está bien aplicado. Si algún cliente se rompe por un cambio puramente interno, hay una abstracción con pérdidas.
+> **TIP:** **El test del reemplazo libre** Si podés cambiar la implementación interna de un módulo (el algoritmo, la base de datos, la librería, la estructura de datos) sin que ningún código externo note la diferencia ni necesite modificarse, Information Hiding está bien aplicado. Si algún cliente se rompe por un cambio puramente interno, hay una abstracción con pérdidas.
 
 ---
 
@@ -1323,17 +1323,17 @@ Hablá solo con tus amigos directos. No navegues a través de la estructura inte
 
 Principio del mínimo conocimiento
 
-La LoD dice que un objeto debería **conocer lo menos posible sobre la estructura interna de otros objetos**. Solo debería hablar con sus "amigos directos" —los objetos con los que tiene una relación inmediata— y nunca con los amigos de sus amigos.
+La LoD dice que un objeto debería **conocer lo menos posible sobre la estructura interna de otros objetos**. Solo debería hablar con sus "amigos directos" (los objetos con los que tiene una relación inmediata) y nunca con los amigos de sus amigos.
 
 Surgió en 1987 en la Universidad Northeastern durante el proyecto Demeter. La idea central: **cada unidad de código debería tener conocimiento limitado sobre otras unidades**. Solo conoce a las que están directamente relacionadas con ella.
 
 > 🏘️ Si necesitás pedirle sal a tu vecino, golpeás su puerta y se la pedís a él directamente. No abrís su puerta, entrás a su cocina, abrís su alacena y sacás la sal vos. _Interactuás con tu vecino, no con su alacena. No necesitás saber cómo tiene organizada su cocina._
 
-● El anti-patrón: "train wreck" — cadena de llamadas
+● El anti-patrón: "train wreck" - cadena de llamadas
 
 order.getCustomer() · getAddress() · getCity() · toUpperCase()
 
-order — amigo directo ✓ customer — amigo de order ✗ address — amigo de customer ✗ city — amigo de address ✗
+order (amigo directo ✓ customer) amigo de order ✗ address (amigo de customer ✗ city) amigo de address ✗
 
 > 🚆 El nombre "train wreck" (choque de trenes) describe visualmente la cadena de puntos. Cada punto es un vagón que se engancha al anterior. Si cualquier eslabón devuelve `null`, el tren descarrila. _Y el código que escribe esta cadena ahora conoce la estructura interna de cuatro objetos distintos._
 > **TIP:** **La señal de alarma más rápida** Contá los puntos en una expresión. Un punto es casi siempre razonable. Dos puntos merece revisión. Tres o más puntos encadenados sobre objetos distintos es casi siempre una violación de LoD. (Los puntos sobre el mismo objeto en un fluent interface son la excepción, como veremos.)
@@ -1378,13 +1378,13 @@ Regla 04
 
 Componentes directos del objeto
 
-Los atributos de instancia de tu clase —las _propiedades que te pertenecen_— son amigos directos. No sus contenidos internos.
+Los atributos de instancia de tu clase (las _propiedades que te pertenecen_) son amigos directos. No sus contenidos internos.
 
 ✓ this.mailer.send()  
 ✗ this.mailer.smtp.connect()
 
-> 👥 Sos vos, tus herramientas (atributos), lo que te traen (parámetros) y lo que fabricás en el momento (objetos creados localmente). Todo lo demás son conocidos de tus conocidos —y con ellos _no hablás directamente._
-> **TIP:** **Lo que NO está en la lista** Los objetos que obtenés llamando un método de otro objeto no son amigos directos. Si `order.getCustomer()` te devuelve un `Customer`, ese `Customer` es un extraño —es amigo de `order`, no tuyo. No deberías llamar métodos sobre él directamente.
+> 👥 Sos vos, tus herramientas (atributos), lo que te traen (parámetros) y lo que fabricás en el momento (objetos creados localmente). Todo lo demás son conocidos de tus conocidos - y con ellos _no hablás directamente._
+> **TIP:** **Lo que NO está en la lista** Los objetos que obtenés llamando un método de otro objeto no son amigos directos. Si `order.getCustomer()` te devuelve un `Customer`, ese `Customer` es un extraño - es amigo de `order`, no tuyo. No deberías llamar métodos sobre él directamente.
 
 ## En el código
 
@@ -1394,103 +1394,103 @@ Reemplazar navegación por delegación
 
 La solución a casi todas las violaciones de LoD es la misma: en lugar de **navegar** a través de la estructura interna de un objeto para obtener lo que necesitás, le **delegás** la tarea a ese objeto directamente. Él sabe dónde está todo; vos no necesitás saberlo.
 
-Viola LoD — navegación
+Viola LoD - navegación
 
 ```js
 class ShippingService {
-  ship(order) {
-    // atravesamos 3 objetos
-    const city = order
-      .getCustomer()  // extraño
-      .getAddress()   // extraño
-      .getCity()      // extraño
+ ship(order) {
+ // atravesamos 3 objetos
+ const city = order
+.getCustomer() // extraño
+.getAddress() // extraño
+.getCity() // extraño
 
-    sendTo(city)
-  }
+ sendTo(city)
+ }
 }
 ```
 
-Respeta LoD — delegación
+Respeta LoD - delegación
 
 ```
 class Order {
-  // Order conoce al Customer
-  getShippingCity() {
-    return this.customer
-      .getCity() // Customer lo delega
-  }
+ // Order conoce al Customer
+ getShippingCity() {
+ return this.customer
+.getCity() // Customer lo delega
+ }
 }
 
 class ShippingService {
-  ship(order) {
-    sendTo(order.getShippingCity())
-  }
+ ship(order) {
+ sendTo(order.getShippingCity())
+ }
 }
 ```
 
-Viola LoD — decisiones sobre extraños
+Viola LoD - decisiones sobre extraños
 
 ```
 class Discount {
-  apply(order) {
-    // ¿cuánto sabe Discount
-    // sobre la estructura de Order?
-    if (order.getCustomer()
-               .getMembership()
-               .isGold()) {
-      order.setDiscount(0.2)
-    }
-  }
+ apply(order) {
+ // ¿cuánto sabe Discount
+ // sobre la estructura de Order?
+ if (order.getCustomer()
+.getMembership()
+.isGold()) {
+ order.setDiscount(0.2)
+ }
+ }
 }
 ```
 
-Respeta LoD — preguntar lo justo
+Respeta LoD - preguntar lo justo
 
 ```
 class Order {
-  isEligibleForGoldDiscount() {
-    return this.customer
-      .isGoldMember() // delega
-  }
+ isEligibleForGoldDiscount() {
+ return this.customer
+.isGoldMember() // delega
+ }
 }
 
 class Discount {
-  apply(order) {
-    if (order.isEligibleForGoldDiscount())
-      order.setDiscount(0.2)
-  }
+ apply(order) {
+ if (order.isEligibleForGoldDiscount())
+ order.setDiscount(0.2)
+ }
 }
 ```
 
-Viola LoD — config anidada
+Viola LoD - config anidada
 
 ```js
 // Demasiado conocimiento
 // sobre la estructura de config
 const host = app
-  .getConfig()
-  .getDatabase()
-  .getConnection()
-  .getHost()
+.getConfig()
+.getDatabase()
+.getConnection()
+.getHost()
 
 // Si cambia la estructura
 // de Config, rompés acá 💥
 ```
 
-Respeta LoD — fachada directa
+Respeta LoD - fachada directa
 
 ```js
 // Config expone lo que
 // los clientes necesitan
 class Config {
-  getDatabaseHost() {
-    return this.db.connection.host
-  }
+ getDatabaseHost() {
+ return this.db.connection.host
+ }
 }
 
 const host = app
-  .getConfig()
-  .getDatabaseHost() // ✓
+.getConfig()
+.getDatabaseHost() // ✓
 ```
 
 > **TIP:** **La regla del "un punto" como heurística** En la mayoría de los casos, una línea con más de un encadenamiento de puntos sobre objetos distintos merece revisión. El primer punto (sobre tu amigo directo) es siempre válido. El segundo ya puede ser una señal. A partir del tercero, casi seguro estás violando LoD.
@@ -1503,43 +1503,43 @@ Decí lo que querés que pase, no preguntes para decidir vos
 
 **Tell, Don't Ask** es el principio hermano de la LoD. En lugar de pedirle datos a un objeto para tomar una decisión externa sobre él, **le decís directamente lo que querés que haga**. El objeto usa sus propios datos para decidir, sin exponer su estructura interna.
 
-Ask — el problema
+Ask - el problema
 
 Pedir datos y decidir afuera
 
 Preguntás el estado interno del objeto, lo traés hacia afuera y tomás la decisión en el llamador. El objeto pierde el control sobre su propio comportamiento. _La lógica sobre el objeto vive fuera del objeto._
 
-Tell — la solución
+Tell - la solución
 
 Decir qué hacer, no cómo
 
 Le decís al objeto qué resultado querés. Él usa sus propios datos para decidir cómo lograrlo. _La lógica sobre el objeto vive dentro del objeto, donde debería estar._
 
-Ask — pedir para decidir afuera
+Ask - pedir para decidir afuera
 
 ```
 // Preguntamos el estado interno
 if (account.getBalance() >= amount
-    && account.isActive()
-    && !account.isFrozen()) {
-  account.setBalance(
-    account.getBalance() - amount
-  )
+ && account.isActive()
+ &&!account.isFrozen()) {
+ account.setBalance(
+ account.getBalance() - amount
+)
 }
 // El llamador sabe demasiado
 // sobre las reglas de Account 😬
 ```
 
-Tell — decir qué queremos
+Tell - decir qué queremos
 
 ```
 class Account {
-  debit(amount) {
-    // Account maneja sus reglas
-    if (!this.canDebit(amount))
-      throw new Error('fondos insuf.')
-    this.balance -= amount
-  }
+ debit(amount) {
+ // Account maneja sus reglas
+ if (!this.canDebit(amount))
+ throw new Error('fondos insuf.')
+ this.balance -= amount
+ }
 }
 
 account.debit(amount) // ✓
@@ -1551,7 +1551,7 @@ Cuándo sí es aceptable preguntar
 
 -   ✅
     
-    **Queries de solo lectura sin efecto** Preguntar el estado de un objeto para mostrarlo en una vista —sin tomar decisiones de negocio sobre él— es razonable. `order.getTotal()` para mostrar el precio en pantalla no viola Tell, Don't Ask porque no produce efectos secundarios basados en ese valor.
+    **Queries de solo lectura sin efecto** Preguntar el estado de un objeto para mostrarlo en una vista (sin tomar decisiones de negocio sobre él) es razonable. `order.getTotal()` para mostrar el precio en pantalla no viola Tell, Don't Ask porque no produce efectos secundarios basados en ese valor.
     
 -   ✅
     
@@ -1564,7 +1564,7 @@ Cuándo sí es aceptable preguntar
 
 Trampas comunes
 
-Cuándo LoD se aplica mal —en ambas direcciones
+Cuándo LoD se aplica mal - en ambas direcciones
 
 La LoD tiene dos tipos de errores: violaciones reales que aumentan el acoplamiento, y **aplicación excesiva** que genera métodos de delegación innecesarios. Como todo principio, requiere criterio.
 
@@ -1574,7 +1574,7 @@ La LoD tiene dos tipos de errores: violaciones reales que aumentan el acoplamien
     
 -   🌊
     
-    **Confundir fluent interfaces con violaciones de LoD** `QueryBuilder.select('*').from('users').where('active', true).limit(10)` no viola LoD. Cada método devuelve _el mismo objeto_ (`this`), no un objeto distinto. Los fluent interfaces son un patrón de diseño intencional —los puntos están sobre el mismo "amigo". La LoD habla de navegar a través de objetos distintos.
+    **Confundir fluent interfaces con violaciones de LoD** `QueryBuilder.select('*').from('users').where('active', true).limit(10)` no viola LoD. Cada método devuelve _el mismo objeto_ (`this`), no un objeto distinto. Los fluent interfaces son un patrón de diseño intencional - los puntos están sobre el mismo "amigo". La LoD habla de navegar a través de objetos distintos.
     
 -   🧱
     
@@ -1582,7 +1582,7 @@ La LoD tiene dos tipos de errores: violaciones reales que aumentan el acoplamien
     
 -   📦
     
-    **LoD aplicada a estructuras de datos puras** La LoD aplica a _objetos con comportamiento_, no a estructuras de datos simples. Acceder a `response.data.user.email` en una respuesta de API, un DTO o un JSON no es una violación —son datos planos sin lógica de negocio. No tiene sentido agregar métodos de delegación a una estructura de datos.
+    **LoD aplicada a estructuras de datos puras** La LoD aplica a _objetos con comportamiento_, no a estructuras de datos simples. Acceder a `response.data.user.email` en una respuesta de API, un DTO o un JSON no es una violación - son datos planos sin lógica de negocio. No tiene sentido agregar métodos de delegación a una estructura de datos.
     
 -   🔍
     
@@ -1640,7 +1640,7 @@ se propagan...
 costo enorme
 
 > 🏗️ En construcción, cuando un ladrillo está mal colocado, mejor descubrirlo ahora que cuando el edificio tiene diez pisos arriba. El costo de reparar la cimentación crece con cada capa que se agrega encima. _El mismo principio aplica a los bugs: cuanto más tarde se detectan, más código construiste encima del error._
-> 🩺 Un sistema que no falla ruidosamente cuando tiene un problema es como un paciente que no siente dolor cuando debería. El dolor es una señal de alarma del cuerpo —molesta, pero es mucho mejor que no sentirlo y que la enfermedad progrese sin síntomas. _Las excepciones son el dolor del software._
+> 🩺 Un sistema que no falla ruidosamente cuando tiene un problema es como un paciente que no siente dolor cuando debería. El dolor es una señal de alarma del cuerpo - molesta, pero es mucho mejor que no sentirlo y que la enfermedad progrese sin síntomas. _Las excepciones son el dolor del software._
 > **TIP:** **La regla de Jim Shore** "Comprobá frecuentemente, fallá ruidosamente, no continúes con estado inválido." Un sistema que detecta un problema y sigue ejecutando como si no hubiera pasado nada es mucho más peligroso que uno que se detiene inmediatamente. El primero corrompe datos; el segundo solo interrumpe.
 
 ## Cuándo aplicar
@@ -1651,7 +1651,7 @@ Las cuatro señales de alarma que deben fallar pronto
 
 Fail Fast no significa lanzar excepciones por todo. Significa identificar los **puntos críticos donde un estado inválido no debería propagarse** y cortarlo ahí. Hay cuatro categorías principales donde siempre aplica.
 
-01 — Precondiciones
+01 - Precondiciones
 
 Validar entradas al inicio de cada función
 
@@ -1660,7 +1660,7 @@ Antes de ejecutar cualquier lógica, verificar que los argumentos son válidos. 
 ✓ if (!userId) throw new Error('userId requerido')  
 ✓ if (amount <= 0) throw new Error('amount > 0')
 
-02 — Bordes del sistema
+02 - Bordes del sistema
 
 Validar todo lo que entra desde afuera
 
@@ -1669,16 +1669,16 @@ HTTP requests, archivos, mensajes de queues, respuestas de APIs externas. Todo l
 ✗ aceptar JSON sin parsear ni validar schema  
 ✓ validar con Zod/Joi/Pydantic en el controller
 
-03 — Invariantes de dominio
+03 - Invariantes de dominio
 
 Reglas que nunca deben violarse
 
-Las condiciones que el sistema asume que siempre son verdaderas. Si se violan, hay un bug —no una condición de negocio. _Usar assertions para detectarlos en el momento exacto en que ocurren._
+Las condiciones que el sistema asume que siempre son verdaderas. Si se violan, hay un bug - no una condición de negocio. _Usar assertions para detectarlos en el momento exacto en que ocurren._
 
 ✓ assert(items.length > 0, 'order sin items')  
 ✓ assert(total >= 0, 'total negativo')
 
-04 — Errores de configuración
+04 - Errores de configuración
 
 Fallar al inicio, no en runtime
 
@@ -1688,7 +1688,7 @@ Si falta una variable de entorno, una clave de API o una conexión a base de dat
 ✓ verificar todas las vars al inicio del proceso
 
 > 🛫 Un avión no despega con un motor defectuoso esperando que "quizás no sea tan grave". La verificación pre-vuelo es un Fail Fast sistemático. _Es preferible cancelar el vuelo en tierra que descubrir el problema a 10.000 metros de altura._
-> **TIP:** **El punto de validación correcto** Fail Fast no significa validar en todos los niveles del sistema. Significa validar _en el punto más cercano a la fuente del dato_. Los datos externos se validan en el borde. Las precondiciones de una función se validan al entrar. Los invariantes se verifican donde se modifica el estado. No repitas la validación en cada capa —eso viola DRY.
+> **TIP:** **El punto de validación correcto** Fail Fast no significa validar en todos los niveles del sistema. Significa validar _en el punto más cercano a la fuente del dato_. Los datos externos se validan en el borde. Las precondiciones de una función se validan al entrar. Los invariantes se verifican donde se modifica el estado. No repitas la validación en cada capa - eso viola DRY.
 
 ## En el código
 
@@ -1702,33 +1702,33 @@ Fallo tardío y silencioso
 
 ```js
 function processOrder(order) {
-  // no validamos nada
-  const total = order.items
-    .reduce((s, i) => s + i.price, 0)
+ // no validamos nada
+ const total = order.items
+.reduce((s, i) => s + i.price, 0)
 
-  // si order.customer es null:
-  // falla acá con un error
-  // que no dice nada útil 💥
-  sendEmail(order.customer.email)
+ // si order.customer es null:
+ // falla acá con un error
+ // que no dice nada útil 💥
+ sendEmail(order.customer.email)
 
-  saveToDb(total, order.customer.id)
+ saveToDb(total, order.customer.id)
 }
 ```
 
-Fail Fast — guard clauses
+Fail Fast - guard clauses
 
 ```js
 function processOrder(order) {
-  // validamos antes de empezar
-  if (!order)
-    throw new Error('order requerida')
-  if (!order.customer?.email)
-    throw new Error('email de cliente falta')
-  if (!order.items?.length)
-    throw new Error('orden sin items')
+ // validamos antes de empezar
+ if (!order)
+ throw new Error('order requerida')
+ if (!order.customer?.email)
+ throw new Error('email de cliente falta')
+ if (!order.items?.length)
+ throw new Error('orden sin items')
 
-  // ahora el flujo principal
-  // trabaja con datos válidos ✓
+ // ahora el flujo principal
+ // trabaja con datos válidos ✓
 }
 ```
 
@@ -1736,13 +1736,13 @@ Config que falla tarde
 
 ```js
 async function sendEmail(to, body) {
-  // se lee cuando se usa
-  const key = process.env.SENDGRID_KEY
+ // se lee cuando se usa
+ const key = process.env.SENDGRID_KEY
 
-  // si KEY no existe, falla acá
-  // cuando el primer email se envía
-  // quizás horas después del deploy 💥
-  await sendgrid.send({ to, body, key })
+ // si KEY no existe, falla acá
+ // cuando el primer email se envía
+ // quizás horas después del deploy 💥
+ await sendgrid.send({ to, body, key })
 }
 ```
 
@@ -1751,24 +1751,24 @@ Config que falla al arrancar
 ```js
 // al inicio del proceso
 const REQUIRED_VARS = [
-  'SENDGRID_KEY', 'DATABASE_URL',
-  'JWT_SECRET', 'APP_PORT'
+ 'SENDGRID_KEY', 'DATABASE_URL',
+ 'JWT_SECRET', 'APP_PORT'
 ]
 
 for (const v of REQUIRED_VARS) {
-  if (!process.env[v])
-    throw new Error(`Falta: ${v}`)
+ if (!process.env[v])
+ throw new Error(`Falta: ${v}`)
 }
 // si llegamos acá, todo OK ✓
 ```
 
-Retornar null — fallo diferido
+Retornar null - fallo diferido
 
 ```js
 function findUser(id) {
-  const user = db.query(id)
-  if (!user) return null // 😬
-  return user
+ const user = db.query(id)
+ if (!user) return null // 😬
+ return user
 }
 
 // Quien llama recibe null y
@@ -1777,14 +1777,14 @@ function findUser(id) {
 // tres llamadas después 💥
 ```
 
-Lanzar excepción — fallo inmediato
+Lanzar excepción - fallo inmediato
 
 ```js
 function findUser(id) {
-  const user = db.query(id)
-  if (!user)
-    throw new UserNotFoundError(id)
-  return user // siempre válido ✓
+ const user = db.query(id)
+ if (!user)
+ throw new UserNotFoundError(id)
+ return user // siempre válido ✓
 }
 
 // El error ocurre exactamente
@@ -1798,9 +1798,9 @@ function findUser(id) {
 
 Fail Fast vs Fail Safe
 
-No son opuestos — son herramientas para contextos distintos
+No son opuestos - son herramientas para contextos distintos
 
-Fail Safe es el otro extremo: diseñar el sistema para que, cuando algo falla, **degrade de forma controlada** en lugar de detenerse completamente. No son contradictorios —son complementarios y se aplican en capas distintas del sistema.
+Fail Safe es el otro extremo: diseñar el sistema para que, cuando algo falla, **degrade de forma controlada** en lugar de detenerse completamente. No son contradictorios - son complementarios y se aplican en capas distintas del sistema.
 
 Fail Fast
 
@@ -1844,7 +1844,7 @@ Bug de programación (null inesperado, tipo incorrecto)
 
 Fail Fast
 
-Es un bug —necesita ser detectado y corregido, no ignorado
+Es un bug - necesita ser detectado y corregido, no ignorado
 
 Configuración inválida al arrancar
 
@@ -1874,7 +1874,7 @@ Datos corruptos en base de datos
 
 Fail Fast
 
-Datos inválidos no deben propagarse —mejor detener y alertar
+Datos inválidos no deben propagarse - mejor detener y alertar
 
 > **TIP:** **La regla de las capas** Fail Fast aplica en el _interior_ del sistema: en las funciones, los servicios, el dominio. Fail Safe aplica en las _fronteras externas_: la comunicación con servicios de terceros, los recursos de red, las integraciones. El núcleo falla fuerte para que los bugs sean obvios; el borde falla con gracia para que los problemas externos no colapsen todo.
 
@@ -1888,26 +1888,26 @@ Violar Fail Fast casi siempre parece **la opción más segura** en el momento. R
 
 -   🔇
     
-    **Swallowing exceptions — tragar el error** El antipatrón más dañino. Un bloque `try/catch` que captura la excepción y no hace nada con ella —o solo loguea "algo salió mal"— convierte un fallo ruidoso en uno silencioso. El sistema continúa en un estado inválido y el bug aparece mucho después, irreconocible.
+    **Swallowing exceptions - tragar el error** El antipatrón más dañino. Un bloque `try/catch` que captura la excepción y no hace nada con ella (o solo loguea "algo salió mal") convierte un fallo ruidoso en uno silencioso. El sistema continúa en un estado inválido y el bug aparece mucho después, irreconocible.
     
-    ✗ try { ... } catch (e) { console.log('error') }  
-    ✓ try { ... } catch (e) { throw new AppError('contexto', e) }
+    ✗ try {... } catch (e) { console.log('error') }  
+    ✓ try {... } catch (e) { throw new AppError('contexto', e) }
     
 -   👻
     
-    **Retornar null, -1 o "" como señal de error** Retornar `null` cuando no se encuentra algo, `-1` cuando falla un índice, o `""` cuando falta un valor transfiere la responsabilidad de detectar el error al llamador —que quizás no lo chequea. La excepción falla en el origen; el `null` falla tres llamadas después con un NullPointerException sin contexto.
+    **Retornar null, -1 o "" como señal de error** Retornar `null` cuando no se encuentra algo, `-1` cuando falla un índice, o `""` cuando falta un valor transfiere la responsabilidad de detectar el error al llamador - que quizás no lo chequea. La excepción falla en el origen; el `null` falla tres llamadas después con un NullPointerException sin contexto.
     
 -   🧢
     
-    **Valores por defecto que ocultan errores de configuración** `const timeout = process.env.TIMEOUT ?? 5000` parece prudente. Pero si `TIMEOUT` debería estar configurado y no lo está, el valor por defecto enmascara una mala configuración. El sistema funciona con un timeout incorrecto sin que nadie se entere. La alternativa es fallar al inicio si la variable es obligatoria.
+    **Valores por defecto que ocultan errores de configuración** `const timeout = process.env.TIMEOUT?? 5000` parece prudente. Pero si `TIMEOUT` debería estar configurado y no lo está, el valor por defecto enmascara una mala configuración. El sistema funciona con un timeout incorrecto sin que nadie se entere. La alternativa es fallar al inicio si la variable es obligatoria.
     
 -   🌊
     
-    **Continuar después de detectar un estado inválido** Verificar que algo está mal y seguir de todas formas: `if (!user) { log('user not found'); return user; }` —el log dice que el usuario no existe, pero se retorna `undefined` de todos modos. El código que llama recibe `undefined` y falla más tarde. Si el estado es inválido, _no continúes_.
+    **Continuar después de detectar un estado inválido** Verificar que algo está mal y seguir de todas formas: `if (!user) { log('user not found'); return user; }` - el log dice que el usuario no existe, pero se retorna `undefined` de todos modos. El código que llama recibe `undefined` y falla más tarde. Si el estado es inválido, _no continúes_.
     
 -   🔄
     
-    **Validar solo en desarrollo, no en producción** Deshabilitar assertions o validaciones en producción "por performance" es una forma de Fail Slow selectivo. Los bugs que solo se manifiestan en producción —con datos reales, bajo carga real— son los más difíciles de diagnosticar. Las assertions tienen un costo mínimo y salvan horas de debugging.
+    **Validar solo en desarrollo, no en producción** Deshabilitar assertions o validaciones en producción "por performance" es una forma de Fail Slow selectivo. Los bugs que solo se manifiestan en producción (con datos reales, bajo carga real) son los más difíciles de diagnosticar. Las assertions tienen un costo mínimo y salvan horas de debugging.
     
 -   📨
     
@@ -1917,7 +1917,7 @@ Violar Fail Fast casi siempre parece **la opción más segura** en el momento. R
 
 # Paquetes
 
-> Seis principios de Robert C. Martin que operan a nivel de módulos y paquetes enteros —la versión macro de SOLID. Determinan cómo agrupar clases y cómo controlar las dependencias entre grupos.
+> Seis principios de Robert C. Martin que operan a nivel de módulos y paquetes enteros - la versión macro de SOLID. Determinan cómo agrupar clases y cómo controlar las dependencias entre grupos.
 
 Seis principios para agrupar clases en paquetes y controlar dependencias entre módulos. La versión macro de SOLID: qué va junto y cómo se conectan los paquetes entre sí.
 
@@ -1938,17 +1938,17 @@ Principios de cohesión
 
 Responden a: _¿Qué clases van en el mismo paquete?_  
   
-REP — Reuse/Release Equivalence  
-CCP — Common Closure  
-CRP — Common Reuse
+REP (Reuse/Release Equivalence  
+CCP) Common Closure  
+CRP - Common Reuse
 
 Principios de acoplamiento
 
 Responden a: _¿Cómo se relacionan los paquetes?_  
   
-ADP — Acyclic Dependencies  
-SDP — Stable Dependencies  
-SAP — Stable Abstractions
+ADP (Acyclic Dependencies  
+SDP) Stable Dependencies  
+SAP - Stable Abstractions
 
 > **TIP:** **¿Por qué importan en un proyecto nuevo?** Ignorar estos principios al inicio no duele. Duele cuando el proyecto tiene seis meses: un cambio en un módulo rompe tres más, no podés testear nada de forma aislada, y cada release es un evento estresante. Estos principios evitan exactamente ese escenario.
 
@@ -1958,7 +1958,7 @@ Principios de cohesión
 
 ¿Qué clases van juntas en un paquete?
 
-Estos tres principios te ayudan a tomar la decisión más difícil del diseño modular: **qué código agrupa con qué otro código**. No hay una respuesta única —los tres principios están en tensión entre sí y reflejan distintas prioridades.
+Estos tres principios te ayudan a tomar la decisión más difícil del diseño modular: **qué código agrupa con qué otro código**. No hay una respuesta única - los tres principios están en tensión entre sí y reflejan distintas prioridades.
 
 Principios de cohesión 3 principios
 
@@ -1978,10 +1978,10 @@ Viola REP
 
 ```
 // paquete: utils
-parseDate()      // fechas
-sendEmail()      // emails
-calcTax()        // impuestos
-resizeImage()    // imágenes
+parseDate() // fechas
+sendEmail() // emails
+calcTax() // impuestos
+resizeImage() // imágenes
 // "utils" no es un concepto
 // nadie lo reutiliza completo
 ```
@@ -2043,7 +2043,7 @@ No forzar dependencias innecesarias
 
 ▾
 
-Las clases que **no se usan juntas no deberían estar en el mismo paquete**. Si dependés de un paquete, dependés de todo él —incluyendo las partes que no usás. Eso significa que cambios en cosas que no te interesan pueden romper tu build.
+Las clases que **no se usan juntas no deberían estar en el mismo paquete**. Si dependés de un paquete, dependés de todo él - incluyendo las partes que no usás. Eso significa que cambios en cosas que no te interesan pueden romper tu build.
 
 CRP es la contracara de CCP: mientras CCP agrupa lo que cambia junto, CRP separa lo que no se usa junto. La tensión entre ambos es normal y hay que gestionarla según las prioridades del proyecto.
 
@@ -2074,7 +2074,7 @@ Ciclo detectado
 ```
 orders → billing
 billing → users
-users → orders  ← ciclo 💥
+users → orders ← ciclo 💥
 
 // Para testear orders
 // necesitás billing y users
@@ -2086,8 +2086,8 @@ Sin ciclos
 
 ```
 orders → billing → users
-         ↓
-      payments
+ ↓
+ payments
 
 // Grafo acíclico dirigido (DAG)
 // Cada paquete se puede
@@ -2104,7 +2104,7 @@ Dependé de lo que es más estable que vos
 
 ▾
 
-Un paquete debería depender solo de paquetes **más estables que él mismo**. La estabilidad se mide por cuánto cuesta cambiar un paquete: un paquete del que dependen muchos otros es difícil de cambiar —es estable. Uno del que nadie depende es fácil de cambiar —es inestable.
+Un paquete debería depender solo de paquetes **más estables que él mismo**. La estabilidad se mide por cuánto cuesta cambiar un paquete: un paquete del que dependen muchos otros es difícil de cambiar (es estable. Uno del que nadie depende es fácil de cambiar) es inestable.
 
 Si un paquete volátil (que cambia seguido) depende de un paquete estable, está bien. Si un paquete estable depende de uno volátil, cualquier cambio en el volátil fuerza cambios en cascada en todo lo que depende del estable.
 
@@ -2114,8 +2114,8 @@ Viola SDP
 // core-domain (estable,
 // 10 paquetes dependen de él)
 // depende de:
-ui-components  ← cambia cada sprint
-feature-flags  ← cambia cada semana
+ui-components ← cambia cada sprint
+feature-flags ← cambia cada semana
 // Un cambio en UI rompe core 💥
 ```
 
@@ -2124,8 +2124,8 @@ Respeta SDP
 ```
 // core-domain (estable)
 // depende de:
-shared-types   ← muy estable
-base-errors    ← muy estable
+shared-types ← muy estable
+base-errors ← muy estable
 
 // ui-components (volátil)
 // depende de core-domain ✓
@@ -2153,7 +2153,7 @@ Los seis principios no siempre apuntan en la misma dirección
 
 Los tres principios de cohesión están **en tensión permanente** entre sí. No podés maximizar los tres a la vez; el diseño es una decisión sobre qué priorizar según el tipo de proyecto.
 
-> ⚖️ REP dice "agrupá lo que se reutiliza junto". CCP dice "agrupá lo que cambia junto". CRP dice "no agrupés lo que no se usa junto". _Un paquete perfecto según los tres principios no existe en la práctica —hay que elegir qué importa más._
+> ⚖️ REP dice "agrupá lo que se reutiliza junto". CCP dice "agrupá lo que cambia junto". CRP dice "no agrupés lo que no se usa junto". _Un paquete perfecto según los tres principios no existe en la práctica - hay que elegir qué importa más._
 
 Principio
 
@@ -2235,7 +2235,7 @@ Las violaciones de estos principios **no duelen al principio**. Se acumulan sile
     
 -   📐
     
-    **Organizar por capa técnica en lugar de por dominio** Una estructura `controllers / services / repositories` viola CCP: un cambio en la lógica de "órdenes" toca un archivo en cada una de las tres carpetas. Una estructura `orders / billing / users` —organizada por dominio— localiza los cambios.
+    **Organizar por capa técnica en lugar de por dominio** Una estructura `controllers / services / repositories` viola CCP: un cambio en la lógica de "órdenes" toca un archivo en cada una de las tres carpetas. Una estructura `orders / billing / users` (organizada por dominio) localiza los cambios.
     
 -   🔍
     
@@ -2259,7 +2259,7 @@ Robert C. Martin acuñó el término en 2011: si entrás a un proyecto nuevo y l
 
 > 🏥 Los planos de un hospital gritan "hospital": salas de operaciones, guardia, UCI, farmacia. No dicen "edificio con puertas y ventanas de la empresa Acme Construction". _La estructura revela el propósito, no el proveedor de materiales._
 > 📚 Una biblioteca bien organizada grita "biblioteca": secciones de ficción, ciencia, historia, referencia. No dice "estanterías de madera, sistema de catalogación Dewey". _El sistema de organización es un detalle. El dominio es lo que importa._
-> **TIP:** **La prueba del taxi** Mostrále la estructura de carpetas de tu proyecto a alguien que no lo conoce durante 10 segundos. Si no puede adivinar a grandes rasgos qué hace el sistema —si lo único que puede decir es "usa Express" o "usa Laravel"— tu arquitectura está gritando el framework, no el dominio.
+> **TIP:** **La prueba del taxi** Mostrále la estructura de carpetas de tu proyecto a alguien que no lo conoce durante 10 segundos. Si no puede adivinar a grandes rasgos qué hace el sistema (si lo único que puede decir es "usa Express" o "usa Laravel") tu arquitectura está gritando el framework, no el dominio.
 
 ## La estructura
 
@@ -2277,15 +2277,15 @@ Grita el dominio
 
 src/ orders/ ← caso de uso central Order.js OrderService.js OrderRepository.js billing/ ← área de negocio Invoice.js PaymentService.js catalog/ ← área de negocio Product.js users/ User.js ↑ Un e-commerce. Obvio.
 
-Sistema de salud — grita MVC
+Sistema de salud - grita MVC
 
 app/ Http/Controllers/ PatientController.php DoctorController.php Models/ Patient.php Appointment.php Repositories/ Podría ser cualquier cosa.
 
-Sistema de salud — grita el dominio
+Sistema de salud - grita el dominio
 
 src/ patients/ Patient.php MedicalHistory.php appointments/ Appointment.php Scheduler.php prescriptions/ billing/ Sistema de salud. Obvio.
 
-> **TIP:** **Los frameworks van adentro, no afuera** Express, Django, Laravel —son detalles de implementación. Pueden vivir en una carpeta `infrastructure/` o `adapters/` dentro de cada módulo de dominio, pero no deberían dictar la estructura de primer nivel del proyecto. El dominio manda; la tecnología sirve.
+> **TIP:** **Los frameworks van adentro, no afuera** Express, Django, Laravel - son detalles de implementación. Pueden vivir en una carpeta `infrastructure/` o `adapters/` dentro de cada módulo de dominio, pero no deberían dictar la estructura de primer nivel del proyecto. El dominio manda; la tecnología sirve.
 
 ## Los principios
 
@@ -2299,31 +2299,31 @@ Screaming Architecture no es solo una convención de carpetas. Es una actitud ha
 
 Los casos de uso son ciudadanos de primera clase
 
-Los _casos de uso del negocio_ —"crear pedido", "aprobar solicitud", "cancelar suscripción"— deben ser visibles en la estructura del código. Si tenés que leer el README para entender qué hace el sistema, los casos de uso están enterrados en capas técnicas.
+Los _casos de uso del negocio_ ("crear pedido", "aprobar solicitud", "cancelar suscripción") deben ser visibles en la estructura del código. Si tenés que leer el README para entender qué hace el sistema, los casos de uso están enterrados en capas técnicas.
 
 02
 
 Los frameworks son herramientas, no identidad
 
-El framework web, el ORM, el motor de templates —son _detalles de implementación_. Deberían poder reemplazarse sin cambiar la lógica de negocio. Si un cambio de ORM requiere reescribir casos de uso, el framework colonizó el dominio.
+El framework web, el ORM, el motor de templates - son _detalles de implementación_. Deberían poder reemplazarse sin cambiar la lógica de negocio. Si un cambio de ORM requiere reescribir casos de uso, el framework colonizó el dominio.
 
 03
 
 La base de datos es un detalle
 
-PostgreSQL, MongoDB, Redis —son mecanismos de persistencia, no el sistema. El esquema de la base de datos no debería dictar la forma de las entidades del dominio. La decisión de qué base de datos usar debería poder postergarse.
+PostgreSQL, MongoDB, Redis - son mecanismos de persistencia, no el sistema. El esquema de la base de datos no debería dictar la forma de las entidades del dominio. La decisión de qué base de datos usar debería poder postergarse.
 
 04
 
 La UI es un detalle
 
-Web, mobile, CLI, API REST —son formas de entregar la funcionalidad. La lógica de negocio no debería saber nada de HTML, JSON o gRPC. Podés cambiar la interfaz de usuario sin tocar el dominio, y deberías poder _testear el dominio sin ninguna interfaz._
+Web, mobile, CLI, API REST - son formas de entregar la funcionalidad. La lógica de negocio no debería saber nada de HTML, JSON o gRPC. Podés cambiar la interfaz de usuario sin tocar el dominio, y deberías poder _testear el dominio sin ninguna interfaz._
 
 05
 
 La estructura comunica intención
 
-Cada decisión de organización —nombres de carpetas, de archivos, de módulos— debería comunicar algo sobre el dominio. `src/orders/CreateOrderUseCase.js` dice mucho más que `src/services/OrderService.js`. El código se lee más de lo que se escribe.
+Cada decisión de organización (nombres de carpetas, de archivos, de módulos) debería comunicar algo sobre el dominio. `src/orders/CreateOrderUseCase.js` dice mucho más que `src/services/OrderService.js`. El código se lee más de lo que se escribe.
 
 ## Trampas
 
@@ -2339,7 +2339,7 @@ La mayoría de los frameworks de desarrollo web generan una estructura de carpet
     
 -   🗂️
     
-    **Carpetas técnicas en el primer nivel**Si el primer nivel de `src/` tiene `helpers/`, `utils/`, `middlewares/`, `validators/` —todo lo visible es tecnología, no dominio. Esas carpetas deberían vivir dentro de los módulos de dominio que las usan, no en el nivel raíz.
+    **Carpetas técnicas en el primer nivel**Si el primer nivel de `src/` tiene `helpers/`, `utils/`, `middlewares/`, `validators/` - todo lo visible es tecnología, no dominio. Esas carpetas deberían vivir dentro de los módulos de dominio que las usan, no en el nivel raíz.
     
 -   🏷️
     
@@ -2351,7 +2351,7 @@ La mayoría de los frameworks de desarrollo web generan una estructura de carpet
     
 -   📋
     
-    **Confundir Screaming Architecture con carpetas gigantes por dominio**Organizar por dominio no significa un archivo de 2000 líneas por módulo. Cada módulo de dominio puede tener su propia estructura interna —entidades, casos de uso, repositorios— siempre que la estructura raíz grite el negocio.
+    **Confundir Screaming Architecture con carpetas gigantes por dominio**Organizar por dominio no significa un archivo de 2000 líneas por módulo. Cada módulo de dominio puede tener su propia estructura interna (entidades, casos de uso, repositorios) siempre que la estructura raíz grite el negocio.
 
 ## Origen del principio
 
@@ -2400,7 +2400,7 @@ Frameworks
 
 Entities ← las dependencias solo van en esta dirección
 
-> 🧅 Como una cebolla: las capas externas envuelven a las internas. Podés pelar y reemplazar la capa exterior sin tocar el corazón. _El núcleo de la cebolla no sabe que tiene capas encima —y no necesita saberlo._
+> 🧅 Como una cebolla: las capas externas envuelven a las internas. Podés pelar y reemplazar la capa exterior sin tocar el corazón. _El núcleo de la cebolla no sabe que tiene capas encima - y no necesita saberlo._
 > **TIP:** **La regla en una oración** Si estás en una capa interna y necesitás hacer un `import` de algo de una capa más externa, estás violando la Dependency Rule. El dominio no importa Express. Los casos de uso no importan Sequelize. Las entidades no importan nada de infraestructura.
 
 ## Las capas
@@ -2409,17 +2409,17 @@ Las cuatro capas
 
 De adentro hacia afuera: estabilidad decreciente
 
-Cada capa tiene una responsabilidad específica. Las capas internas son **más estables** —cambian menos y son las más valiosas. Las capas externas son más volátiles y son reemplazables.
+Cada capa tiene una responsabilidad específica. Las capas internas son **más estables** - cambian menos y son las más valiosas. Las capas externas son más volátiles y son reemplazables.
 
-1\. Entities — Entidades
+1\. Entities - Entidades
 
 Más estable
 
-Las _reglas de negocio de la empresa_. Las que existirían aunque el sistema fuera papel y lápiz. No saben de bases de datos, de HTTP ni de ningún framework. Son los objetos más puros del sistema —clases o estructuras de datos con las reglas críticas de negocio.
+Las _reglas de negocio de la empresa_. Las que existirían aunque el sistema fuera papel y lápiz. No saben de bases de datos, de HTTP ni de ningún framework. Son los objetos más puros del sistema - clases o estructuras de datos con las reglas críticas de negocio.
 
 OrderCustomerProductInvoiceMoneyreglas de dominio
 
-2\. Use Cases — Casos de uso
+2\. Use Cases - Casos de uso
 
 Lógica de aplicación
 
@@ -2439,7 +2439,7 @@ OrderControllerOrderPresenterPostgresOrderRepositorySendGridMailer
 
 Más volátil
 
-La capa más externa. Frameworks web, bases de datos, UI, dispositivos externos, servicios de terceros. _Escribimos poco código en esta capa_ —principalmente pegamento que conecta los detalles externos con la capa de adaptadores. Es la capa más fácil de reemplazar.
+La capa más externa. Frameworks web, bases de datos, UI, dispositivos externos, servicios de terceros. _Escribimos poco código en esta capa_ - principalmente pegamento que conecta los detalles externos con la capa de adaptadores. Es la capa más fácil de reemplazar.
 
 Express / FastifyPostgreSQL / MongoDBReact / VueSendGrid SDKAWS SDK
 
@@ -2459,13 +2459,13 @@ import { db } from '../db/postgres'
 import { sendgrid } from 'sendgrid'
 
 class CreateOrderUseCase {
-  async execute(data) {
-    const order = new Order(data)
-    // conoce Postgres directamente
-    await db.query('INSERT...')
-    // conoce SendGrid directamente
-    await sendgrid.send(...)
-  }
+ async execute(data) {
+ const order = new Order(data)
+ // conoce Postgres directamente
+ await db.query('INSERT...')
+ // conoce SendGrid directamente
+ await sendgrid.send(...)
+ }
 }
 ```
 
@@ -2474,17 +2474,17 @@ Respeta la Dependency Rule
 ```js
 // Use case define interfaces (puertos)
 class CreateOrderUseCase {
-  constructor(
-    orderRepo: IOrderRepository,
-    mailer:    IMailer
-  ) { ... }
+ constructor(
+ orderRepo: IOrderRepository,
+ mailer: IMailer
+) {... }
 
-  async execute(data) {
-    const order = new Order(data)
-    await this.orderRepo.save(order)
-    await this.mailer.sendConfirm(order)
-  }
-  // No sabe qué hay detrás ✓
+ async execute(data) {
+ const order = new Order(data)
+ await this.orderRepo.save(order)
+ await this.mailer.sendConfirm(order)
+ }
+ // No sabe qué hay detrás ✓
 }
 ```
 
@@ -2494,9 +2494,9 @@ La interfaz (definida en capa interna)
 // Vive en la capa de Use Cases
 // No importa nada de infraestructura
 interface IOrderRepository {
-  save(order: Order): Promise<void>
-  findById(id: string): Promise<Order>
-  findByStatus(s: string): Promise<Order[]>
+ save(order: Order): Promise<void>
+ findById(id: string): Promise<Order>
+ findByStatus(s: string): Promise<Order[]>
 }
 ```
 
@@ -2508,11 +2508,11 @@ La implementación (capa externa)
 import { db } from '../postgres'
 
 class PostgresOrderRepository
-  implements IOrderRepository {
+ implements IOrderRepository {
 
-  async save(order: Order) {
-    await db.query('INSERT...')
-  }
+ async save(order: Order) {
+ await db.query('INSERT...')
+ }
 }
 ```
 
@@ -2536,11 +2536,11 @@ La Dependency Rule es fácil de entender y difícil de mantener bajo presión. L
     
 -   🌐
     
-    **Lógica de negocio en los controllers**El controller debería recibir el request, extraer los datos, llamar al caso de uso y devolver la respuesta. Cualquier lógica condicional de negocio en el controller está en la capa equivocada —y no puede testearse sin levantar el servidor HTTP.
+    **Lógica de negocio en los controllers**El controller debería recibir el request, extraer los datos, llamar al caso de uso y devolver la respuesta. Cualquier lógica condicional de negocio en el controller está en la capa equivocada - y no puede testearse sin levantar el servidor HTTP.
     
 -   💾
     
-    **Casos de uso que conocen el esquema de BD**Si un caso de uso construye una query SQL, conoce el nombre de una tabla o mapea columnas, la Dependency Rule está rota. Esa lógica pertenece al repositorio —el adaptador que implementa la interfaz de persistencia definida por el caso de uso.
+    **Casos de uso que conocen el esquema de BD**Si un caso de uso construye una query SQL, conoce el nombre de una tabla o mapea columnas, la Dependency Rule está rota. Esa lógica pertenece al repositorio - el adaptador que implementa la interfaz de persistencia definida por el caso de uso.
     
 -   ⚡
     
@@ -2550,7 +2550,7 @@ La Dependency Rule es fácil de entender y difícil de mantener bajo presión. L
 
 # Hexagonal
 
-> El dominio vive en el centro. Define puertos —interfaces— que describen lo que necesita. El mundo exterior conecta a través de adaptadores que implementan esos puertos. El dominio no sabe nada de afuera.
+> El dominio vive en el centro. Define puertos (interfaces) que describen lo que necesita. El mundo exterior conecta a través de adaptadores que implementan esos puertos. El dominio no sabe nada de afuera.
 
 El dominio en el centro, el mundo afuera. Define puertos (interfaces) y conecta el exterior con adaptadores intercambiables. El dominio no sabe nada de infraestructura.
 
@@ -2560,12 +2560,12 @@ El dominio en el centro, el mundo afuera. Define puertos (interfaces) y conecta 
 
 El dominio en el centro · El mundo afuera
 
-Alistair Cockburn la formuló en 2005. La idea central: la aplicación debería ser igualmente usable por **cualquier medio externo** —HTTP, CLI, tests, eventos— y debería poder funcionar en **aislamiento completo** de bases de datos, servicios externos y frameworks. Todo eso se logra con puertos y adaptadores.
+Alistair Cockburn la formuló en 2005. La idea central: la aplicación debería ser igualmente usable por **cualquier medio externo** (HTTP, CLI, tests, eventos) y debería poder funcionar en **aislamiento completo** de bases de datos, servicios externos y frameworks. Todo eso se logra con puertos y adaptadores.
 
 *[Diagrama: representación visual del concepto]*
 
-> 🔌 El tomacorriente de tu casa no sabe qué enchufás en él —un teléfono, una lámpara o un cargador de laptop. Define un contrato (forma, voltaje) y cualquier dispositivo que lo cumpla funciona. _El dominio define los puertos; los adaptadores son los enchufes que conectan el mundo exterior._
-> **TIP:** **El nombre "hexagonal" es arbitrario** Cockburn eligió el hexágono como forma porque tiene suficientes lados para dibujar varios puertos. No hay nada mágico en el número seis. Por eso el nombre más descriptivo es **Ports and Adapters** —es lo que realmente importa en el patrón.
+> 🔌 El tomacorriente de tu casa no sabe qué enchufás en él - un teléfono, una lámpara o un cargador de laptop. Define un contrato (forma, voltaje) y cualquier dispositivo que lo cumpla funciona. _El dominio define los puertos; los adaptadores son los enchufes que conectan el mundo exterior._
+> **TIP:** **El nombre "hexagonal" es arbitrario** Cockburn eligió el hexágono como forma porque tiene suficientes lados para dibujar varios puertos. No hay nada mágico en el número seis. Por eso el nombre más descriptivo es **Ports and Adapters** - es lo que realmente importa en el patrón.
 
 ## Los puertos
 
@@ -2573,7 +2573,7 @@ Los puertos
 
 Las interfaces que el dominio define para comunicarse con el exterior
 
-Un **puerto** es simplemente una interfaz —un contrato— definida por el dominio. Describe lo que el dominio necesita o lo que el dominio ofrece, sin saber nada sobre quién lo implementa. Hay dos tipos con roles completamente distintos.
+Un **puerto** es simplemente una interfaz (un contrato) definida por el dominio. Describe lo que el dominio necesita o lo que el dominio ofrece, sin saber nada sobre quién lo implementa. Hay dos tipos con roles completamente distintos.
 
 Driving ports · Puertos primarios
 
@@ -2599,8 +2599,8 @@ IMailer → sendConfirmation(order)
 
 IPaymentGateway → charge(amount, card)
 
-> 🎭 Los puertos _driving_ son como el escenario de un teatro: definen qué actuaciones son posibles. Los puertos _driven_ son como la tramoya: el escenario no sabe si hay humanos moviendo los telones o un sistema automático —solo sabe que cuando los pide, aparecen.
-> **TIP:** **¿Dónde viven los puertos?** Los puertos —ambos tipos— viven _dentro del dominio_. Son interfaces definidas por el dominio para sus propias necesidades. Los adaptadores viven afuera e implementan esas interfaces. Esto garantiza que la dependencia siempre apunta hacia adentro: la infraestructura depende del dominio, nunca al revés.
+> 🎭 Los puertos _driving_ son como el escenario de un teatro: definen qué actuaciones son posibles. Los puertos _driven_ son como la tramoya: el escenario no sabe si hay humanos moviendo los telones o un sistema automático - solo sabe que cuando los pide, aparecen.
+> **TIP:** **¿Dónde viven los puertos?** Los puertos (ambos tipos) viven _dentro del dominio_. Son interfaces definidas por el dominio para sus propias necesidades. Los adaptadores viven afuera e implementan esas interfaces. Esto garantiza que la dependencia siempre apunta hacia adentro: la infraestructura depende del dominio, nunca al revés.
 
 ## Los adaptadores
 
@@ -2610,7 +2610,7 @@ Los traductores entre el dominio y el mundo exterior
 
 Un **adaptador** es la implementación concreta de un puerto. Traduce entre el lenguaje del dominio y el lenguaje de la tecnología específica que conecta. Es intercambiable: podés reemplazar un adaptador por otro sin tocar el dominio.
 
-Adaptadores driving — conectan el exterior con el dominio
+Adaptadores driving - conectan el exterior con el dominio
 
 HTTP Controller
 
@@ -2636,7 +2636,7 @@ Event / Queue Consumer
 
 Un mensaje de Kafka o SQS dispara un caso de uso. El adaptador deserializa el mensaje y llama al puerto driving. _El dominio no sabe que hay una queue._
 
-Adaptadores driven — conectan el dominio con servicios externos
+Adaptadores driven - conectan el dominio con servicios externos
 
 PostgreSQL Adapter
 
@@ -2677,13 +2677,13 @@ Puerto driven (dentro del dominio)
 // Vive en el dominio. No importa nada.
 
 interface IOrderRepository {
-  save(order: Order): Promise<void>
-  findById(id: string): Promise<Order | null>
-  listByStatus(s: string): Promise<Order[]>
+ save(order: Order): Promise<void>
+ findById(id: string): Promise<Order | null>
+ listByStatus(s: string): Promise<Order[]>
 }
 
 interface IMailer {
-  sendConfirmation(order: Order): Promise<void>
+ sendConfirmation(order: Order): Promise<void>
 }
 ```
 
@@ -2693,17 +2693,17 @@ Caso de uso (usa los puertos)
 // src/orders/CreateOrderUseCase.ts
 
 class CreateOrderUseCase {
-  constructor(
-    private repo:   IOrderRepository,
-    private mailer: IMailer
-  ) {}
+ constructor(
+ private repo: IOrderRepository,
+ private mailer: IMailer
+) {}
 
-  async execute(data: CreateOrderDTO) {
-    const order = Order.create(data)
-    await this.repo.save(order)
-    await this.mailer.sendConfirmation(order)
-    return order
-  }
+ async execute(data: CreateOrderDTO) {
+ const order = Order.create(data)
+ await this.repo.save(order)
+ await this.mailer.sendConfirmation(order)
+ return order
+ }
 }
 ```
 
@@ -2714,15 +2714,15 @@ Adaptador driven (implementa el puerto)
 import { db } from './connection'
 
 class PostgresOrderRepository
-  implements IOrderRepository {
+ implements IOrderRepository {
 
-  async save(order: Order) {
-    await db.query(
-      `INSERT INTO orders ...`,
-      [order.id, order.total]
-    )
-  }
-  // ... findById, listByStatus
+ async save(order: Order) {
+ await db.query(
+ `INSERT INTO orders...`,
+ [order.id, order.total]
+)
+ }
+ //... findById, listByStatus
 }
 ```
 
@@ -2733,16 +2733,16 @@ Composición (conecta todo)
 // El único lugar donde se conocen
 // las implementaciones concretas
 
-const repo   = new PostgresOrderRepository()
+const repo = new PostgresOrderRepository()
 const mailer = new SendGridMailer()
 const useCase = new CreateOrderUseCase(
-  repo, mailer
+ repo, mailer
 )
 
 // En tests:
 const useCase = new CreateOrderUseCase(
-  new InMemoryOrderRepo(),
-  new FakeMailer()
+ new InMemoryOrderRepo(),
+ new FakeMailer()
 )
 ```
 
@@ -2754,7 +2754,7 @@ Trampas comunes
 
 Cuando los puertos se convierten en tuberías vacías
 
-Hexagonal Architecture puede aplicarse mecánicamente sin captar el espíritu. El resultado es una arquitectura que tiene la forma correcta pero no los beneficios —capas adicionales sin valor real.
+Hexagonal Architecture puede aplicarse mecánicamente sin captar el espíritu. El resultado es una arquitectura que tiene la forma correcta pero no los beneficios - capas adicionales sin valor real.
 
 -   🪞
     
@@ -2770,7 +2770,7 @@ Hexagonal Architecture puede aplicarse mecánicamente sin captar el espíritu. E
     
 -   💾
     
-    **Adaptadores driven que transforman la forma del dominio**Si el repositorio de PostgreSQL retorna filas SQL y quien consume decide cómo mapearlas a entidades, el mapping está en el lugar equivocado. El adaptador driven es responsable de convertir los datos del storage al formato de la entidad de dominio —y de volver a convertir al guardar.
+    **Adaptadores driven que transforman la forma del dominio**Si el repositorio de PostgreSQL retorna filas SQL y quien consume decide cómo mapearlas a entidades, el mapping está en el lugar equivocado. El adaptador driven es responsable de convertir los datos del storage al formato de la entidad de dominio - y de volver a convertir al guardar.
     
 -   🏗️
     

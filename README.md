@@ -51,7 +51,9 @@ React está instalado como dependencia para funcionalidades interactivas futuras
 
 ```
 scripts/
-└── gen-og-images.mjs          # Prebuild: genera 13 OG images JPG con sharp
+├── gen-og-images.mjs          # Prebuild: genera 13 OG images JPG con sharp
+├── gen-agent-files.mjs        # Prebuild: genera archivos para agentes en public/llms/
+└── validate-principle-tabs.mjs # Validación: evita markup de layout incrustado en tabs[].content
 src/
 ├── components/                # Componentes .astro reutilizables
 │   ├── ContextSection.astro   # Bloque de origen y alcance
@@ -91,7 +93,7 @@ git clone https://github.com/guspatagonico/software-design-principles-es.git
 cd software-design-principles-es
 pnpm install
 
-# 2. Generar imágenes OG (necesario una vez, y antes de cada build)
+# 2. Prebuild (valida contenido y genera assets derivados)
 pnpm prebuild
 
 # 3. Desarrollo local
@@ -119,6 +121,8 @@ pnpm build
 ### Modificar el contenido de un principio existente
 
 Editá el archivo JSON correspondiente en `src/content/principle/`. El HTML de los tabs va dentro del campo `content` de cada tab. No hace falta tocar ningún `.astro`.
+
+**Importante:** `tabs[].content` debe contener solo el cuerpo del tab. No incrustes wrappers de layout (`.panel`, `.context-inner`, `.progress`, `btnPrev/btnNext`, etc.). `pnpm check:content` y `pnpm prebuild` validan esto y fallan si detectan contaminación.
 
 ### Agregar una nueva sección o funcionalidad
 
@@ -156,11 +160,12 @@ El atributo `data-accent` se inyecta en `<body>` desde `BaseLayout.astro`. Los c
 ## Build y deploy
 
 ```bash
-pnpm prebuild   # node scripts/gen-og-images.mjs → 13 JPGs en public/og/
+pnpm check:content  # valida tabs[].content en src/content/principle/*.json
+pnpm prebuild       # pnpm check:content + genera OG + genera archivos para agentes
 pnpm build      # pnpm astro build → dist/ con HTML + sitemap + assets
 ```
 
-El sitio se deploya como carpeta estática. El sitemap se genera automáticamente via `@astrojs/sitemap`. Las imágenes OG deben existir en `public/og/` antes del build; `pnpm dev` no las regenera.
+El sitio se deploya como carpeta estática. El sitemap se genera automáticamente via `@astrojs/sitemap`. `pnpm build` ejecuta `prebuild`, por lo que valida contenido y regenera assets automáticamente antes de compilar. `pnpm dev` no ejecuta `prebuild`.
 
 ---
 

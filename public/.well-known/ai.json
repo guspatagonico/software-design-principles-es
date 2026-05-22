@@ -18,7 +18,7 @@
 	},
 	"principles": [
 		{
-			"title": "KISS — Keep It Simple, Stupid",
+			"title": "KISS - Keep It Simple, Stupid",
 			"url": "https://principles.gustavosalvini.com.ar/principios/kiss/",
 			"markdown": "https://principles.gustavosalvini.com.ar/llms/kiss.md",
 			"accent": "kiss",
@@ -87,7 +87,7 @@
 			"markdown": "https://principles.gustavosalvini.com.ar/llms/pkg.md",
 			"accent": "pkg",
 			"position": 9,
-			"tagline": "Seis principios de Robert C. Martin que operan a nivel de módulos y paquetes enteros —la versión macro de SOLID. Determinan cómo agrupar clases y cómo controlar las dependencias entre grupos."
+			"tagline": "Seis principios de Robert C. Martin que operan a nivel de módulos y paquetes enteros - la versión macro de SOLID. Determinan cómo agrupar clases y cómo controlar las dependencias entre grupos."
 		},
 		{
 			"title": "Screaming",
@@ -111,7 +111,7 @@
 			"markdown": "https://principles.gustavosalvini.com.ar/llms/hexagonal.md",
 			"accent": "hexagonal",
 			"position": 12,
-			"tagline": "El dominio vive en el centro. Define puertos —interfaces— que describen lo que necesita. El mundo exterior conecta a través de adaptadores que implementan esos puertos. El dominio no sabe nada de afuera."
+			"tagline": "El dominio vive en el centro. Define puertos (interfaces) que describen lo que necesita. El mundo exterior conecta a través de adaptadores que implementan esos puertos. El dominio no sabe nada de afuera."
 		}
 	]
 }
