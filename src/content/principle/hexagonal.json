@@ -6,7 +6,7 @@
   "position": 12,
   "width": "wide",
   "navLabel": "Hexagonal",
-  "cardTitle": "Ports &amp; Adapters",
+  "cardTitle": "Hexagonal / Ports &amp; Adapters",
   "cardTagline": "Alistair Cockburn · 2005",
   "cardDesc": "El dominio en el centro, el mundo afuera. Define <em>puertos</em> (interfaces) y conecta el exterior con <em>adaptadores</em> intercambiables. <em>Testear el dominio completo sin base de datos ni servicios externos.</em>",
   "indexAbbr": "Hexagonal",

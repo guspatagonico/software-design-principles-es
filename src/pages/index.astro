@@ -172,7 +172,7 @@ const rfPhases = [
 											</span>
 										</div>
 										<div class="card-body">
-											<div class="card-title">{p.cardTitle || p.title}</div>
+					<div class="card-title" set:html={p.cardTitle || p.title}></div>
 											<div class="card-tagline">{p.cardTagline || ""}</div>
 											<div class="card-desc" set:html={p.cardDesc || ""} />
 										</div>
