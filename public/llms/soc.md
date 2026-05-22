@@ -271,3 +271,14 @@ Las violaciones de SoC raramente son decisiones conscientes. Son **atajos razona
 -   🌀
     
     **Separación por capa técnica en lugar de por preocupación** Una carpeta `services/` con 40 archivos que mezclan lógica de órdenes, de usuarios, de pagos y de notificaciones no es separación de preocupaciones - es separación de tipos de archivo. Una preocupación verdadera es "todo lo relacionado con el ciclo de vida de un pedido", no "todos los archivos que son services".
+
+## Origen del principio
+
+El término fue acuñado por **Edsger W. Dijkstra** en su ensayo _"On the role of scientific thought"_ (1974). Dijkstra lo describió como la habilidad de concentrarse en un aspecto del problema a la vez, ignorando temporalmente los demás. En software moderno es la base de MVC, Clean Architecture, Hexagonal Architecture y Domain-Driven Design.
+
+## Solo aplica a código?
+
+Es el principio de diseño más universal. Aplica en cualquier paradigma y escala.
+
+> POO · Funcional · Arquitectura de sistemas · Bases de datos · Infraestructura / DevOps · Diseño de APIs
+

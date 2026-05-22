@@ -181,3 +181,14 @@ El error más común con DRY es **abstraer demasiado temprano** basándose en si
 -   📋
     
     **Ignorar DRY en la documentación y configuración** DRY se viola constantemente fuera del código: la misma información en el README, en la wiki y en los comentarios del código. Cuando algo cambia, las tres fuentes divergen y ninguna es confiable. Una sola fuente de verdad, con links desde las otras.
+
+## Origen del principio
+
+DRY fue formulado por **Andy Hunt y Dave Thomas** en _The Pragmatic Programmer_ (1999). La definición original habla de "conocimiento", no de "código" —una distinción importante que suele perderse cuando se enseña el principio como "no copies y pegues".
+
+## Solo aplica a código?
+
+DRY aplica en todo lugar donde exista conocimiento que pueda divergir.
+
+> Lógica de negocio · Validaciones · Schemas / modelos · Configuración · Documentación · Tests - usar DAMP
+

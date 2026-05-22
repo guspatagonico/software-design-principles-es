@@ -293,3 +293,14 @@ Las violaciones de Information Hiding se llaman **"leaky abstractions"** - abstr
     
 
 > **TIP:** **El test del reemplazo libre** Si podés cambiar la implementación interna de un módulo (el algoritmo, la base de datos, la librería, la estructura de datos) sin que ningún código externo note la diferencia ni necesite modificarse, Information Hiding está bien aplicado. Si algún cliente se rompe por un cambio puramente interno, hay una abstracción con pérdidas.
+
+## Origen del principio
+
+Information Hiding fue formulado por **David Parnas** en su seminal paper _"On the Criteria To Be Used in Decomposing Systems into Modules"_ (1972), uno de los textos más influyentes de la ingeniería de software. Parnas propuso que el criterio correcto para modularizar no era agrupar código relacionado funcionalmente, sino **ocultar decisiones de diseño propensas a cambiar**. El paper sigue siendo tan relevante hoy como cuando se publicó.
+
+## Solo aplica a código?
+
+Es uno de los principios más universales. Aplica a cualquier nivel donde haya una frontera entre módulos.
+
+> POO · Módulos funcionales · APIs REST / GraphQL · Microservicios · SDKs y librerías · Bases de datos - vistas/procs
+

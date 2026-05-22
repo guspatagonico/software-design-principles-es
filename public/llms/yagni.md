@@ -139,3 +139,14 @@ Nadie viola YAGNI pensando que está haciendo algo malo. Las violaciones siempre
 -   📊
     
     **Métricas y logging exhaustivo desde el inicio** Instrumentar cada función, cada query, cada request antes de saber qué problema estás tratando de diagnosticar. Medí lo que necesitás ahora; agregá más instrumentación cuando tengas una pregunta concreta que responder.
+
+## Origen del principio
+
+YAGNI fue popularizado por **Ron Jeffries**, uno de los creadores de Extreme Programming (XP), a finales de los 90. Es una reacción directa a la tendencia de los desarrolladores de sobre-diseñar soluciones para problemas que todavía no existen. También está fuertemente vinculado al pensamiento de **Martin Fowler** sobre diseño evolutivo.
+
+## Solo aplica a código?
+
+YAGNI trabaja en conjunto con KISS y DRY, y en tensión controlada con SOLID.
+
+> Complementa KISS · Refuerza DRY · Desarrollo ágil / XP · Tensión con OCP de SOLID · Tensión con DIP de SOLID
+

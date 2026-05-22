@@ -177,3 +177,14 @@ La Dependency Rule es fácil de entender y difícil de mantener bajo presión. L
 -   ⚡
     
     **Invertir las capas "solo para este caso"**La excepción más peligrosa: "en este caso específico necesito que el dominio acceda directamente a la base de datos porque es más eficiente". Cada excepción erosiona la arquitectura. Si el caso de uso necesita datos, define una interfaz para obtenerlos; la eficiencia es problema del adaptador.
+
+## Origen del principio
+
+**Robert C. Martin** formalizó Clean Architecture en su libro homónimo (2017), sintetizando ideas de Hexagonal Architecture (Cockburn, 2005), Onion Architecture (Palermo, 2008) y otras. La Dependency Rule es el corazón de todas estas variantes: las dependencias siempre apuntan hacia el dominio, nunca hacia afuera de él.
+
+## Solo aplica a código?
+
+Clean Architecture es la aplicación sistemática de DIP, SoC e Information Hiding a nivel arquitectónico.
+
+> Aplica DIP de SOLID · Amplía Hexagonal Arch. · Complementa Screaming Arch. · Requiere disciplina sostenida
+

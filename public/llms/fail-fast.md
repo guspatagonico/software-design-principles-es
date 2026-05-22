@@ -317,3 +317,14 @@ Violar Fail Fast casi siempre parece **la opción más segura** en el momento. R
 -   📨
     
     **Mensajes de error sin contexto** `throw new Error('invalid input')` es Fail Fast en forma pero no en espíritu. Un error útil dice: qué valor recibió, qué esperaba, en qué función, con qué parámetros. ``throw new Error(`amount debe ser positivo, recibido: ${amount} en processPayment(orderId=${orderId})`)`` lleva al bug en segundos.
+
+## Origen del principio
+
+El principio fue articulado por **Jim Shore** en su artículo _"Fail Fast"_ publicado en _IEEE Software_ en 2004. Shore describió cómo los sistemas que detectan y reportan errores inmediatamente son mucho más fáciles de depurar que los que continúan con estado inválido. También está fuertemente asociado al trabajo de **Martin Fowler** sobre assertion patterns y diseño defensivo.
+
+## Solo aplica a código?
+
+Fail Fast es un principio de sistemas en general —aplica en hardware, en procesos, en equipos.
+
+> Código de aplicación · Configuración / arranque · Tests (assertions) · Pipelines de CI/CD · Validación de APIs · Sistemas distribuidos - balancear con Fail Safe
+

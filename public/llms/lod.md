@@ -277,3 +277,14 @@ La LoD tiene dos tipos de errores: violaciones reales que aumentan el acoplamien
     
 
 > **TIP:** **La señal más clara de una violación real** Si un cambio en la estructura interna de un objeto (renombrar un campo, cambiar cómo almacena algo) rompe código en una clase que no debería saber nada de ese objeto, la LoD está siendo violada. El acoplamiento estructural se propaga silenciosamente hasta que un refactor lo hace visible.
+
+## Origen del principio
+
+La Law of Demeter fue formulada en **1987** por Karl Lieberherr e Ian Holland en la Universidad Northeastern (proyecto Demeter). El nombre es una referencia a Deméter, diosa griega de la tierra y la agricultura —la misma raíz del proyecto. También se la conoce como el **Principio del Mínimo Conocimiento** (_Principle of Least Knowledge_), que es quizás el nombre más descriptivo.
+
+## Solo aplica a código?
+
+Aplica a cualquier sistema donde haya unidades que se comunican entre sí.
+
+> POO - nativo · Microservicios · Diseño de APIs REST · GraphQL · Funcional - adaptado · Datos planos - no aplica
+

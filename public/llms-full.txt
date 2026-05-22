@@ -318,6 +318,17 @@ Nadie viola YAGNI pensando que está haciendo algo malo. Las violaciones siempre
     
     **Métricas y logging exhaustivo desde el inicio** Instrumentar cada función, cada query, cada request antes de saber qué problema estás tratando de diagnosticar. Medí lo que necesitás ahora; agregá más instrumentación cuando tengas una pregunta concreta que responder.
 
+## Origen del principio
+
+YAGNI fue popularizado por **Ron Jeffries**, uno de los creadores de Extreme Programming (XP), a finales de los 90. Es una reacción directa a la tendencia de los desarrolladores de sobre-diseñar soluciones para problemas que todavía no existen. También está fuertemente vinculado al pensamiento de **Martin Fowler** sobre diseño evolutivo.
+
+## Solo aplica a código?
+
+YAGNI trabaja en conjunto con KISS y DRY, y en tensión controlada con SOLID.
+
+> Complementa KISS · Refuerza DRY · Desarrollo ágil / XP · Tensión con OCP de SOLID · Tensión con DIP de SOLID
+
+
 ---
 
 # DRY
@@ -503,6 +514,17 @@ El error más común con DRY es **abstraer demasiado temprano** basándose en si
 -   📋
     
     **Ignorar DRY en la documentación y configuración** DRY se viola constantemente fuera del código: la misma información en el README, en la wiki y en los comentarios del código. Cuando algo cambia, las tres fuentes divergen y ninguna es confiable. Una sola fuente de verdad, con links desde las otras.
+
+## Origen del principio
+
+DRY fue formulado por **Andy Hunt y Dave Thomas** en _The Pragmatic Programmer_ (1999). La definición original habla de "conocimiento", no de "código" —una distinción importante que suele perderse cuando se enseña el principio como "no copies y pegues".
+
+## Solo aplica a código?
+
+DRY aplica en todo lugar donde exista conocimiento que pueda divergir.
+
+> Lógica de negocio · Validaciones · Schemas / modelos · Configuración · Documentación · Tests - usar DAMP
+
 
 ---
 
@@ -734,6 +756,19 @@ class OrderService {
 ```
 
 > **TIP:** **💡 Truco mental** Si en el constructor ves `new ClaseConcrета()`, preguntate si deberías recibir esa dependencia desde afuera mediante inyección. Ese patrón se llama _Dependency Injection_ y es la implementación más común de este principio.
+
+## Origen del principio
+
+Una **clase** es una plantilla que agrupa datos y comportamiento relacionados. En la práctica, podés pensarla como cualquier **unidad de código con identidad propia**: una clase en Python, Java o C#, un módulo en JavaScript, un servicio en Go, o una función con estado en un lenguaje funcional.  
+  
+Cuando SOLID dice "clase", habla de **cualquier unidad de organización de código** que tenga responsabilidades y dependa de otras unidades.
+
+## Solo aplica a código?
+
+SOLID nació en el mundo de la **Programación Orientada a Objetos** (Robert C. Martin, 2000), pero sus ideas son mucho más amplias. Hoy se aplican —con adaptaciones— en paradigmas funcionales, arquitectura de microservicios e incluso diseño de APIs.
+
+> POO - nativo · Microservicios · Diseño de APIs · Funcional - parcial · Scripts simples - opcional
+
 
 ---
 
@@ -1010,6 +1045,17 @@ Las violaciones de SoC raramente son decisiones conscientes. Son **atajos razona
 -   🌀
     
     **Separación por capa técnica en lugar de por preocupación** Una carpeta `services/` con 40 archivos que mezclan lógica de órdenes, de usuarios, de pagos y de notificaciones no es separación de preocupaciones - es separación de tipos de archivo. Una preocupación verdadera es "todo lo relacionado con el ciclo de vida de un pedido", no "todos los archivos que son services".
+
+## Origen del principio
+
+El término fue acuñado por **Edsger W. Dijkstra** en su ensayo _"On the role of scientific thought"_ (1974). Dijkstra lo describió como la habilidad de concentrarse en un aspecto del problema a la vez, ignorando temporalmente los demás. En software moderno es la base de MVC, Clean Architecture, Hexagonal Architecture y Domain-Driven Design.
+
+## Solo aplica a código?
+
+Es el principio de diseño más universal. Aplica en cualquier paradigma y escala.
+
+> POO · Funcional · Arquitectura de sistemas · Bases de datos · Infraestructura / DevOps · Diseño de APIs
+
 
 ---
 
@@ -1309,6 +1355,17 @@ Las violaciones de Information Hiding se llaman **"leaky abstractions"** - abstr
 
 > **TIP:** **El test del reemplazo libre** Si podés cambiar la implementación interna de un módulo (el algoritmo, la base de datos, la librería, la estructura de datos) sin que ningún código externo note la diferencia ni necesite modificarse, Information Hiding está bien aplicado. Si algún cliente se rompe por un cambio puramente interno, hay una abstracción con pérdidas.
 
+## Origen del principio
+
+Information Hiding fue formulado por **David Parnas** en su seminal paper _"On the Criteria To Be Used in Decomposing Systems into Modules"_ (1972), uno de los textos más influyentes de la ingeniería de software. Parnas propuso que el criterio correcto para modularizar no era agrupar código relacionado funcionalmente, sino **ocultar decisiones de diseño propensas a cambiar**. El paper sigue siendo tan relevante hoy como cuando se publicó.
+
+## Solo aplica a código?
+
+Es uno de los principios más universales. Aplica a cualquier nivel donde haya una frontera entre módulos.
+
+> POO · Módulos funcionales · APIs REST / GraphQL · Microservicios · SDKs y librerías · Bases de datos - vistas/procs
+
+
 ---
 
 # Law of Demeter
@@ -1590,6 +1647,17 @@ La LoD tiene dos tipos de errores: violaciones reales que aumentan el acoplamien
     
 
 > **TIP:** **La señal más clara de una violación real** Si un cambio en la estructura interna de un objeto (renombrar un campo, cambiar cómo almacena algo) rompe código en una clase que no debería saber nada de ese objeto, la LoD está siendo violada. El acoplamiento estructural se propaga silenciosamente hasta que un refactor lo hace visible.
+
+## Origen del principio
+
+La Law of Demeter fue formulada en **1987** por Karl Lieberherr e Ian Holland en la Universidad Northeastern (proyecto Demeter). El nombre es una referencia a Deméter, diosa griega de la tierra y la agricultura —la misma raíz del proyecto. También se la conoce como el **Principio del Mínimo Conocimiento** (_Principle of Least Knowledge_), que es quizás el nombre más descriptivo.
+
+## Solo aplica a código?
+
+Aplica a cualquier sistema donde haya unidades que se comunican entre sí.
+
+> POO - nativo · Microservicios · Diseño de APIs REST · GraphQL · Funcional - adaptado · Datos planos - no aplica
+
 
 ---
 
@@ -1912,6 +1980,17 @@ Violar Fail Fast casi siempre parece **la opción más segura** en el momento. R
 -   📨
     
     **Mensajes de error sin contexto** `throw new Error('invalid input')` es Fail Fast en forma pero no en espíritu. Un error útil dice: qué valor recibió, qué esperaba, en qué función, con qué parámetros. ``throw new Error(`amount debe ser positivo, recibido: ${amount} en processPayment(orderId=${orderId})`)`` lleva al bug en segundos.
+
+## Origen del principio
+
+El principio fue articulado por **Jim Shore** en su artículo _"Fail Fast"_ publicado en _IEEE Software_ en 2004. Shore describió cómo los sistemas que detectan y reportan errores inmediatamente son mucho más fáciles de depurar que los que continúan con estado inválido. También está fuertemente asociado al trabajo de **Martin Fowler** sobre assertion patterns y diseño defensivo.
+
+## Solo aplica a código?
+
+Fail Fast es un principio de sistemas en general —aplica en hardware, en procesos, en equipos.
+
+> Código de aplicación · Configuración / arranque · Tests (assertions) · Pipelines de CI/CD · Validación de APIs · Sistemas distribuidos - balancear con Fail Safe
+
 
 ---
 
@@ -2241,6 +2320,17 @@ Las violaciones de estos principios **no duelen al principio**. Se acumulan sile
     
     **No medir la estabilidad de los paquetes** La estabilidad de un paquete es calculable: _estabilidad = dependencias salientes / (dependencias entrantes + salientes)_. Un paquete con muchos consumidores y pocas dependencias externas tiene estabilidad cercana a 1. Si ese paquete tiene alto acoplamiento con detalles volátiles, hay un problema de diseño que se puede detectar antes de que cause daño.
 
+## Origen del principio
+
+Estos seis principios fueron desarrollados por **Robert C. Martin** ("Uncle Bob") en los años 90 y publicados en _Agile Software Development: Principles, Patterns, and Practices_ (2002). Son la extensión natural de SOLID al nivel de módulos y paquetes, y forman parte del mismo marco teórico de diseño orientado a objetos escalable.
+
+## Solo aplica a código?
+
+Los principios aplican a cualquier sistema con unidades de código independientes.
+
+> Monolitos modulares · Microservicios · Librerías / npm / pip · Monorepos · Sistemas pequeños - opcional
+
+
 ---
 
 # Screaming
@@ -2546,6 +2636,17 @@ La Dependency Rule es fácil de entender y difícil de mantener bajo presión. L
     
     **Invertir las capas "solo para este caso"**La excepción más peligrosa: "en este caso específico necesito que el dominio acceda directamente a la base de datos porque es más eficiente". Cada excepción erosiona la arquitectura. Si el caso de uso necesita datos, define una interfaz para obtenerlos; la eficiencia es problema del adaptador.
 
+## Origen del principio
+
+**Robert C. Martin** formalizó Clean Architecture en su libro homónimo (2017), sintetizando ideas de Hexagonal Architecture (Cockburn, 2005), Onion Architecture (Palermo, 2008) y otras. La Dependency Rule es el corazón de todas estas variantes: las dependencias siempre apuntan hacia el dominio, nunca hacia afuera de él.
+
+## Solo aplica a código?
+
+Clean Architecture es la aplicación sistemática de DIP, SoC e Information Hiding a nivel arquitectónico.
+
+> Aplica DIP de SOLID · Amplía Hexagonal Arch. · Complementa Screaming Arch. · Requiere disciplina sostenida
+
+
 ---
 
 # Hexagonal
@@ -2775,5 +2876,16 @@ Hexagonal Architecture puede aplicarse mecánicamente sin captar el espíritu. E
 -   🏗️
     
     **Aplicarla donde es overhead puro**Hexagonal Architecture agrega complejidad real: más archivos, más interfaces, más indirección. Para scripts, herramientas internas simples o prototipos, el overhead no se justifica. El patrón brilla cuando el dominio es complejo, las integraciones son múltiples o el sistema necesita testearse en aislamiento.
+
+## Origen del principio
+
+**Alistair Cockburn** formuló Ports and Adapters en 2005 como respuesta a la dificultad de testear aplicaciones con dependencias directas a bases de datos y servicios externos. La motivó la pregunta: _"¿Cómo puedo testear mi aplicación sin la base de datos?"_. La respuesta fue definir interfaces que el dominio controla y que la infraestructura implementa.
+
+## Solo aplica a código?
+
+Hexagonal es la base práctica de Clean Architecture y comparte el mismo principio fundamental.
+
+> Implementa DIP de SOLID · Precede Clean Architecture · Compatible con DDD · Overhead en sistemas simples
+
 
 ---

@@ -323,3 +323,14 @@ Las violaciones de estos principios **no duelen al principio**. Se acumulan sile
 -   🔍
     
     **No medir la estabilidad de los paquetes** La estabilidad de un paquete es calculable: _estabilidad = dependencias salientes / (dependencias entrantes + salientes)_. Un paquete con muchos consumidores y pocas dependencias externas tiene estabilidad cercana a 1. Si ese paquete tiene alto acoplamiento con detalles volátiles, hay un problema de diseño que se puede detectar antes de que cause daño.
+
+## Origen del principio
+
+Estos seis principios fueron desarrollados por **Robert C. Martin** ("Uncle Bob") en los años 90 y publicados en _Agile Software Development: Principles, Patterns, and Practices_ (2002). Son la extensión natural de SOLID al nivel de módulos y paquetes, y forman parte del mismo marco teórico de diseño orientado a objetos escalable.
+
+## Solo aplica a código?
+
+Los principios aplican a cualquier sistema con unidades de código independientes.
+
+> Monolitos modulares · Microservicios · Librerías / npm / pip · Monorepos · Sistemas pequeños - opcional
+

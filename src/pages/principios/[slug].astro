@@ -23,6 +23,14 @@ const idx = sortedPages.findIndex(p => p.slug === page.slug);
 const prevPage = idx === 0? null: sortedPages[idx - 1];
 const nextPage = idx < sortedPages.length - 1? sortedPages[idx + 1]: null;
 const posLabel = `${String(idx + 1).padStart(2, '0')}\u2009/\u2009${String(sortedPages.length).padStart(2, '0')}`;
+
+const normalizePreIndentation = (html) => html.replace(/<pre>([\s\S]*?)<\/pre>/g, (_match, preBody) => {
+	const normalizedBody = preBody.replace(/\n( +)(?=\S)/g, (_line, spaces) => {
+		const normalizedSize = Math.max(4, spaces.length * 4);
+		return `\n${' '.repeat(normalizedSize)}`;
+	});
+	return `<pre>${normalizedBody}</pre>`;
+});
 ---
 
 <BaseLayout
@@ -96,8 +104,9 @@ const posLabel = `${String(idx + 1).padStart(2, '0')}\u2009/\u2009${String(sorte
 		{page.tabs.map((tab, i) => {
 			const letterColor = tab.tabColorVar? `--letter-color: var(${tab.tabColorVar})`: '';
 			const interpolatedContent = tab.tabColorVar? tab.content.replace(/<div class="p-letter">/g, `<div class="p-letter" style="${letterColor}">`): tab.content;
+			const normalizedContent = normalizePreIndentation(interpolatedContent);
 			return (<div class={`panel${i === 0? ' active': ''}`} id={`panel-${i}`}>
-					<Fragment set:html={interpolatedContent} />
+					<Fragment set:html={normalizedContent} />
 				</div>);
 		})}
 

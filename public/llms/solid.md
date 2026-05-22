@@ -226,3 +226,16 @@ class OrderService {
 ```
 
 > **TIP:** **💡 Truco mental** Si en el constructor ves `new ClaseConcrета()`, preguntate si deberías recibir esa dependencia desde afuera mediante inyección. Ese patrón se llama _Dependency Injection_ y es la implementación más común de este principio.
+
+## Origen del principio
+
+Una **clase** es una plantilla que agrupa datos y comportamiento relacionados. En la práctica, podés pensarla como cualquier **unidad de código con identidad propia**: una clase en Python, Java o C#, un módulo en JavaScript, un servicio en Go, o una función con estado en un lenguaje funcional.  
+  
+Cuando SOLID dice "clase", habla de **cualquier unidad de organización de código** que tenga responsabilidades y dependa de otras unidades.
+
+## Solo aplica a código?
+
+SOLID nació en el mundo de la **Programación Orientada a Objetos** (Robert C. Martin, 2000), pero sus ideas son mucho más amplias. Hoy se aplican —con adaptaciones— en paradigmas funcionales, arquitectura de microservicios e incluso diseño de APIs.
+
+> POO - nativo · Microservicios · Diseño de APIs · Funcional - parcial · Scripts simples - opcional
+

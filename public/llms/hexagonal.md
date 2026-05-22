@@ -225,3 +225,14 @@ Hexagonal Architecture puede aplicarse mecánicamente sin captar el espíritu. E
 -   🏗️
     
     **Aplicarla donde es overhead puro**Hexagonal Architecture agrega complejidad real: más archivos, más interfaces, más indirección. Para scripts, herramientas internas simples o prototipos, el overhead no se justifica. El patrón brilla cuando el dominio es complejo, las integraciones son múltiples o el sistema necesita testearse en aislamiento.
+
+## Origen del principio
+
+**Alistair Cockburn** formuló Ports and Adapters en 2005 como respuesta a la dificultad de testear aplicaciones con dependencias directas a bases de datos y servicios externos. La motivó la pregunta: _"¿Cómo puedo testear mi aplicación sin la base de datos?"_. La respuesta fue definir interfaces que el dominio controla y que la infraestructura implementa.
+
+## Solo aplica a código?
+
+Hexagonal es la base práctica de Clean Architecture y comparte el mismo principio fundamental.
+
+> Implementa DIP de SOLID · Precede Clean Architecture · Compatible con DDD · Overhead en sistemas simples
+
