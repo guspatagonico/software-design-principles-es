@@ -30,6 +30,7 @@ const posLabel = `${String(idx + 1).padStart(2, '0')}\u2009/\u2009${String(sorte
 	description={page.description}
 	accent={page.accent}
 	widthClass={page.width === 'wide' ? 'layout-wide' : ''}
+	bodyClass={page.slug === 'screaming-architecture' ? 'screaming-page' : ''}
 	image={`og/${page.slug}.jpg`}
 	canonicalURL={`${Astro.site}/principios/${page.slug}/`}
 	type="article"

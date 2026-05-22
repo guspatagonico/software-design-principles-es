@@ -5,9 +5,10 @@
   "description": "",
   "scripts": {
     "dev": "astro dev",
-    "prebuild": "node scripts/gen-og-images.mjs && node scripts/gen-agent-files.mjs",
+    "prebuild": "pnpm check:content && node scripts/gen-og-images.mjs && node scripts/gen-agent-files.mjs",
+    "check:content": "node scripts/validate-principle-tabs.mjs",
     "build": "astro build",
-    "build:staging": "SITE_URL=https://principles.harness.ar astro build",
+    "build:staging": "pnpm check:content && SITE_URL=https://principles.harness.ar astro build",
     "preview": "astro preview"
   },
   "keywords": [],
