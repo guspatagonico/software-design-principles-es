@@ -10,11 +10,11 @@
   "cardTagline": "Alistair Cockburn · 2005",
   "cardDesc": "El dominio en el centro, el mundo afuera. Define <em>puertos</em> (interfaces) y conecta el exterior con <em>adaptadores</em> intercambiables. <em>Testear el dominio completo sin base de datos ni servicios externos.</em>",
   "indexAbbr": "Hexagonal",
-  "rfLabel": "Hexagonal / Ports &amp; Adapters",
+  "rfLabel": "Hexagonal / Ports & Adapters",
   "headerLabel": "Principios de arquitectura · Referencia para devs",
-  "headerTitle": "<em>Ports &amp; Adapters</em><br>Hexagonal Architecture",
+  "headerTitle": "<em>Ports & Adapters</em><br>Hexagonal Architecture",
   "headerSubtitle": "El dominio vive en el centro. Define puertos —interfaces— que describen lo que necesita. El mundo exterior conecta a través de adaptadores que implementan esos puertos. El dominio no sabe nada de afuera.",
-  "footerLeft": "Ports &amp; Adapters · Alistair Cockburn · 2005",
+  "footerLeft": "Ports & Adapters · Alistair Cockburn · 2005",
   "tabs": [
     {
       "icon": "💡",

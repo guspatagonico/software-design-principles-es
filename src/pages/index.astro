@@ -1,192 +1,235 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
-import SiteNav from '../components/SiteNav.astro';
-import { getCollection } from 'astro:content';
-import { ACCENT_HEX, rgba, accentStyle } from '../data/accents.mjs';
+import BaseLayout from "../layouts/BaseLayout.astro";
+import SiteNav from "../components/SiteNav.astro";
+import { getCollection } from "astro:content";
+import { ACCENT_HEX, rgba, accentStyle } from "../data/accents.mjs";
 
-const base = import.meta.env.BASE_URL.endsWith('/') ? import.meta.env.BASE_URL : import.meta.env.BASE_URL + '/';
+const base = import.meta.env.BASE_URL.endsWith("/") ? import.meta.env.BASE_URL : import.meta.env.BASE_URL + "/";
 
-const allEntries = await getCollection('principle');
-const principlePages = allEntries
-	.map(e => e.data)
-	.sort((a, b) => a.position - b.position);
+const allEntries = await getCollection("principle");
+const principlePages = allEntries.map((e) => e.data).sort((a, b) => a.position - b.position);
 
 const firstPage = principlePages[0];
 
 const phases = [
-	{
-		name: 'Fase 1 · Mindset', title: 'Antes de escribir una sola línea',
-		desc: 'Estos tres principios son actitudes de diseño que deben estar internalizadas <strong>antes de tomar cualquier decisión técnica</strong>. Determinan qué construís, cuánto construís y cómo de complejo lo hacés. Ignorarlos al inicio es la causa raíz de la mayoría de la deuda técnica.',
-		phaseClass: 'p1', color: 'var(--p1)',
-		pages: principlePages.filter(p => p.position >= 1 && p.position <= 3),
-	},
-	{
-		name: 'Fase 2 · Diseño de código', title: 'Cuando diseñás clases y funciones',
-		desc: 'Una vez que sabés qué vas a construir y cuánto, estos cinco principios guían <strong>cómo diseñar las unidades de código</strong>: clases, funciones, módulos. Son los que determinan si el código es testeable, mantenible y resistente al cambio.',
-		phaseClass: 'p2', color: 'var(--p2)',
-		pages: principlePages.filter(p => p.position >= 4 && p.position <= 8),
-	},
-	{
-		name: 'Fase 3 · Diseño de módulos', title: 'Cuando el sistema empieza a crecer',
-		desc: 'Una vez que tenés código bien diseñado, necesitás decidir <strong>cómo agrupar ese código en paquetes, módulos o servicios</strong>. Estos principios son SOLID a escala macro: determinan qué poner junto, qué separar y cómo manejar las dependencias entre grupos.',
-		phaseClass: 'p3', color: 'var(--p3)',
-		pages: principlePages.filter(p => p.position === 9),
-	},
-	{
-		name: 'Fase 4 · Arquitectura', title: 'Cuando diseñás la estructura completa del sistema',
-		desc: 'Las decisiones arquitectónicas son las más costosas de revertir. Estos tres principios se complementan y se aplican juntos.',
-		phaseClass: 'p4', color: 'var(--p4)',
-		pages: principlePages.filter(p => p.position >= 10 && p.position <= 12),
-	},
+  {
+    name: "Fase 1 · Mindset",
+    title: "Antes de escribir una sola línea",
+    desc: "Estos tres principios son actitudes de diseño que deben estar internalizadas <strong>antes de tomar cualquier decisión técnica</strong>. Determinan qué construís, cuánto construís y cómo de complejo lo hacés. Ignorarlos al inicio es la causa raíz de la mayoría de la deuda técnica.",
+    phaseClass: "p1",
+    color: "var(--p1)",
+    pages: principlePages.filter((p) => p.position >= 1 && p.position <= 3),
+  },
+  {
+    name: "Fase 2 · Diseño de código",
+    title: "Cuando diseñás clases y funciones",
+    desc: "Una vez que sabés qué vas a construir y cuánto, estos cinco principios guían <strong>cómo diseñar las unidades de código</strong>: clases, funciones, módulos. Son los que determinan si el código es testeable, mantenible y resistente al cambio.",
+    phaseClass: "p2",
+    color: "var(--p2)",
+    pages: principlePages.filter((p) => p.position >= 4 && p.position <= 8),
+  },
+  {
+    name: "Fase 3 · Diseño de módulos",
+    title: "Cuando el sistema empieza a crecer",
+    desc: "Una vez que tenés código bien diseñado, necesitás decidir <strong>cómo agrupar ese código en paquetes, módulos o servicios</strong>. Estos principios son SOLID a escala macro: determinan qué poner junto, qué separar y cómo manejar las dependencias entre grupos.",
+    phaseClass: "p3",
+    color: "var(--p3)",
+    pages: principlePages.filter((p) => p.position === 9),
+  },
+  {
+    name: "Fase 4 · Arquitectura",
+    title: "Cuando diseñás la estructura completa del sistema",
+    desc: "Las decisiones arquitectónicas son las más costosas de revertir. Estos tres principios se complementan y se aplican juntos.",
+    phaseClass: "p4",
+    color: "var(--p4)",
+    pages: principlePages.filter((p) => p.position >= 10 && p.position <= 12),
+  },
 ];
 
 const rfPhases = [
-	{ label: 'Fase 1<br>Mindset', color: 'var(--p1)', pages: principlePages.filter(p => p.position >= 1 && p.position <= 3) },
-	{ label: 'Fase 2<br>Código', color: 'var(--p2)', pages: principlePages.filter(p => p.position >= 4 && p.position <= 8) },
-	{ label: 'Fase 3<br>Módulos', color: 'var(--p3)', pages: principlePages.filter(p => p.position === 9) },
-	{ label: 'Fase 4<br>Arq.', color: 'var(--p4)', pages: principlePages.filter(p => p.position >= 10 && p.position <= 12) },
+  {
+    label: "Fase 1<br>Mindset",
+    color: "var(--p1)",
+    pages: principlePages.filter((p) => p.position >= 1 && p.position <= 3),
+  },
+  {
+    label: "Fase 2<br>Código",
+    color: "var(--p2)",
+    pages: principlePages.filter((p) => p.position >= 4 && p.position <= 8),
+  },
+  {
+    label: "Fase 3<br>Módulos",
+    color: "var(--p3)",
+    pages: principlePages.filter((p) => p.position === 9),
+  },
+  {
+    label: "Fase 4<br>Arq.",
+    color: "var(--p4)",
+    pages: principlePages.filter((p) => p.position >= 10 && p.position <= 12),
+  },
 ];
 ---
 
 <BaseLayout
-	title="Principios de Diseño de Software — 12 principios, 4 fases, una guía de referencia"
-	description="Guía de referencia de 12 principios de diseño de software organizados por orden de aplicación: desde mindset (KISS, YAGNI, DRY) hasta arquitectura (Screaming, Clean, Hexagonal). Con ejemplos de código y reglas prácticas."
-	accent="index"
-	image="og/index.jpg"
-	canonicalURL={`${Astro.site}/`}
-	type="website"
-	jsonLd={{
-		'@context': 'https://schema.org',
-		'@graph': [
-			{
-				'@type': 'WebSite',
-				name: 'Principios de Diseño de Software',
-				url: `${Astro.site}/`,
-				description: 'Guía de referencia de 12 principios de diseño de software organizados por orden de aplicación en el ciclo de vida de un proyecto.',
-				inLanguage: 'es',
-				author: {
-					'@type': 'Person',
-					name: 'Gustavo Adrián Salvini',
-					url: 'https://github.com/guspatagonico',
-				},
-			},
-			{
-				'@type': 'ItemList',
-				name: 'Principios de Diseño de Software',
-				numberOfItems: principlePages.length,
-				itemListElement: principlePages.map((p, i) => ({
-					'@type': 'ListItem',
-					position: i + 1,
-					name: p.title,
-					url: `${Astro.site}/principios/${p.slug}/`,
-					description: p.description || p.headerSubtitle || '',
-				})),
-			},
-		],
-	}}
+  title="Principios de Diseño de Software — 12 principios, 4 fases, una guía de referencia"
+  description="Guía de referencia de 12 principios de diseño de software organizados por orden de aplicación: desde mindset (KISS, YAGNI, DRY) hasta arquitectura (Screaming, Clean, Hexagonal). Con ejemplos de código y reglas prácticas."
+  accent="index"
+  image="og/index.jpg"
+  canonicalURL={`${Astro.site}/`}
+  type="website"
+  jsonLd={{
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebSite",
+        name: "Principios de Diseño de Software",
+        url: `${Astro.site}/`,
+        description:
+          "Guía de referencia de 12 principios de diseño de software organizados por orden de aplicación en el ciclo de vida de un proyecto.",
+        inLanguage: "es",
+        author: {
+          "@type": "Person",
+          name: "Gustavo Adrián Salvini",
+          url: "https://github.com/guspatagonico",
+        },
+      },
+      {
+        "@type": "ItemList",
+        name: "Principios de Diseño de Software",
+        numberOfItems: principlePages.length,
+        itemListElement: principlePages.map((p, i) => ({
+          "@type": "ListItem",
+          position: i + 1,
+          name: p.title,
+          url: `${Astro.site}/principios/${p.slug}/`,
+          description: p.description || p.headerSubtitle || "",
+        })),
+      },
+    ],
+  }}
 >
-	<SiteNav position="top" prevPage={null} nextPage={firstPage} posLabel="" isFirstPage={false} />
+  <SiteNav position="top" prevPage={null} nextPage={firstPage} posLabel="" isFirstPage={false} />
 
-	<header class="index-header">
-		<div class="header-eyebrow">Gustavo Adrián Salvini · @guspatagonico</div>
-		<h1><em>Principios de</em><br>Diseño de Software</h1>
-		<p class="header-sub">
-			Una guía de referencia para developers. Organizados por <strong>orden de prioridad y aplicabilidad</strong> en el ciclo de vida real de un proyecto —desde las decisiones más tempranas hasta las más arquitectónicas.
-		</p>
-		<div class="stats-row">
-			<div class="stat">
-				<span class="stat-num">12</span>
-				<span class="stat-label">principios</span>
-			</div>
-			<div class="stat">
-				<span class="stat-num">4</span>
-				<span class="stat-label">fases de aplicación</span>
-			</div>
-			<div class="stat">
-				<span class="stat-num">~60</span>
-				<span class="stat-label">ejemplos de código</span>
-			</div>
-		</div>
-	</header>
+  <header class="index-header">
+    <div class="header-eyebrow">
+      <a href="https://gustavosalvini.com.ar" target="_blank"> Gustavo Adrián Salvini </a> · <a href="https://x.com/guspatagonico" target="_blank">@guspatagonico</a>
+    </div>
+    <h1><em>Principios de</em><br />Diseño de Software</h1>
+    <p class="header-sub">
+      Una guía de referencia organizada por <strong>orden de prioridad y aplicabilidad</strong> en el ciclo de vida real de
+      un proyecto —desde las decisiones más tempranas hasta las más arquitectónicas.
+    </p>
+    <div class="stats-row">
+      <div class="stat">
+        <span class="stat-num">12</span>
+        <span class="stat-label">principios</span>
+      </div>
+      <div class="stat">
+        <span class="stat-num">4</span>
+        <span class="stat-label">fases de aplicación</span>
+      </div>
+      <div class="stat">
+        <span class="stat-num">~60</span>
+        <span class="stat-label">ejemplos de código</span>
+      </div>
+    </div>
+  </header>
 
-	{phases.map(phase => {
-		const gridClass = phase.pages.length === 1 ? 'cards-grid single-col' : 'cards-grid';
-		return (
-			<>
-				<div class="phase-header">
-					<div class="phase-inner">
-						<span class="phase-badge" style={`color:${phase.color};border-color:${phase.color.replace(')', '.25)')};background:var(--${phase.phaseClass}-r`}>
-							{phase.name}
-						</span>
-						<span class="phase-title">{phase.title}</span>
-						<div class="phase-line"></div>
-					</div>
-					<p class="phase-desc" set:html={phase.desc}></p>
-				</div>
+  {
+    phases.map((phase) => {
+      const gridClass = phase.pages.length === 1 ? "cards-grid single-col" : "cards-grid";
+      return (
+        <>
+          <div class="phase-header">
+            <div class="phase-inner">
+              <span
+                class="phase-badge"
+                style={`color:${phase.color};border-color:${phase.color.replace(")", ".25)")};background:var(--${phase.phaseClass}-r`}
+              >
+                {phase.name}
+              </span>
+              <span class="phase-title">{phase.title}</span>
+              <div class="phase-line" />
+            </div>
+            <p class="phase-desc" set:html={phase.desc} />
+          </div>
 
-				<div class="cards-wrap">
-					<div class={`${phase.phaseClass} ${gridClass}`}>
-						{phase.pages.map(p => {
-							const hex = ACCENT_HEX[p.accent] || '#d4d4d8';
-							const abbrColor = p.indexAbbrColor || hex;
-							const indexNum = String(p.position).padStart(2, '0');
-							return (
-								<a class="card" href={`${base}principios/${p.slug}`}>
-									<div class="card-top">
-										<span class="card-index">{indexNum}</span>
-										<span class="card-abbr" style={`color:${abbrColor};border-color:${rgba(hex, .3)};background:${rgba(hex, .08)}`}>
-											{p.indexAbbr || p.navLabel || p.title}
-										</span>
-									</div>
-									<div class="card-body">
-										<div class="card-title">{p.cardTitle || p.title}</div>
-										<div class="card-tagline">{p.cardTagline || ''}</div>
-										<div class="card-desc" set:html={p.cardDesc || ''}></div>
-									</div>
-									<div class="card-footer">
-										<div class="card-tabs">
-											{p.tabs.map(t => <span class="card-tab">{t.label}</span>)}
-										</div>
-										<span class="card-arrow">→</span>
-									</div>
-								</a>
-							);
-						})}
-					</div>
-				</div>
-			</>
-		);
-	})}
+          <div class="cards-wrap">
+            <div class={`${phase.phaseClass} ${gridClass}`}>
+              {phase.pages.map((p) => {
+                const hex = ACCENT_HEX[p.accent as keyof typeof ACCENT_HEX] || "#d4d4d8";
+                const abbrColor = p.indexAbbrColor || hex;
+                const indexNum = String(p.position).padStart(2, "0");
+                return (
+                  <a class="card" href={`${base}principios/${p.slug}`}>
+                    <div class="card-top">
+                      <span class="card-index">{indexNum}</span>
+                      <span
+                        class="card-abbr"
+                        style={`color:${abbrColor};border-color:${rgba(hex, 0.3)};background:${rgba(hex, 0.08)}`}
+                      >
+                        {p.indexAbbr || p.navLabel || p.title}
+                      </span>
+                    </div>
+                    <div class="card-body">
+                      <div class="card-title">{p.cardTitle || p.title}</div>
+                      <div class="card-tagline">{p.cardTagline || ""}</div>
+                      <div class="card-desc" set:html={p.cardDesc || ""} />
+                    </div>
+                    <div class="card-footer">
+                      <div class="card-tabs">
+                        {p.tabs.map((t) => (
+                          <span class="card-tab">{t.label}</span>
+                        ))}
+                      </div>
+                      <span class="card-arrow">→</span>
+                    </div>
+                  </a>
+                );
+              })}
+            </div>
+          </div>
+        </>
+      );
+    })
+  }
 
-	<div class="reading-strip">
-		<div class="reading-inner">
-			<div class="reading-title">Orden de lectura sugerido</div>
-			{rfPhases.map(rf => (
-				<div class="rf-row">
-					<span class="rf-phase-label" style={`color:${rf.color}`} set:html={rf.label}></span>
-					<div class="rf-divider"></div>
-					<div class="rf-chips">
-						{rf.pages.map((p, i) => {
-							const hex = ACCENT_HEX[p.accent] || '#d4d4d8';
-							return (
-								<>
-									<a class="rf-chip" href={`${base}principios/${p.slug}`} style={`color:${hex};border-color:${rgba(hex, .3)};background:${rgba(hex, .06)}`}>
-										{p.rfLabel || p.navLabel || p.title}
-									</a>
-									{i < rf.pages.length - 1 && <span class="rf-arrow">→</span>}
-								</>
-							);
-						})}
-					</div>
-				</div>
-			))}
-		</div>
-	</div>
+  <div class="reading-strip">
+    <div class="reading-inner">
+      <div class="reading-title">Orden de lectura sugerido</div>
+      {
+        rfPhases.map((rf) => (
+          <div class="rf-row">
+            <span class="rf-phase-label" style={`color:${rf.color}`} set:html={rf.label} />
+            <div class="rf-divider" />
+            <div class="rf-chips">
+              {rf.pages.map((p, i) => {
+                const hex = ACCENT_HEX[p.accent as keyof typeof ACCENT_HEX] || "#d4d4d8";
+                return (
+                  <>
+                    <a
+                      class="rf-chip"
+                      href={`${base}principios/${p.slug}`}
+                      style={`color:${hex};border-color:${rgba(hex, 0.3)};background:${rgba(hex, 0.06)}`}
+                    >
+                      {p.rfLabel || p.navLabel || p.title}
+                    </a>
+                    {i < rf.pages.length - 1 && <span class="rf-arrow">→</span>}
+                  </>
+                );
+              })}
+            </div>
+          </div>
+        ))
+      }
+    </div>
+  </div>
 
-	<footer class="index-footer">
-		<span>12 principios · 4 fases · diseño de software</span>
-		<span>Gustavo Adrián Salvini · <a href="https://github.com/guspatagonico" target="_blank">@guspatagonico</a></span>
-	</footer>
+  <footer class="index-footer">
+    <span>12 principios · 4 fases · diseño de software</span>
+    <span><a href="https://gustavosalvini.com.ar" target="_blank"> Gustavo Adrián Salvini </a> · <a href="https://x.com/guspatagonico" target="_blank">@guspatagonico</a></span>
 
-	<SiteNav position="bot" prevPage={null} nextPage={firstPage} posLabel="" isFirstPage={false} />
+  </footer>
+
+  <SiteNav position="bot" prevPage={null} nextPage={firstPage} posLabel="" isFirstPage={false} />
 </BaseLayout>
